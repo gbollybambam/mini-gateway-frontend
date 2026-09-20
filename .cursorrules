@@ -1,0 +1,7 @@
+# Frontend Rules: Mini Payment Gateway Dashboard
+
+- Framework: Next.js (App Router), TypeScript, Tailwind CSS.
+- Design: Follow design/style-guide.md for exact colors, fonts, and breakpoints. Use screenshots in design/ as visual benchmarks.
+- API: Strictly follow openapi.json for all paths, request bodies, and response types. Base URL: http://127.0.0.1:8000/api.
+- Auth: Manage Sanctum Bearer tokens in localStorage/cookies. Create an API client with auto-attaching headers and 401 handling.
+- Icons: Use assets provided in the design folder or Lucide React.

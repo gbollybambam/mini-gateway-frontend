@@ -1,0 +1,5 @@
+{
+  "tailwindCSS.lint.invalidApply": "ignore",
+  "tailwindCSS.lint.cssConflict": "ignore",
+  "tailwindCSS.validate": false
+}
