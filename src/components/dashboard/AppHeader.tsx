@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, ChevronDown, Plus } from "lucide-react";
 import { useToast } from "@/components/dashboard/ui";
+import { useAuth } from "@/components/dashboard/DashboardProviders"; // Injects Global Auth
 
 const labels: Record<string, string> = {
   "/": "Command Center",
@@ -14,15 +15,16 @@ const labels: Record<string, string> = {
   "/settings": "Merchant Settings",
   "/api-keys": "Cryptographic Keys",
   "/webhooks": "Webhook Endpoints",
+  "/team": "Team Management",
 };
 
 export default function AppHeader() {
   const pathname = usePathname();
   const toast = useToast();
+  const { user } = useAuth(); // Get the logged-in user profile
   
   const title = labels[pathname] ?? Object.entries(labels).find(([path]) => path !== "/" && pathname.startsWith(path))?.[1] ?? "Workspace";
 
-  // Simulate notification click
   const handleNotifications = () => {
     toast.success("System: Infrastructure operating normally. No new alerts.");
   };
@@ -34,8 +36,6 @@ export default function AppHeader() {
       </div>
       
       <div className="flex items-center gap-4">
-
-        {/* INTERACTIVE NOTIFICATION BELL */}
         <button 
           onClick={handleNotifications}
           aria-label="Notifications" 
@@ -56,11 +56,18 @@ export default function AppHeader() {
           Initialize Link
         </Link>
 
+        {/* DYNAMIC USER IDENTITY BADGE */}
         <button className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 p-1.5 pr-4 transition-all hover:bg-white/10" type="button">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] text-xs font-black text-[#090d14]">
-            M
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] text-xs font-black text-[#090d14] uppercase">
+            {user?.name?.charAt(0) || "U"}
           </div>
-          <ChevronDown className="h-4 w-4 text-[#8995a3]" />
+          <div className="hidden md:flex flex-col items-start text-left">
+            <span className="text-xs font-bold text-white leading-tight">{user?.name || "Loading..."}</span>
+            <span className="text-[9px] uppercase tracking-widest text-[#35d5a4] font-bold mt-0.5">
+              {user?.role} @ {user?.business_name || "Merchant"}
+            </span>
+          </div>
+          <ChevronDown className="h-4 w-4 text-[#8995a3] ml-1 hidden md:block" />
         </button>
       </div>
     </header>

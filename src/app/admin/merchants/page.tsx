@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { Users, FilterX, ChevronLeft, ChevronRight, Search, ArrowLeft } from "lucide-react";
+import { Users, FilterX, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface Merchant {
@@ -24,28 +24,45 @@ export default function AdminMerchantsPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
 
-  const loadMerchants = useCallback(async () => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const res = await api.get("/admin/merchants", {
-        params: {
-          page,
-          status: statusFilter || null,
-        }
-      });
-      setMerchants(res.data.data);
-      setMeta(res.data.meta);
-    } catch (err) {
-      setError("Failed to load merchants.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, statusFilter]);
-
+  // Remove useCallback. The function now lives inside the useEffect.
   useEffect(() => {
+    let isMounted = true; // Prevents state updates if component unmounts
+
+    const loadMerchants = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        const res = await api.get("/admin/merchants", {
+          params: {
+            page,
+            status: statusFilter || null,
+          }
+        });
+        
+        if (isMounted) {
+          setMerchants(res.data.data);
+          setMeta(res.data.meta);
+        }
+      } catch {
+        if (isMounted) setError("Failed to load merchants.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
     loadMerchants();
-  }, [loadMerchants]);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [page, statusFilter]); // Effect depends directly on page and statusFilter
+
+  // We recreate the function here JUST for the manual retry button, 
+  // but it doesn't trigger the useEffect infinite loop warning.
+  const retryLoad = () => {
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -94,7 +111,7 @@ export default function AdminMerchantsPage() {
       {isLoading && !merchants.length ? (
         <div className="flex h-64 items-center justify-center"><Spinner /></div>
       ) : error ? (
-        <ErrorMessage message={error} retry={loadMerchants} />
+        <ErrorMessage message={error} retry={retryLoad} />
       ) : (
         <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
           <div className="overflow-x-auto flex-1">

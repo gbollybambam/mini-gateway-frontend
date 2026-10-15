@@ -1,7 +1,9 @@
 import axios from "axios";
 
+let redirectingToLogin = false;
+
 export const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
   withCredentials: true, 
   headers: {
     "Content-Type": "application/json",
@@ -9,34 +11,51 @@ export const api = axios.create({
   },
 });
 
-// Extract the CSRF token and force it into the headers
-api.interceptors.request.use((config) => {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(new RegExp("(^|;\\s*)(XSRF-TOKEN)=([^;]*)"));
-    if (match) {
-      config.headers["X-XSRF-TOKEN"] = decodeURIComponent(match[3]);
-    }
-  }
-  return config;
-});
+export async function getCsrfCookie() {
+  await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "http://localhost:8000"}/sanctum/csrf-cookie`,
+    {
+      withCredentials: true,
+    },
+  );
+}
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
-        
-        // Route admins to the admin login, and merchants to the merchant login
-        if (window.location.pathname.startsWith("/admin")) {
-          window.location.href = "/admin/login";
-        } else {
-          window.location.href = "/login";
-        }
-        
-        // Halt the promise chain immediately
-        return new Promise(() => {}); 
+// 🛑 STRICT BROWSER LOCK: Node.js will completely ignore this during npm run build
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  
+  // ROBUST CSRF EXTRACTION
+  api.interceptors.request.use((config) => {
+    const cookies = document.cookie.split(";");
+    let xsrfToken = "";
+    
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith("XSRF-TOKEN=")) {
+        xsrfToken = decodeURIComponent(cookie.substring(11));
+        break;
       }
     }
-    return Promise.reject(error);
-  }
-);
+
+    if (xsrfToken) {
+      config.headers["X-XSRF-TOKEN"] = xsrfToken;
+    }
+    return config;
+  });
+
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!redirectingToLogin && !window.location.pathname.endsWith("/login")) {
+          redirectingToLogin = true;
+          if (window.location.pathname.startsWith("/admin")) {
+            window.location.replace("/admin/login");
+          } else {
+            window.location.replace("/login");
+          }
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+}

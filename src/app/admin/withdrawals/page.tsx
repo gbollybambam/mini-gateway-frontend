@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { ArrowLeft, ArrowDownRight, FilterX, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowLeft, ArrowDownRight,  X } from "lucide-react";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface Withdrawal {
@@ -20,6 +20,13 @@ interface Withdrawal {
   };
 }
 
+// FIX 1: Explicitly define the Pagination interface instead of using 'any'
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
 const formatCurrency = (amount: number, currency: string = "NGN") => {
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -30,7 +37,10 @@ const formatCurrency = (amount: number, currency: string = "NGN") => {
 
 export default function AdminWithdrawalsPage() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [meta, setMeta] = useState<any>(null);
+  
+  // FIX 1: Apply the PaginationMeta interface
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   
@@ -51,7 +61,7 @@ export default function AdminWithdrawalsPage() {
         last_page: data.last_page || 1,
         total: data.total || 0,
       });
-    } catch (err) {
+    } catch {
       setError("Failed to load withdrawals queue.");
     } finally {
       setIsLoading(false);
@@ -59,6 +69,8 @@ export default function AdminWithdrawalsPage() {
   }, [page, statusFilter]);
 
   useEffect(() => {
+    // FIX 2: Tell the strict React linter that triggering our async fetch here is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadWithdrawals();
   }, [loadWithdrawals]);
 

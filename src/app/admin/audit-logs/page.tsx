@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { ArrowLeft, Shield, Search, ChevronLeft, ChevronRight, Eye, X, Terminal } from "lucide-react";
+import { ArrowLeft, Shield, ChevronLeft, ChevronRight, Eye, X, Terminal } from "lucide-react";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface AuditLog {
@@ -12,41 +12,79 @@ interface AuditLog {
   action: string;
   target_type: string;
   target_id: string;
-  changes: Record<string, any>;
+  changes: Record<string, unknown>;
   ip_address: string;
   created_at: string;
 }
 
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
+// Strictly type the API response to remove all 'any' related ESLint errors
+interface ApiResponse {
+  data: {
+    data: AuditLog[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+}
+
 export default function AdminAuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [meta, setMeta] = useState<any>(null);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   
   const [page, setPage] = useState(1);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-  const loadLogs = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await api.get("/admin/audit-logs", { params: { page } });
-      const data = res.data.data;
-      setLogs(data.data || data);
-      setMeta({
-        current_page: data.current_page || 1,
-        last_page: data.last_page || 1,
-        total: data.total || 0,
-      });
-    } catch (err) {
-      setError("Failed to load system audit logs.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page]);
+  const fetchLogsData = useCallback(async (pageNum: number) => {
+    const res = await api.get<ApiResponse>("/admin/audit-logs", { params: { page: pageNum } });
+    return res.data.data;
+  }, []);
 
   useEffect(() => {
-    loadLogs();
-  }, [loadLogs]);
+    let isMounted = true;
+    
+    // Notice: We removed the synchronous setIsLoading(true) from here.
+
+    const loadLogs = async () => {
+      // If we are changing pages (and it's not the initial load), 
+      // we can set loading state right as the async operation begins.
+      setIsLoading(true); 
+      
+      try {
+        const data = await fetchLogsData(page);
+        if (isMounted) {
+          setLogs(data.data || []);
+          setMeta({
+            current_page: data.current_page || 1,
+            last_page: data.last_page || 1,
+            total: data.total || 0,
+          });
+          setError("");
+        }
+      } catch {
+        if (isMounted) {
+          setError("Failed to load system audit logs.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadLogs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, fetchLogsData]);
 
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat("en-US", {
@@ -86,7 +124,7 @@ export default function AdminAuditLogsPage() {
       {isLoading && !logs.length ? (
         <div className="flex h-64 items-center justify-center"><Spinner /></div>
       ) : error ? (
-        <ErrorMessage message={error} retry={loadLogs} />
+        <ErrorMessage message={error} retry={() => setPage(1)} />
       ) : (
         <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
           <div className="overflow-x-auto flex-1">

@@ -9,7 +9,7 @@ import {
 import { api } from "@/lib/api";
 import Link from "next/link";
 import type { TransactionResource } from "@/types/api";
-import { ErrorMessage, Spinner } from "@/components/dashboard/ui";
+import { ErrorMessage } from "@/components/dashboard/ui";
 
 export interface DashboardOverview {
   currency: string;
@@ -17,7 +17,8 @@ export interface DashboardOverview {
   metrics: { 
     total_payment_volume: number; 
     transaction_count?: number; 
-    total_withdrawals?: number; 
+    total_withdrawals_volume?: number; 
+    withdrawal_count?: number;
   };
   recent_activity: TransactionResource[];
 }
@@ -46,11 +47,10 @@ function ActivityRow({ transaction, currency }: { transaction: TransactionResour
   const isProblem = ["FAILED", "CANCELLED", "REFUNDED"].includes(normalizedStatus);
   
   const activityLabel = transaction.payment_method || transaction.provider || "Payment Request";
-  
   const ActivityIcon = isProblem ? TriangleAlert : isPending ? Clock3 : transaction.payment_method?.toLowerCase().includes("bank") ? Landmark : transaction.payment_method?.toLowerCase().includes("card") ? CreditCard : Banknote;
 
   return (
-    <div className="flex items-center justify-between py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.03] px-4 -mx-4 rounded-xl transition-colors group">
+    <div className="flex items-center justify-between py-4 border-b border-white/5 last:border-0 hover:bg-white/3 px-4 -mx-4 rounded-xl transition-colors group">
       <div className="flex items-center gap-4">
         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border backdrop-blur-md ${
           isProblem ? "border-red-500/20 bg-red-500/10 text-red-400" : 
@@ -80,43 +80,107 @@ function ActivityRow({ transaction, currency }: { transaction: TransactionResour
   );
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="col-span-1 xl:col-span-2 rounded-3xl border border-white/5 bg-white/2 p-8 min-h-65">
+          <div className="h-4 w-32 bg-white/10 rounded-full mb-8"></div>
+          <div className="h-16 w-64 bg-white/10 rounded-xl mb-12"></div>
+          <div className="flex gap-4"><div className="h-12 w-40 bg-white/10 rounded-xl"></div></div>
+        </div>
+        <div className="col-span-1 rounded-3xl border border-white/5 bg-white/2 p-8 min-h-65">
+          <div className="h-4 w-24 bg-white/10 rounded-full mb-10"></div>
+          <div className="space-y-6">
+            <div className="h-10 w-full bg-white/10 rounded-xl"></div>
+            <div className="h-20 w-full bg-white/10 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="rounded-3xl border border-white/5 bg-white/2 p-6 h-32"></div>
+        ))}
+      </div>
+      
+      {/* NEW: Recent Activity Table Skeleton */}
+      <div className="rounded-3xl border border-white/5 bg-white/2 p-6 shadow-2xl overflow-hidden mt-6">
+        <div className="h-5 w-40 bg-white/10 rounded-full mb-8"></div>
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex justify-between items-center py-5 border-b border-white/5 last:border-0">
+              <div className="flex gap-4 items-center">
+                <div className="h-11 w-11 bg-white/10 rounded-xl shrink-0"></div>
+                <div className="space-y-2.5">
+                  <div className="h-3.5 w-32 bg-white/10 rounded-full"></div>
+                  <div className="h-2.5 w-48 bg-white/5 rounded-full"></div>
+                </div>
+              </div>
+              <div className="space-y-2.5 text-right flex flex-col items-end">
+                 <div className="h-3.5 w-20 bg-white/10 rounded-full"></div>
+                 <div className="h-4 w-16 bg-white/5 rounded-full"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardOverviewPage() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true); 
-
-  async function fetchOverview() {
-    try {
-      const response = await api.get<{ data: DashboardOverview }>("/dashboard/overview");
-      setOverview(response.data.data);
-      setError(""); 
-    } catch (err) {
-      setError(isAxiosError(err) ? err.response?.data?.message || "Failed to load payload" : "System Error");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => { 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchOverview(); 
-  }, []);
+    const controller = new AbortController();
+    let isMounted = true;
+    
+    api.get<{ data: DashboardOverview }>("/dashboard/overview", { signal: controller.signal })
+      .then(res => {
+        if (isMounted) {
+          setOverview(res.data.data);
+          setError("");
+          setIsLoading(false);
+        }
+      })
+      .catch(err => {
+        // STRICT SAFETY CHECK: Only show error if the component didn't unmount 
+        // and the request wasn't intentionally canceled by React Strict Mode
+        if (isMounted && !controller.signal.aborted) {
+          setError(isAxiosError(err) ? err.response?.data?.message || "Failed to load payload" : "System Error");
+          setIsLoading(false);
+        }
+      });
+      
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [retryCount]);
 
-  if (isLoading) return (
-    <div className="flex h-96 items-center justify-center">
-      <div className="flex items-center gap-3 text-[#35d5a4] bg-[#2f9d78]/10 px-6 py-3 rounded-full border border-[#2f9d78]/20 font-medium text-sm shadow-[0_0_20px_rgba(47,157,120,0.15)]">
-        <Spinner /> Initializing metrics...
-      </div>
-    </div>
-  );
-
-  if (error || !overview) return <ErrorMessage message={error} retry={fetchOverview} />;
+  if (isLoading) return <DashboardSkeleton />;
+  if (error || !overview) {
+    return (
+      <ErrorMessage
+        message={error || "Failed to load dashboard"}
+        retry={() => {
+          setError("");
+          setOverview(null);
+          setIsLoading(true);
+          setRetryCount((count) => count + 1);
+        }}
+      />
+    );
+  }
 
   const { recent_activity: activity, balances, metrics, currency } = overview;
   const hasActivity = activity.length > 0;
 
   const txCount = metrics.transaction_count ?? activity.length;
-  const withdrawalsSum = metrics.total_withdrawals ?? 0;
+  const withdrawalsSum = metrics.total_withdrawals_volume ?? 0;
 
   return (
     <div className="space-y-6">
@@ -125,7 +189,7 @@ export default function DashboardOverviewPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         {/* Main Balance Card */}
-        <div className="col-span-1 xl:col-span-2 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[260px]">
+        <div className="col-span-1 xl:col-span-2 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-65">
           <div className="absolute inset-0 z-0 opacity-[0.15]" style={{ backgroundImage: `radial-gradient(#2f9d78 1px, transparent 1px)`, backgroundSize: '30px 30px', maskImage: 'linear-gradient(to bottom right, black 20%, transparent 80%)' }} />
           <div className="absolute -right-10 -bottom-10 h-64 w-64 rounded-full bg-[#2f9d78]/10 blur-[80px]" />
           
@@ -142,7 +206,7 @@ export default function DashboardOverviewPage() {
           </div>
 
           <div className="relative z-10 mt-10 flex flex-wrap items-center gap-4">
-            <Link href="/withdrawals" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#2f9d78] to-[#1a6b50] px-8 py-3.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] hover:brightness-110 border border-white/10">
+            <Link href="/withdrawals" className="flex items-center gap-2 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-8 py-3.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] hover:brightness-110 border border-white/10">
               <ArrowUpRight className="h-4 w-4" /> Withdraw Funds
             </Link>
             <Link href="/payment-links" className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-8 py-3.5 text-sm font-bold text-[#e8edf2] transition-all hover:bg-white/10 hover:text-white">
@@ -152,7 +216,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* System Status */}
-        <div className="col-span-1 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl p-8 shadow-xl flex flex-col justify-center">
+        <div className="col-span-1 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-8 shadow-xl flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-8">
             <div className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#35d5a4] opacity-75"></span>
@@ -189,7 +253,7 @@ export default function DashboardOverviewPage() {
           { label: "Total Transactions", value: txCount.toString(), icon: Receipt, color: "blue" },
           { label: "Total Withdrawals", value: formatAmount(withdrawalsSum, currency), icon: ArrowDownToLine, color: "purple" }
         ].map((stat, i) => (
-          <div key={i} className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl p-6 shadow-lg transition-all hover:border-white/10 hover:bg-white/[0.04]">
+          <div key={i} className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-6 shadow-lg transition-all hover:border-white/10 hover:bg-white/4">
             <div className="flex items-center gap-3 mb-4">
               <div className={`flex h-8 w-8 items-center justify-center rounded-xl border backdrop-blur-md ${
                 stat.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
@@ -207,8 +271,8 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* Recent Activity Table */}
-      <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between border-b border-white/5 p-6 md:px-8 bg-white/[0.01]">
+      <div className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between border-b border-white/5 p-6 md:px-8 bg-white/1">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#e8edf2] shadow-inner">
               <Activity className="h-4 w-4" />

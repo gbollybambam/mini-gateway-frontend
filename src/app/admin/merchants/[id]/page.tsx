@@ -48,7 +48,7 @@ export default function MerchantDetailOperations() {
       if (res.data.data.merchant.wallets.length > 0) {
         setAdjustForm(prev => ({ ...prev, currency: res.data.data.merchant.wallets[0].currency }));
       }
-    } catch (err) {
+    } catch {
       setError("Failed to load merchant details.");
     } finally {
       setIsLoading(false);

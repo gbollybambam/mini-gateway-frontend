@@ -2,11 +2,12 @@ import type { NextConfig } from "next";
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data:;
     font-src 'self';
-    connect-src 'self' http://localhost:8000 http://127.0.0.1:8000;
+    connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 https://challenges.cloudflare.com;
+    frame-src 'self' https://challenges.cloudflare.com;
     frame-ancestors 'none';
 `.replace(/\s{2,}/g, " ").trim();
 

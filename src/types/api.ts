@@ -1,3 +1,4 @@
+export type TeamRole = "owner" | "admin" | "developer" | "finance";
 export type ApiKeyEnvironment = "sandbox" | "production";
 
 export interface ApiKeyResource {
@@ -125,3 +126,24 @@ export interface UpdatePasswordRequest {
   password_confirmation?: string;
 }
 export interface WebhookSecretPayload { webhook_secret: string; }
+
+
+
+export interface TeamMemberResource {
+  id: string;
+  name: string;
+  email: string;
+  role: TeamRole;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface TeamListResponse {
+  data: TeamMemberResource[];
+}
+
+export interface InviteTeamMemberRequest {
+  name: string;
+  email: string;
+  role: TeamRole;
+}

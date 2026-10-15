@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Eye, EyeOff, RefreshCw } from "./icons";
 
@@ -9,16 +9,16 @@ export const primaryButton = "inline-flex items-center justify-center gap-2 h-10
 export const secondaryButton = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-slate-800 text-slate-200 font-medium text-sm hover:bg-slate-700 transition-all border border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export function useToast() {
-  return {
-    success: (msg: string) => toast.success(msg, { 
-      style: { background: '#0f172a', color: '#fff', border: '1px solid rgba(16, 185, 129, 0.2)' },
-      iconTheme: { primary: '#10b981', secondary: '#fff' }
-    }),
-    error: (msg: string) => toast.error(msg, { 
-      style: { background: '#0f172a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.2)' },
-      iconTheme: { primary: '#ef4444', secondary: '#fff' }
-    }),
-  };
+  const success = useCallback((msg: string) => toast.success(msg, { 
+    style: { background: '#0f172a', color: '#fff', border: '1px solid rgba(16, 185, 129, 0.2)' },
+    iconTheme: { primary: '#10b981', secondary: '#fff' }
+  }), []);
+  const error = useCallback((msg: string) => toast.error(msg, { 
+    style: { background: '#0f172a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.2)' },
+    iconTheme: { primary: '#ef4444', secondary: '#fff' }
+  }), []);
+
+  return useMemo(() => ({ success, error }), [success, error]);
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {

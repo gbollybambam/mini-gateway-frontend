@@ -8,7 +8,7 @@ import { isAxiosError } from "axios";
 import { 
   Users, Activity, TrendingUp, ArrowDownRight, 
   ShieldCheck, ListOrdered, ServerCrash, ChevronRight,
-  Clock, CheckCircle2, XCircle, Wallet, ArrowUpRight, LogOut
+  Clock, CheckCircle2, ArrowUpRight, LogOut
 } from "lucide-react";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 

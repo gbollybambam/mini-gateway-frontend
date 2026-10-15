@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 
 type AuthMode = "login" | "register";
 
@@ -46,7 +47,6 @@ function getErrorMessage(error: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
-// FIX: Added 'rightLabel' so we can perfectly place the Forgot Password link
 function Field({ label, name, value, onChange, type = "text", required = true, autoComplete, placeholder, rightLabel }: { label: string; name: keyof FormState; value: string; onChange: (name: keyof FormState, value: string) => void; type?: string; required?: boolean; autoComplete?: string; placeholder?: string; rightLabel?: React.ReactNode; }) {
   return (
     <div className="grid gap-2">
@@ -93,7 +93,41 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const isRegister = mode === "register";
+
+  const idempotencyKey = useRef<string>(
+    typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : ""
+  );
+
+  // Load saved data if the user clicked "Wrong Email" on the OTP screen
+  useEffect(() => {
+    if (isRegister) {
+      const savedData = sessionStorage.getItem("registration_draft");
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          // 1. Remove it from storage immediately
+          sessionStorage.removeItem("registration_draft");
+          
+          // 2. Delay the state update to escape the synchronous render cycle
+          setTimeout(() => {
+            setForm((prev) => ({ 
+              ...prev, 
+              ...parsed, 
+              email: "", 
+              password: "", 
+              password_confirmation: "" 
+            }));
+          }, 0);
+        } catch {
+
+        }
+      }
+    }
+  }, [isRegister]);
 
   function updateField(name: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -108,17 +142,22 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
       return;
     }
 
+    if (isRegister && !turnstileToken && process.env.NODE_ENV !== "development") {
+      setError("Please complete the security check.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await api.get("/sanctum/csrf-cookie", { baseURL: "http://localhost:8000" });
+      await getCsrfCookie();
 
       if (isRegister) {
         const dialCode = DIAL_CODES[form.country] || "";
         const cleanPhone = form.phone.replace(/^0+/, ""); 
         const formattedPhone = cleanPhone ? `${dialCode}${cleanPhone}` : null;
 
-        await api.post("/auth/register", {
+        const response = await api.post("/auth/register", {
           business_name: form.business_name,
           email: form.email,
           phone: formattedPhone,
@@ -126,19 +165,68 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
           currency: form.currency,
           business_type: form.business_type,
           password: form.password,
-        }, { headers: { "Idempotency-Key": crypto.randomUUID() } });
+          password_confirmation: form.password_confirmation,
+          "cf-turnstile-response": turnstileToken,
+        }, { 
+          headers: { "Idempotency-Key": idempotencyKey.current } 
+        });
+
+        idempotencyKey.current = crypto.randomUUID();
+        
+        // Save safe data to session storage in case they need to correct their email
+        sessionStorage.setItem("registration_draft", JSON.stringify({
+          business_name: form.business_name,
+          phone: form.phone,
+          country: form.country,
+          currency: form.currency,
+          business_type: form.business_type,
+        }));
+
+        toast.success("Account created. Please enter the code sent to your email.");
+        router.push(`/verify-otp?merchant_id=${response.data.data.merchant_id}`);
       } else {
-        await api.post("/auth/login", {
+        // NEW: Login Architecture Checkpoints
+        const response = await api.post("/auth/login", {
           email: form.email,
           password: form.password,
         });
+        
+        // INTERCEPT: Device is unknown, challenge required
+        if (response.status === 202 && response.data.code === 'device_unknown') {
+          toast.success("Please verify this new device.");
+          router.push(`/verify-device?challenge=${encodeURIComponent(response.data.data.challenge)}`);
+          return;
+        }
+
+        toast.success("Welcome back.");
+        router.push("/");
+      }
+    } catch (requestError) {
+      // NEW: Catch specific 403 Forbidden intercept codes from the backend
+      if (isAxiosError(requestError) && requestError.response) {
+        const { status, data } = requestError.response;
+
+        if (status === 403) {
+          if (data.code === 'email_unverified') {
+            toast.error(data.message || "Please verify your email address.");
+            router.push(`/verify-otp?merchant_id=${data.data.merchant_id}`);
+            setIsSubmitting(false);
+            return;
+          }
+          if (data.code === 'account_suspended') {
+            setError(data.message || "This account has been suspended. Please contact support.");
+            setIsSubmitting(false);
+            return;
+          }
+        }
       }
 
-      toast.success(isRegister ? "Account created." : "Welcome back.");
-      router.push("/");
-      router.refresh();
-    } catch (requestError) {
+      // Default error fallback
       setError(getErrorMessage(requestError));
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+        setTurnstileToken("");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -175,20 +263,19 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
         </div>
       )}
 
-      {/* FIX: Login password is now 100% wide, and Forgot Password is top-right of the label */}
       {isRegister ? (
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Password" name="password" value={form.password} onChange={updateField} type="password" autoComplete="new-password" />
           <Field label="Confirm password" name="password_confirmation" value={form.password_confirmation} onChange={updateField} type="password" autoComplete="new-password" />
         </div>
       ) : (
-        <Field 
-          label="Password" 
-          name="password" 
-          value={form.password} 
-          onChange={updateField} 
-          type="password" 
-          autoComplete="current-password" 
+        <Field
+          label="Password"
+          name="password"
+          value={form.password}
+          onChange={updateField}
+          type="password"
+          autoComplete="current-password"
           rightLabel={
             <Link href="/forgot-password" className="text-preset-5 font-bold text-green transition hover:text-turquoise">
               Forgot password?
@@ -199,7 +286,22 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
 
       {error && <p className="rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-preset-4 text-red">{error}</p>}
 
-      <button className="flex h-12 items-center justify-center gap-2 rounded-xl bg-grey-900 px-5 text-preset-4-bold text-white transition hover:bg-green disabled:opacity-60" type="submit" disabled={isSubmitting}>
+      {isRegister && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+        <div className="flex justify-center my-2">
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            onSuccess={(token) => setTurnstileToken(token)}
+            options={{ theme: 'light' }}
+          />
+        </div>
+      )}
+
+      <button
+        className="flex h-12 items-center justify-center gap-2 rounded-xl bg-grey-900 px-5 text-preset-4-bold text-white transition hover:bg-green disabled:opacity-60"
+        type="submit"
+        disabled={isSubmitting || (isRegister && !turnstileToken && process.env.NODE_ENV !== "development")}
+      >
         {isSubmitting && <Spinner />} {isSubmitting ? "Working..." : isRegister ? "Create merchant account" : "Sign in"}
       </button>
     </form>
