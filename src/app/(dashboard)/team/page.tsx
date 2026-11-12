@@ -134,50 +134,50 @@ export default function TeamPage() {
       <div className="space-y-8 animate-in fade-in duration-300 relative">
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Organization</p>
-            <h1 className="text-2xl font-bold text-white drop-shadow-sm mt-1">Team Management</h1>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Organization</p>
+            <h1 className="text-2xl font-bold text-ink drop-shadow-sm mt-1">Team Management</h1>
           </div>
           <button
             onClick={() => { setInviteError(""); setIsInviteOpen(true); }}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#2f9d78] to-[#1a6b50] px-6 py-2.5 text-sm font-bold text-white hover:brightness-110 shadow-lg"
+            className="flex items-center gap-2 rounded-input bg-gradient-to-r from-brand-500 to-brand-800 px-6 py-2.5 text-sm font-bold text-ink hover:brightness-110 shadow-lg"
           >
             <UserPlus className="h-4 w-4" /> Invite New Member
           </button>
         </header>
 
         {successMsg && (
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-xs text-emerald-400">
+          <div className="flex items-center gap-2 rounded-input bg-success-tint border border-line p-4 text-xs text-success">
             <CheckCircle2 className="h-4 w-4 shrink-0" /> <p>{successMsg}</p>
           </div>
         )}
 
         {/* Main Table Content */}
-        <section className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <section className="rounded-card border border-line bg-surface backdrop-blur-xl shadow-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-white/1 border-b border-white/5">
+              <thead className="bg-surface border-b border-line">
                 <tr>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-[#8995a3]">Name</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-[#8995a3]">Status</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-[#8995a3]">Access Role</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-[#8995a3] text-right">Actions</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-ink-muted">Name</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-ink-muted">Status</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-ink-muted">Access Role</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase text-ink-muted text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {loading ? (
                    <tr><td colSpan={4} className="p-8 text-center"><Spinner /></td></tr>
                 ) : team.map((member) => (
-                  <tr key={member.id} className="hover:bg-white/2 transition-colors">
+                  <tr key={member.id} className="hover:bg-surface transition-colors">
                     <td className="px-8 py-5">
                       <div className="flex flex-col">
-                        <span className="font-bold text-white text-sm">{member.name}</span>
-                        <span className="text-xs text-[#8995a3]">{member.email}</span>
+                        <span className="font-bold text-ink text-sm">{member.name}</span>
+                        <span className="text-xs text-ink-muted">{member.email}</span>
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      {member.status === "pending" && <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md">Pending Invite</span>}
-                      {member.status === "active" && <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Active</span>}
-                      {member.status === "suspended" && <span className="text-[10px] uppercase font-bold tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded-md">Suspended</span>}
+                      {member.status === "pending" && <span className="text-[10px] uppercase font-bold tracking-wider text-pending bg-surface-muted border border-line px-2.5 py-1 rounded-md">Pending Invite</span>}
+                      {member.status === "active" && <span className="text-[10px] uppercase font-bold tracking-wider text-success bg-success-tint border border-line px-2.5 py-1 rounded-md">Active</span>}
+                      {member.status === "suspended" && <span className="text-[10px] uppercase font-bold tracking-wider text-danger bg-danger-tint border border-line px-2.5 py-1 rounded-md">Suspended</span>}
                     </td>
                     <td className="px-8 py-5">
                       {member.role === "owner" ? (
@@ -187,13 +187,13 @@ export default function TeamPage() {
                           <select 
                             value={member.role} 
                             onChange={(e) => handleRoleChange(member.id, e.target.value as TeamRole)} 
-                            className="w-full appearance-none bg-[#0a0f16] border border-white/10 text-xs font-bold text-white px-3 py-2 rounded-lg outline-none focus:border-[#2f9d78] cursor-pointer"
+                            className="w-full appearance-none bg-surface border border-line text-xs font-bold text-ink px-3 py-2 rounded-input outline-none focus:border-brand-500 cursor-pointer"
                           >
                             <option value="admin">Admin</option>
                             <option value="developer">Developer</option>
                             <option value="finance">Finance</option>
                           </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#68747e] pointer-events-none" />
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-ink-muted pointer-events-none" />
                         </div>
                       )}
                     </td>
@@ -202,21 +202,21 @@ export default function TeamPage() {
                         <div className="flex items-center justify-end gap-2">
                           {member.status === 'pending' && (
                             <>
-                              <button onClick={() => handleResend(member.id)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 text-xs font-bold transition-colors">
+                              <button onClick={() => handleResend(member.id)} className="flex items-center gap-1.5 px-3 py-2 rounded-input bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 text-xs font-bold transition-colors">
                                 <Mail className="h-3.5 w-3.5" /> Resend Invite
                               </button>
-                              <button onClick={() => setMemberToRemove(member)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-colors">
+                              <button onClick={() => setMemberToRemove(member)} className="flex items-center gap-1.5 px-3 py-2 rounded-input bg-danger-tint border border-line text-danger hover:bg-danger-tint text-xs font-bold transition-colors">
                                 <X className="h-3.5 w-3.5" /> Cancel Invite
                               </button>
                             </>
                           )}
                           {member.status !== 'pending' && (
                             <>
-                              <button onClick={() => handleToggleSuspend(member)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-bold transition-colors ${member.is_active ? "bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"}`}>
+                              <button onClick={() => handleToggleSuspend(member)} className={`flex items-center gap-1.5 px-3 py-2 rounded-input border text-xs font-bold transition-colors ${member.is_active ? "bg-surface-muted border-line text-pending hover:bg-pending/20" : "bg-success-tint border-line text-success hover:bg-success-tint"}`}>
                                 {member.is_active ? <ShieldBan className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
                                 {member.is_active ? 'Suspend Access' : 'Restore Access'}
                               </button>
-                              <button onClick={() => setMemberToRemove(member)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-colors">
+                              <button onClick={() => setMemberToRemove(member)} className="flex items-center gap-1.5 px-3 py-2 rounded-input bg-danger-tint border border-line text-danger hover:bg-danger-tint text-xs font-bold transition-colors">
                                 <Trash2 className="h-3.5 w-3.5" /> Remove User
                               </button>
                             </>
@@ -233,54 +233,54 @@ export default function TeamPage() {
 
         {isInviteOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0d131a] shadow-2xl overflow-hidden flex flex-col relative scale-100 animate-in zoom-in-95 duration-200">
-              <div className="flex items-center justify-between border-b border-white/5 bg-white/2 p-6">
+            <div className="w-full max-w-md rounded-card border border-line bg-surface shadow-card overflow-hidden flex flex-col relative scale-100 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between border-b border-line bg-surface p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2f9d78]/10 border border-[#2f9d78]/20 text-[#35d5a4]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-input bg-success-tint border border-line text-brand-500">
                     <UserPlus className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Invite Team Member</h3>
-                    <p className="text-xs text-[#8995a3]">Send a secure email invitation</p>
+                    <h3 className="text-lg font-bold text-ink">Invite Team Member</h3>
+                    <p className="text-xs text-ink-muted">Send a secure email invitation</p>
                   </div>
                 </div>
-                <button onClick={() => setIsInviteOpen(false)} className="rounded-full p-2 text-[#8995a3] hover:text-white transition-colors bg-white/5 hover:bg-white/10">
+                <button onClick={() => setIsInviteOpen(false)} className="rounded-full p-2 text-ink-muted hover:text-ink transition-colors bg-surface-muted hover:bg-surface-muted">
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               <form onSubmit={handleInvite} className="p-6 space-y-5">
                 {inviteError && (
-                  <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400 leading-relaxed">
+                  <div className="flex items-center gap-2 rounded-input bg-danger-tint border border-line p-3 text-xs text-danger leading-relaxed">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     <p>{inviteError}</p>
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Full Name</label>
-                  <input required value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="e.g. Jane Doe" className="w-full h-11 rounded-xl border border-white/10 bg-[#05080c] px-4 text-sm text-white outline-none focus:border-[#2f9d78] shadow-inner" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Full Name</label>
+                  <input required value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="e.g. Jane Doe" className="w-full h-11 rounded-input border border-line bg-bg px-4 text-sm text-ink outline-none focus:border-brand-500 shadow-inner" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Email Address</label>
-                  <input required type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="jane@company.com" className="w-full h-11 rounded-xl border border-white/10 bg-[#05080c] px-4 text-sm text-white outline-none focus:border-[#2f9d78] shadow-inner" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Email Address</label>
+                  <input required type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="jane@company.com" className="w-full h-11 rounded-input border border-line bg-bg px-4 text-sm text-ink outline-none focus:border-brand-500 shadow-inner" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Access Role</label>
-                  <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as TeamRole)} className="w-full h-11 rounded-xl border border-white/10 bg-[#05080c] px-4 text-sm font-bold text-white outline-none focus:border-[#2f9d78] shadow-inner cursor-pointer">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Access Role</label>
+                  <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as TeamRole)} className="w-full h-11 rounded-input border border-line bg-bg px-4 text-sm font-bold text-ink outline-none focus:border-brand-500 shadow-inner cursor-pointer">
                     <option value="admin">Admin (Full Access except Owner)</option>
                     <option value="developer">Developer (API Keys & Webhooks)</option>
                     <option value="finance">Finance (Transactions, Ledger & Payouts)</option>
                   </select>
                 </div>
 
-                <div className="pt-3 border-t border-white/5 flex gap-3">
-                  <button type="button" onClick={() => setIsInviteOpen(false)} className="w-1/2 h-11 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:bg-white/10">
+                <div className="pt-3 border-t border-line flex gap-3">
+                  <button type="button" onClick={() => setIsInviteOpen(false)} className="w-1/2 h-11 rounded-input border border-line bg-surface-muted text-xs font-bold text-ink hover:bg-surface-muted">
                     Cancel
                   </button>
-                  <button type="submit" disabled={inviting || !inviteName.trim() || !inviteEmail.trim()} className="w-1/2 h-11 rounded-xl bg-gradient-to-r from-[#2f9d78] to-[#1a6b50] text-xs font-bold text-white hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(47,157,120,0.3)]">
+                  <button type="submit" disabled={inviting || !inviteName.trim() || !inviteEmail.trim()} className="w-1/2 h-11 rounded-input bg-gradient-to-r from-brand-500 to-brand-800 text-xs font-bold text-ink hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2 shadow-card">
                     {inviting ? <Spinner /> : "Send Invite"}
                   </button>
                 </div>
@@ -291,30 +291,30 @@ export default function TeamPage() {
 
         {memberToRemove && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0d131a] shadow-2xl p-6 space-y-5 scale-100 animate-in zoom-in-95 duration-200">
+            <div className="w-full max-w-md rounded-card border border-line bg-surface shadow-card p-6 space-y-5 scale-100 animate-in zoom-in-95 duration-200">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-red-500/10 border-red-500/20 text-red-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-input border bg-danger-tint border-line text-danger">
                   <ShieldAlert className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-ink">
                     {memberToRemove.status === 'pending' ? 'Cancel Invitation?' : 'Remove Team Member?'}
                   </h3>
-                  <p className="text-xs text-[#8995a3]">{memberToRemove.name} ({memberToRemove.email})</p>
+                  <p className="text-xs text-ink-muted">{memberToRemove.name} ({memberToRemove.email})</p>
                 </div>
               </div>
 
-              <p className="text-xs text-[#8995a3] leading-relaxed">
+              <p className="text-xs text-ink-muted leading-relaxed">
                 {memberToRemove.status === 'pending' 
                   ? "This will permanently invalidate the invitation link sent to their email. They will not be able to join your organization."
                   : "This user will immediately lose access to your merchant console and all associated privileges. This action cannot be undone."}
               </p>
 
-              <div className="flex gap-3 pt-2 border-t border-white/5">
-                <button onClick={() => setMemberToRemove(null)} className="w-1/2 h-11 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:bg-white/10">
+              <div className="flex gap-3 pt-2 border-t border-line">
+                <button onClick={() => setMemberToRemove(null)} className="w-1/2 h-11 rounded-input border border-line bg-surface-muted text-xs font-bold text-ink hover:bg-surface-muted">
                   Keep User
                 </button>
-                <button disabled={removing} onClick={handleRemoveMember} className="w-1/2 h-11 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white flex items-center justify-center gap-2">
+                <button disabled={removing} onClick={handleRemoveMember} className="w-1/2 h-11 rounded-input bg-red-600 hover:bg-red-500 text-xs font-bold text-ink flex items-center justify-center gap-2">
                   {removing ? <Spinner /> : (memberToRemove.status === 'pending' ? 'Cancel Invite' : 'Remove User')}
                 </button>
               </div>

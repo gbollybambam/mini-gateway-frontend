@@ -6,6 +6,7 @@
 @config "../../tailwind.config.ts";
 
 :root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --bg: #FAFAFA;
   --surface: #FFFFFF;
   --surface-muted: #F2F1EF;
@@ -285,34 +286,14 @@
 
   .content-shell { width: 100%; max-width: none; margin-inline: auto; }
 
-  .dashboard-root { background: #090d14 !important; color: #e8edf2; }
   .dashboard-root { font-size: 0.875rem; font-weight: 400; letter-spacing: 0; line-height: 1.45; }
-  .dashboard-root main { background: #090d14; }
-  .dashboard-root aside { background: #0e151f; border-right: 1px solid rgba(255, 255, 255, 0.08); }
-  .dashboard-root .border-b, .dashboard-root .border-t { border-color: rgba(255, 255, 255, 0.08) !important; }
-  .dashboard-root .text-grey-900 { color: #eef2f5 !important; }
-  .dashboard-root .text-grey-500 { color: #8995a3 !important; }
-  .dashboard-root .text-grey-300 { color: #b3bdc8 !important; }
-  .dashboard-root .bg-white { background-color: #101722 !important; }
-  .dashboard-root .bg-grey-100 { background-color: #151d28 !important; }
-  .dashboard-root .bg-beige-100 { background-color: #090d14 !important; }
-  .dashboard-root .panel { border-color: rgba(255, 255, 255, 0.09); background: #101722; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16); }
-  .dashboard-root .data-table thead { background: #151d28; }
-  .dashboard-root .data-table tbody tr:hover { background: rgba(185, 243, 229, 0.06); }
-  .dashboard-root .profile-chip, .dashboard-root header button { border-color: rgba(255, 255, 255, 0.1); background: #101722; box-shadow: none; }
-  .dashboard-root .profile-chip:hover, .dashboard-root header button:hover { background: #151d28; }
-  .dashboard-root .profile-avatar { background: #b9f3e5; color: #0c1119; }
-  .dashboard-root .sidebar-link:not([class*="bg-white"]):hover { background: rgba(255, 255, 255, 0.06); }
-  .dashboard-root .sidebar-link[class*="bg-white"] { background: rgba(53, 213, 164, 0.12) !important; color: #f5f7f9 !important; box-shadow: inset 3px 0 0 #35d5a4; }
-  .dashboard-root table thead { background: #151d28 !important; }
-  .dashboard-root table tr { border-color: rgba(255, 255, 255, 0.07) !important; }
-  .dashboard-root table tbody tr:hover { background: rgba(185, 243, 229, 0.05); }
-  .dashboard-root input, .dashboard-root select { border-color: rgba(255, 255, 255, 0.12); background: #101722; color: #eef2f5; }
-  .dashboard-root input::placeholder { color: #687584; }
-  .dashboard-root .empty-state-mark { background: #182536; color: #b9f3e5; }
-  .dashboard-root .app-header, .dashboard-root .shimmer { animation: none !important; }
+  .dashboard-root :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
+  .dashboard-root .dashboard-card { border-radius: var(--radius-card-token); background: var(--surface); box-shadow: var(--shadow-card-token); }
+  .dashboard-root .dashboard-enter { animation: dashboard-enter 220ms var(--ease-out) both; }
+  .dashboard-root .dashboard-chart-enter { transform-origin: bottom; animation: dashboard-chart-enter 220ms var(--ease-out) both; }
+  .dashboard-root input, .dashboard-root select { border: 1px solid var(--line); border-radius: var(--radius-input-token); background: var(--surface); color: var(--ink); }
+  .dashboard-root input::placeholder { color: var(--ink-muted); }
   .dashboard-root .sidebar-link::after { display: none; }
-  .dashboard-root aside .sidebar-link { letter-spacing: 0.005em; }
   .workspace-rail { width: 16rem; }
   .rail-section { margin: 0 0 1.15rem; padding: 0 0 1.15rem; }
   .rail-section:not(:last-child) { border-bottom: 1px solid rgba(255, 255, 255, 0.075); }
@@ -320,7 +301,7 @@
   .rail-link { position: relative; display: flex; min-height: 2.25rem; align-items: center; border-radius: 0.4rem; padding: 0.45rem 0.8rem; color: #8f9baa; font-size: 0.76rem; transition: background 140ms ease, color 140ms ease; }
   .rail-link:hover { background: rgba(255, 255, 255, 0.045); color: #e8edf2; }
   .rail-link-active { background: rgba(53, 213, 164, 0.12) !important; color: #f4f7fa !important; }
-  .rail-link-active::before { position: absolute; left: 0; width: 0.2rem; height: 1rem; border-radius: 0 0.2rem 0.2rem 0; background: #35d5a4; content: ""; }
+  .rail-link-active::before { display: none; }
   .rail-footer { display: grid; gap: 0.2rem; border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 0.9rem 1.1rem 1rem; }
   .rail-footer a, .rail-footer button { display: flex; min-height: 2.35rem; align-items: center; color: #8f9baa; font-size: 0.75rem; text-align: left; }
   .rail-footer a:hover, .rail-footer button:hover { color: #e8edf2; }
@@ -462,6 +443,8 @@
   .action-tile-blue { background: rgba(226, 119, 182, 0.08); }
   .action-tile-blue > span { background: #e277b6; }
   @keyframes glass-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes dashboard-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes dashboard-chart-enter { from { opacity: 0; transform: scaleY(0.2); } to { opacity: 1; transform: scaleY(1); } }
   .owed-card { animation-delay: 70ms; }
   .overview-lower-cards .insight-card:first-child { animation-delay: 130ms; }
   .overview-lower-cards .insight-card:last-child { animation-delay: 190ms; }
@@ -659,7 +642,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .checkout-enter, .checkout-success-icon { animation: none; }
+    .checkout-enter, .checkout-success-icon, .dashboard-enter, .dashboard-chart-enter { animation: none; }
     *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
 }

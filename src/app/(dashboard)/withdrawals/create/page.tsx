@@ -179,42 +179,42 @@ export default function CreateWithdrawalPage() {
 
   return (
     <div className="w-full space-y-8 pb-10">
-      <Link href="/withdrawals" className="inline-flex items-center gap-2 text-sm font-bold text-[#8995a3] hover:text-white transition-colors">
+      <Link href="/withdrawals" className="inline-flex items-center gap-2 text-sm font-bold text-ink-muted hover:text-ink transition-colors">
         <ArrowLeft className="h-5 w-5" /> Back to Ledger
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-16">
         
-        <div className="lg:col-span-7 xl:col-span-8 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-6 sm:p-8 md:p-12 shadow-2xl relative min-h-150">
-          <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-[#3f82b2]/5 blur-[120px] pointer-events-none" />
+        <div className="lg:col-span-7 xl:col-span-8 rounded-card border border-line bg-surface backdrop-blur-xl p-6 sm:p-8 md:p-12 shadow-card relative min-h-150">
+          <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-surface-muted blur-[120px] pointer-events-none" />
 
           <div className="flex items-center gap-5 mb-10 sm:mb-12 relative z-10">
-            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-[#3f82b2]/10 text-[#79b8e8] border border-[#3f82b2]/20 shadow-inner shrink-0">
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-card bg-surface-muted text-ink-muted border border-line shadow-inner shrink-0">
               <Landmark className="h-6 w-6 sm:h-8 sm:w-8" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight drop-shadow-sm">Request Payout</h1>
-              <p className="text-sm sm:text-base text-[#8995a3] mt-1">Withdraw funds to a verified destination.</p>
+              <h1 className="text-xl sm:text-3xl font-black text-ink tracking-tight drop-shadow-sm">Request Payout</h1>
+              <p className="text-sm sm:text-base text-ink-muted mt-1">Withdraw funds to a verified destination.</p>
             </div>
           </div>
 
           {error && (
-            <div className="mb-8 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-bold text-red-500 relative z-10">
+            <div className="mb-8 rounded-input border border-line bg-danger-tint p-5 text-sm font-bold text-danger relative z-10">
               {error}
             </div>
           )}
 
           <div className="space-y-10 relative z-10">
             <div className={`space-y-6 sm:space-y-8 transition-opacity duration-300 ${step === 2 ? 'opacity-50' : 'opacity-100'}`}>
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-3">
-                  <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black shadow-inner ${step === 1 ? 'bg-[#3f82b2] text-white shadow-[#3f82b2]/50' : 'bg-[#2f9d78] text-white shadow-[#2f9d78]/50'}`}>
+              <div className="flex items-center justify-between border-b border-line pb-3">
+                <h2 className="text-sm sm:text-base font-bold text-ink flex items-center gap-3">
+                  <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black shadow-inner ${step === 1 ? 'bg-brand-500 text-ink shadow-brand-500/30' : 'bg-brand-500 text-ink shadow-brand-500/30'}`}>
                     {step === 2 ? <Check className="h-4 w-4" /> : "1"}
                   </span>
                   Destination Bank Details
                 </h2>
                 {step === 2 && (
-                  <button onClick={() => setStep(1)} className="text-xs font-bold text-[#79b8e8] hover:text-white transition-colors bg-[#3f82b2]/10 px-3 py-1.5 rounded-lg border border-[#3f82b2]/20">
+                  <button onClick={() => setStep(1)} className="text-xs font-bold text-ink-muted hover:text-ink transition-colors bg-surface-muted px-3 py-1.5 rounded-input border border-line">
                     Edit Account
                   </button>
                 )}
@@ -222,9 +222,9 @@ export default function CreateWithdrawalPage() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                 <div className="space-y-3 relative">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Select Supported Bank</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Select Supported Bank</label>
                   <div className="relative">
-                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#68747e]" />
+                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-muted" />
                     <input 
                       type="text"
                       disabled={step === 2 || loadingBanks}
@@ -236,13 +236,13 @@ export default function CreateWithdrawalPage() {
                       }}
                       onFocus={() => setIsBankDropdownOpen(true)}
                       onBlur={() => setTimeout(() => setIsBankDropdownOpen(false), 200)}
-                      className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/80 pl-12 pr-10 text-sm font-medium text-white placeholder:text-[#68747e] outline-none transition-all focus:border-[#3f82b2] focus:bg-white/5 focus:ring-1 focus:ring-[#3f82b2] shadow-inner disabled:opacity-50"
+                      className="h-14 w-full rounded-input border border-line bg-bg/80 pl-12 pr-10 text-sm font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner disabled:opacity-50"
                     />
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#68747e] pointer-events-none" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-muted pointer-events-none" />
                   </div>
 
                   {isBankDropdownOpen && filteredBanks.length > 0 && (
-                    <div className="absolute top-full left-0 z-50 mt-2 w-full max-h-60 overflow-y-auto rounded-xl border border-white/10 bg-[#0a0f16] shadow-2xl custom-scrollbar py-2">
+                    <div className="absolute top-full left-0 z-50 mt-2 w-full max-h-60 overflow-y-auto rounded-input border border-line bg-surface shadow-card custom-scrollbar py-2">
                       {filteredBanks.map((bank, index) => (
                         <div 
                           key={`${bank.code}-${index}`}
@@ -251,7 +251,7 @@ export default function CreateWithdrawalPage() {
                             setBankSearch(bank.name);
                             setIsBankDropdownOpen(false);
                           }}
-                          className={`px-5 py-3 text-sm cursor-pointer transition-colors ${form.bank_code === bank.code ? 'bg-[#3f82b2]/20 text-[#79b8e8] font-bold' : 'text-[#e8edf2] hover:bg-white/5'}`}
+                          className={`px-5 py-3 text-sm cursor-pointer transition-colors ${form.bank_code === bank.code ? 'bg-surface-muted text-ink-muted font-bold' : 'text-ink hover:bg-surface-muted'}`}
                         >
                           {bank.name}
                         </div>
@@ -259,21 +259,21 @@ export default function CreateWithdrawalPage() {
                     </div>
                   )}
                   {isBankDropdownOpen && filteredBanks.length === 0 && !loadingBanks && (
-                    <div className="absolute top-full left-0 z-50 mt-2 w-full rounded-xl border border-white/10 bg-[#0a0f16] shadow-2xl p-4 text-center text-sm text-[#68747e]">
+                    <div className="absolute top-full left-0 z-50 mt-2 w-full rounded-input border border-line bg-surface shadow-card p-4 text-center text-sm text-ink-muted">
                       No banks found matching &quot;{bankSearch}&quot;
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Account Number</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Account Number</label>
                   <input 
                     type="text"
                     disabled={step === 2}
                     value={form.account_number}
                     onChange={(e) => setForm({ ...form, account_number: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     placeholder="0123456789"
-                    className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/80 px-5 text-base font-medium text-white placeholder:text-[#68747e] outline-none transition-all focus:border-[#3f82b2] focus:bg-white/5 focus:ring-1 focus:ring-[#3f82b2] shadow-inner disabled:opacity-50"
+                    className="h-14 w-full rounded-input border border-line bg-bg/80 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -283,7 +283,7 @@ export default function CreateWithdrawalPage() {
                   type="button"
                   onClick={handleResolveAccount}
                   disabled={isResolving || form.account_number.length < 10 || !form.bank_code}
-                  className="flex h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#3f82b2]/30 bg-[#3f82b2]/10 px-8 text-sm font-bold text-[#79b8e8] transition-all hover:bg-[#3f82b2]/20 disabled:opacity-50 shadow-inner"
+                  className="flex h-14 w-full items-center justify-center gap-3 rounded-input border border-line bg-surface-muted px-8 text-sm font-bold text-ink-muted transition-all hover:bg-surface-muted disabled:opacity-50 shadow-inner"
                 >
                   {isResolving ? <Spinner /> : <Search className="h-4 w-4" />}
                   {isResolving ? "Querying National Database..." : "Verify Account Ownership"}
@@ -291,37 +291,37 @@ export default function CreateWithdrawalPage() {
               )}
 
               {step === 2 && (
-                <div className="flex items-center gap-4 rounded-2xl bg-linear-to-r from-[#2f9d78]/10 to-transparent border border-[#2f9d78]/20 p-5 sm:p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2f9d78]/20 text-[#35d5a4] shrink-0 shadow-inner">
+                <div className="flex items-center gap-4 rounded-card bg-linear-to-r from-brand-500/10 to-transparent border border-line p-5 sm:p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success-tint text-brand-500 shrink-0 shadow-inner">
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3] mb-1">NIBSS Verified Identity</p>
-                    <p className="text-lg font-black text-white uppercase tracking-wide">{form.account_name}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-1">NIBSS Verified Identity</p>
+                    <p className="text-lg font-black text-ink uppercase tracking-wide">{form.account_name}</p>
                   </div>
                 </div>
               )}
             </div>
 
             {step === 2 && (
-              <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-4 fade-in duration-500 pt-8 border-t border-white/10">
-                <h2 className="text-sm sm:text-base font-bold text-white border-b border-white/10 pb-3 flex items-center gap-3">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#3f82b2] text-xs font-black text-white shadow-inner shadow-[#3f82b2]/50">2</span>
+              <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-4 fade-in duration-500 pt-8 border-t border-line">
+                <h2 className="text-sm sm:text-base font-bold text-ink border-b border-line pb-3 flex items-center gap-3">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-xs font-black text-ink shadow-inner shadow-brand-500/30">2</span>
                   Withdrawal Amount
                 </h2>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Amount to Withdraw</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Amount to Withdraw</label>
                     {wallet && (
-                      <button type="button" onClick={handleMaxClick} className="flex items-center gap-1.5 rounded-lg bg-[#3f82b2]/10 px-3 py-1.5 text-[10px] font-bold text-[#79b8e8] hover:bg-[#3f82b2]/20 transition-colors border border-[#3f82b2]/20">
+                      <button type="button" onClick={handleMaxClick} className="flex items-center gap-1.5 rounded-input bg-surface-muted px-3 py-1.5 text-[10px] font-bold text-ink-muted hover:bg-surface-muted transition-colors border border-line">
                         Use Max: {formatCurrency(wallet.available_balance)}
                       </button>
                     )}
                   </div>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-6 pointer-events-none">
-                      <span className="text-[#8995a3] font-bold text-xl">{wallet?.currency === 'NGN' ? '₦' : '$'}</span>
+                      <span className="text-ink-muted font-bold text-xl">{wallet?.currency === 'NGN' ? '₦' : '$'}</span>
                     </div>
                     <input 
                       required
@@ -329,7 +329,7 @@ export default function CreateWithdrawalPage() {
                       value={displayAmount}
                       onChange={handleAmountChange}
                       placeholder="0.00"
-                      className="h-20 w-full rounded-2xl border border-white/10 bg-[#090d14]/80 pl-12 pr-6 text-3xl font-black text-white placeholder:text-[#68747e] outline-none transition-all focus:border-[#3f82b2] focus:bg-white/5 focus:ring-1 focus:ring-[#3f82b2] shadow-inner"
+                      className="h-20 w-full rounded-card border border-line bg-bg/80 pl-12 pr-6 text-3xl font-black text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
                     />
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export default function CreateWithdrawalPage() {
                   <button 
                     type="submit" 
                     disabled={isSubmitting || !form.amount}
-                    className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-[#3f82b2] to-[#2c658f] px-8 text-base font-bold text-white transition-all hover:shadow-[0_0_30px_rgba(63,130,178,0.4)] hover:brightness-110 disabled:opacity-50 border border-white/10"
+                    className="flex h-16 w-full items-center justify-center gap-3 rounded-card bg-brand-500 px-8 text-base font-bold text-surface transition-colors hover:bg-brand-800 disabled:opacity-50 border border-line"
                   >
                     {isSubmitting ? <Spinner /> : <ArrowUpRight className="h-6 w-6" />}
                     {isSubmitting ? "Authorizing Payout..." : "Initiate Secure Payout"}
@@ -351,37 +351,37 @@ export default function CreateWithdrawalPage() {
 
         <div className="lg:col-span-5 xl:col-span-4 hidden lg:block">
           <div className="sticky top-32 space-y-6">
-            <div className="flex items-center gap-3 text-[#8995a3] mb-6">
+            <div className="flex items-center gap-3 text-ink-muted mb-6">
               <Wallet className="h-5 w-5" />
               <span className="text-sm font-bold uppercase tracking-widest">Available Funds</span>
             </div>
 
-            <div className="rounded-[2.5rem] bg-linear-to-br from-[#131d2a] to-[#090d14] p-10 shadow-2xl transition-all duration-300 border border-white/10 relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-40 w-40 bg-[#35d5a4]/10 rounded-full blur-[60px]" />
+            <div className="rounded-card bg-brand-900 p-10 shadow-card transition-all duration-300 border border-line relative overflow-hidden">
+              <div className="absolute top-0 right-0 h-40 w-40 bg-success-tint rounded-full blur-[60px]" />
               
               <div className="space-y-2 mb-10 relative z-10">
-                <p className="text-sm font-medium text-[#8995a3]">Current Wallet Balance</p>
+                <p className="text-sm font-medium text-ink-muted">Current Wallet Balance</p>
                 {wallet ? (
-                  <h3 className="text-4xl font-black text-white tracking-tight truncate">
+                  <h3 className="text-4xl font-black text-ink tracking-tight truncate">
                     {formatCurrency(wallet.available_balance)}
                   </h3>
                 ) : (
-                  <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse" />
+                  <div className="h-10 w-48 bg-surface-muted rounded-input animate-pulse" />
                 )}
               </div>
 
               <div className="space-y-4 relative z-10">
-                <div className="flex justify-between items-center text-sm pb-4 border-b border-white/5">
-                  <span className="text-[#8995a3]">Requested Amount</span>
-                  <span className="font-bold text-white truncate max-w-37.5 text-right">{form.amount ? formatCurrency(parseFloat(form.amount)) : "0.00"}</span>
+                <div className="flex justify-between items-center text-sm pb-4 border-b border-line">
+                  <span className="text-ink-muted">Requested Amount</span>
+                  <span className="font-bold text-ink truncate max-w-37.5 text-right">{form.amount ? formatCurrency(parseFloat(form.amount)) : "0.00"}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm pb-4 border-b border-white/5">
-                  <span className="text-[#8995a3]">Network Fee</span>
-                  <span className="font-bold text-red-400">Determined by Provider</span>
+                <div className="flex justify-between items-center text-sm pb-4 border-b border-line">
+                  <span className="text-ink-muted">Network Fee</span>
+                  <span className="font-bold text-danger">Determined by Provider</span>
                 </div>
               </div>
 
-              <div className="mt-10 flex items-center justify-center gap-2 text-[#68747e] bg-white/5 py-3 rounded-xl border border-white/5">
+              <div className="mt-10 flex items-center justify-center gap-2 text-ink-muted bg-surface-muted py-3 rounded-input border border-line">
                 <ShieldCheck className="h-4 w-4 shrink-0" />
                 <span className="text-xs font-medium">Secured by Immutable Ledger</span>
               </div>

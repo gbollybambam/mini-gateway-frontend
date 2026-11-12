@@ -43,15 +43,15 @@ function ApiKeySkeleton() {
   return (
     <>
       {[...Array(3)].map((_, i) => (
-        <tr key={i} className="animate-pulse border-b border-white/5">
-          <td className="px-8 py-5"><div className="h-4 w-32 bg-white/10 rounded-full" /></td>
-          <td className="px-8 py-5"><div className="h-6 w-48 bg-white/5 rounded-lg" /></td>
-          <td className="px-8 py-5"><div className="h-5 w-32 bg-white/10 rounded-full" /></td>
-          <td className="px-8 py-5"><div className="h-4 w-24 bg-white/5 rounded-full" /></td>
-          <td className="px-8 py-5"><div className="h-4 w-24 bg-white/5 rounded-full" /></td>
+        <tr key={i} className="animate-pulse border-b border-line">
+          <td className="px-8 py-5"><div className="h-4 w-32 bg-surface-muted rounded-full" /></td>
+          <td className="px-8 py-5"><div className="h-6 w-48 bg-surface-muted rounded-input" /></td>
+          <td className="px-8 py-5"><div className="h-5 w-32 bg-surface-muted rounded-full" /></td>
+          <td className="px-8 py-5"><div className="h-4 w-24 bg-surface-muted rounded-full" /></td>
+          <td className="px-8 py-5"><div className="h-4 w-24 bg-surface-muted rounded-full" /></td>
           <td className="px-8 py-5 flex justify-end gap-2">
-            <div className="h-8 w-8 bg-white/10 rounded-lg" />
-            <div className="h-8 w-8 bg-red-500/10 rounded-lg" />
+            <div className="h-8 w-8 bg-surface-muted rounded-input" />
+            <div className="h-8 w-8 bg-danger-tint rounded-input" />
           </td>
         </tr>
       ))}
@@ -214,22 +214,22 @@ export default function ApiKeysPage() {
         
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Developers</p>
-            <h1 className="text-2xl font-bold text-white drop-shadow-sm mt-1">API Keys</h1>
-            <p className="text-xs text-[#8995a3] mt-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Developers</p>
+            <h1 className="text-2xl font-bold text-ink drop-shadow-sm mt-1">API Keys</h1>
+            <p className="text-xs text-ink-muted mt-1">
               Authenticate server-to-server requests with granular permissions and expirations.
             </p>
           </div>
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-2 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-6 py-2.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] hover:brightness-110 border border-white/10"
+            className="flex items-center gap-2 rounded-input bg-brand-500 px-6 py-2.5 text-sm font-bold text-ink transition-all hover:shadow-card hover:brightness-110 border border-line"
           >
             <Plus className="h-4 w-4" /> Generate Secret Key
           </button>
         </header>
 
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-amber-200/90 text-xs leading-relaxed">
-          <ShieldAlert className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-card border border-line bg-amber-500/5 p-4 text-ink-muted text-xs leading-relaxed">
+          <ShieldAlert className="h-5 w-5 shrink-0 text-pending mt-0.5" />
           <div>
             <p className="font-bold text-amber-300">Security Guidelines</p>
             <p className="mt-0.5 text-amber-200/80">
@@ -238,25 +238,25 @@ export default function ApiKeysPage() {
           </div>
         </div>
 
-        <section className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 p-6 bg-white/1">
+        <section className="rounded-card border border-line bg-surface backdrop-blur-xl shadow-card overflow-hidden flex flex-col relative">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line p-6 bg-surface">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <div className="flex h-8 w-8 items-center justify-center rounded-input bg-purple-500/10 border border-purple-500/20 text-purple-400">
                 <Key className="h-4 w-4" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white">Active Credentials</h2>
-                <p className="text-xs text-[#8995a3]">Manage and rotate merchant API keys</p>
+                <h2 className="text-base font-bold text-ink">Active Credentials</h2>
+                <p className="text-xs text-ink-muted">Manage and rotate merchant API keys</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 rounded-xl bg-[#0a0f16] p-1 border border-white/10 self-start sm:self-auto">
+            <div className="flex items-center gap-1 rounded-input bg-surface p-1 border border-line self-start sm:self-auto">
               {(["all", "test", "live"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-wider transition-all ${
-                    filter === f ? "bg-purple-600 text-white shadow-sm" : "text-[#8995a3] hover:text-white"
+                  className={`rounded-input px-3 py-1 text-xs font-bold uppercase tracking-wider transition-all ${
+                    filter === f ? "bg-purple-600 text-ink shadow-sm" : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   {f}
@@ -267,14 +267,14 @@ export default function ApiKeysPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-white/1 border-b border-white/5">
+              <thead className="bg-surface border-b border-line">
                 <tr>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Name / Environment</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Secret Key Token</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Permissions</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Expires</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Last Used</th>
-                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3] text-right">Actions</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Name / Environment</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Secret Key Token</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Permissions</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Expires</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Last Used</th>
+                  <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -290,11 +290,11 @@ export default function ApiKeysPage() {
                   <tr>
                     <td colSpan={6}>
                       <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
-                          <Key className="h-6 w-6 text-[#68747e]" />
+                        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-card bg-surface-muted border border-line">
+                          <Key className="h-6 w-6 text-ink-muted" />
                         </div>
-                        <h3 className="text-base font-bold text-white">No API keys found</h3>
-                        <p className="mt-1 text-xs text-[#8995a3] max-w-sm">
+                        <h3 className="text-base font-bold text-ink">No API keys found</h3>
+                        <p className="mt-1 text-xs text-ink-muted max-w-sm">
                           Generate a secret API key to start integrating the payment gateway API.
                         </p>
                       </div>
@@ -308,18 +308,18 @@ export default function ApiKeysPage() {
                     const isFullAccess = item.scopes.includes("*");
 
                     return (
-                      <tr key={item.id} className="transition-colors hover:bg-white/2">
+                      <tr key={item.id} className="transition-colors hover:bg-surface">
                         <td className="px-8 py-5">
                           <div className="flex flex-col gap-1.5">
-                            <span className="font-bold text-white">{item.name}</span>
+                            <span className="font-bold text-ink">{item.name}</span>
                             <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                                isLive ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                isLive ? "bg-success-tint text-success border border-line" : "bg-surface-muted text-pending border border-line"
                               }`}>
                                 {item.environment}
                               </span>
                               {isRevoked && (
-                                <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-400 border border-red-500/20">
+                                <span className="rounded-full bg-danger-tint px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-danger border border-line">
                                   Revoked
                                 </span>
                               )}
@@ -327,14 +327,14 @@ export default function ApiKeysPage() {
                           </div>
                         </td>
                         <td className="px-8 py-5">
-                          <div className="flex items-center gap-2 font-mono text-xs text-[#8995a3] bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 w-fit">
+                          <div className="flex items-center gap-2 font-mono text-xs text-ink-muted bg-black/40 px-3 py-1.5 rounded-input border border-line w-fit">
                             <Terminal className="h-3.5 w-3.5 text-purple-400" />
                             <span>{item.token}</span>
                           </div>
                         </td>
                         <td className="px-8 py-5">
                           {isFullAccess ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider">
+                            <span className="inline-flex items-center gap-1 text-success bg-success-tint border border-line px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider">
                               <Unlock className="h-3 w-3" /> Full Access
                             </span>
                           ) : (
@@ -353,17 +353,17 @@ export default function ApiKeysPage() {
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-1.5 text-xs font-medium">
                             {isExpired ? (
-                              <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded uppercase text-[10px] tracking-wider">
+                              <span className="text-danger font-bold flex items-center gap-1 bg-danger-tint border border-line px-2 py-0.5 rounded uppercase text-[10px] tracking-wider">
                                 Expired
                               </span>
                             ) : (
-                              <span className="text-[#8995a3]">
+                              <span className="text-ink-muted">
                                 {formatDate(item.expires_at)}
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-8 py-5 text-xs font-medium text-[#8995a3]">
+                        <td className="px-8 py-5 text-xs font-medium text-ink-muted">
                           {formatDate(item.last_used_at)}
                         </td>
                         <td className="px-8 py-5 text-right">
@@ -372,20 +372,20 @@ export default function ApiKeysPage() {
                               <button
                                 onClick={() => setConfirmAction({ type: "rotate", id: item.id, name: item.name })}
                                 title="Rotate Key"
-                                className="rounded-lg p-2 text-[#8995a3] hover:bg-white/10 hover:text-white transition-colors"
+                                className="rounded-input p-2 text-ink-muted hover:bg-surface-muted hover:text-ink transition-colors"
                               >
                                 <RotateCcw className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => setConfirmAction({ type: "revoke", id: item.id, name: item.name })}
                                 title="Revoke Key"
-                                className="rounded-lg p-2 text-[#8995a3] hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                                className="rounded-input p-2 text-ink-muted hover:bg-danger-tint hover:text-danger transition-colors"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
                           ) : (
-                            <span className="text-xs text-[#68747e] italic">Inactive</span>
+                            <span className="text-xs text-ink-muted italic">Inactive</span>
                           )}
                         </td>
                       </tr>
@@ -400,59 +400,59 @@ export default function ApiKeysPage() {
         {/* Modal: Generate New Key */}
         {isCreateOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0d131a] shadow-2xl overflow-hidden flex flex-col my-8">
-              <div className="flex items-center justify-between border-b border-white/5 bg-white/2 p-6 shrink-0">
+            <div className="w-full max-w-md rounded-card border border-line bg-surface shadow-card overflow-hidden flex flex-col my-8">
+              <div className="flex items-center justify-between border-b border-line bg-surface p-6 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-input bg-purple-500/10 border border-purple-500/20 text-purple-400">
                     <Key className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Generate Secret Key</h3>
-                    <p className="text-xs text-[#8995a3]">Create credentials for API access</p>
+                    <h3 className="text-lg font-bold text-ink">Generate Secret Key</h3>
+                    <p className="text-xs text-ink-muted">Create credentials for API access</p>
                   </div>
                 </div>
-                <button onClick={() => setIsCreateOpen(false)} className="rounded-full p-2 text-[#8995a3] hover:text-white transition-colors">
+                <button onClick={() => setIsCreateOpen(false)} className="rounded-full p-2 text-ink-muted hover:text-ink transition-colors">
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               <form onSubmit={handleCreate} className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[60vh]">
                 {createError && (
-                  <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400">
+                  <div className="flex items-center gap-2 rounded-input bg-danger-tint border border-line p-3 text-xs text-danger">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     <p>{createError}</p>
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Key Identifier / Name</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Key Identifier / Name</label>
                   <input
                     required
                     value={createName}
                     onChange={(e) => setCreateName(e.target.value)}
                     placeholder="e.g. Backend Production Server"
-                    className="w-full h-11 rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm text-white outline-none focus:border-[#2f9d78] focus:ring-1 focus:ring-[#2f9d78] transition-all"
+                    className="w-full h-11 rounded-input border border-line bg-surface px-4 text-sm text-ink outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Environment</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Environment</label>
                   <div className="grid grid-cols-2 gap-3">
-                    <button type="button" onClick={() => setCreateEnv("test")} className={`h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all ${createEnv === "test" ? "border-amber-500/50 bg-amber-500/10 text-amber-300" : "border-white/5 bg-[#0a0f16] text-[#8995a3] hover:bg-white/5"}`}>
+                    <button type="button" onClick={() => setCreateEnv("test")} className={`h-11 rounded-input border text-xs font-bold uppercase tracking-wider transition-all ${createEnv === "test" ? "border-amber-500/50 bg-surface-muted text-amber-300" : "border-line bg-surface text-ink-muted hover:bg-surface-muted"}`}>
                       Test Mode
                     </button>
-                    <button type="button" onClick={() => setCreateEnv("live")} className={`h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all ${createEnv === "live" ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300" : "border-white/5 bg-[#0a0f16] text-[#8995a3] hover:bg-white/5"}`}>
+                    <button type="button" onClick={() => setCreateEnv("live")} className={`h-11 rounded-input border text-xs font-bold uppercase tracking-wider transition-all ${createEnv === "live" ? "border-emerald-500/50 bg-success-tint text-emerald-300" : "border-line bg-surface text-ink-muted hover:bg-surface-muted"}`}>
                       Live Mode
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] flex items-center gap-1.5"><Calendar className="h-3 w-3" /> Expiration</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted flex items-center gap-1.5"><Calendar className="h-3 w-3" /> Expiration</label>
                   <select 
                     value={expirationDays === null ? "" : expirationDays}
                     onChange={(e) => setExpirationDays(e.target.value === "" ? null : Number(e.target.value))}
-                    className="w-full h-11 rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm text-white outline-none focus:border-[#2f9d78] focus:ring-1 focus:ring-[#2f9d78] transition-all"
+                    className="w-full h-11 rounded-input border border-line bg-surface px-4 text-sm text-ink outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
                   >
                     <option value="">Never Expires</option>
                     <option value="7">7 Days</option>
@@ -463,12 +463,12 @@ export default function ApiKeysPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Permissions & Scopes</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Permissions & Scopes</label>
                   <div className="grid grid-cols-2 gap-3">
-                    <button type="button" onClick={() => setIsFullAccess(true)} className={`h-11 flex items-center justify-center gap-2 rounded-xl border text-xs font-bold tracking-wider transition-all ${isFullAccess ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300" : "border-white/5 bg-[#0a0f16] text-[#8995a3] hover:bg-white/5"}`}>
+                    <button type="button" onClick={() => setIsFullAccess(true)} className={`h-11 flex items-center justify-center gap-2 rounded-input border text-xs font-bold tracking-wider transition-all ${isFullAccess ? "border-emerald-500/50 bg-success-tint text-emerald-300" : "border-line bg-surface text-ink-muted hover:bg-surface-muted"}`}>
                       <Unlock className="h-3.5 w-3.5" /> Full Access
                     </button>
-                    <button type="button" onClick={() => setIsFullAccess(false)} className={`h-11 flex items-center justify-center gap-2 rounded-xl border text-xs font-bold tracking-wider transition-all ${!isFullAccess ? "border-purple-500/50 bg-purple-500/10 text-purple-300" : "border-white/5 bg-[#0a0f16] text-[#8995a3] hover:bg-white/5"}`}>
+                    <button type="button" onClick={() => setIsFullAccess(false)} className={`h-11 flex items-center justify-center gap-2 rounded-input border text-xs font-bold tracking-wider transition-all ${!isFullAccess ? "border-purple-500/50 bg-purple-500/10 text-purple-300" : "border-line bg-surface text-ink-muted hover:bg-surface-muted"}`}>
                       <Lock className="h-3.5 w-3.5" /> Restricted
                     </button>
                   </div>
@@ -476,16 +476,16 @@ export default function ApiKeysPage() {
                   {!isFullAccess && (
                     <div className="space-y-2 mt-4 animate-in slide-in-from-top-2 fade-in">
                       {AVAILABLE_SCOPES.map(scope => (
-                        <label key={scope.id} className="flex items-start gap-3 p-3 rounded-xl border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                        <label key={scope.id} className="flex items-start gap-3 p-3 rounded-input border border-line bg-surface-muted cursor-pointer hover:bg-surface-muted transition-colors">
                           <input 
                             type="checkbox" 
                             checked={selectedScopes.includes(scope.id)}
                             onChange={() => toggleScope(scope.id)}
-                            className="mt-0.5 rounded border-white/10 bg-black/50 text-[#2f9d78] focus:ring-1 focus:ring-[#2f9d78] h-4 w-4 shrink-0"
+                            className="mt-0.5 rounded border-line bg-ink/10 text-brand-500 focus:ring-1 focus:ring-brand-500 h-4 w-4 shrink-0"
                           />
                           <div>
-                            <p className="text-xs font-bold text-white">{scope.label}</p>
-                            <p className="text-[10px] text-[#8995a3] mt-0.5 leading-relaxed">{scope.desc}</p>
+                            <p className="text-xs font-bold text-ink">{scope.label}</p>
+                            <p className="text-[10px] text-ink-muted mt-0.5 leading-relaxed">{scope.desc}</p>
                           </div>
                         </label>
                       ))}
@@ -494,14 +494,14 @@ export default function ApiKeysPage() {
                 </div>
               </form>
 
-              <div className="p-6 border-t border-white/5 flex gap-3 shrink-0 bg-white/[0.01]">
-                <button type="button" onClick={() => setIsCreateOpen(false)} className="w-1/2 h-11 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:bg-white/10 transition-colors">
+              <div className="p-6 border-t border-line flex gap-3 shrink-0 bg-surface/[0.01]">
+                <button type="button" onClick={() => setIsCreateOpen(false)} className="w-1/2 h-11 rounded-input border border-line bg-surface-muted text-xs font-bold text-ink hover:bg-surface-muted transition-colors">
                   Cancel
                 </button>
                 <button
                   onClick={handleCreate}
                   disabled={creating || !createName.trim() || (!isFullAccess && selectedScopes.length === 0)}
-                  className="w-1/2 h-11 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] text-xs font-bold text-white hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(47,157,120,0.3)] transition-all"
+                  className="w-1/2 h-11 rounded-input bg-brand-500 text-xs font-bold text-ink hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2 shadow-card transition-all"
                 >
                   {creating ? <Spinner /> : "Create Key"}
                 </button>
@@ -513,39 +513,39 @@ export default function ApiKeysPage() {
         {/* Modal: Secret Key Reveal */}
         {revealedKey && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="w-full max-w-lg rounded-3xl border border-emerald-500/30 bg-[#0d131a] shadow-2xl overflow-hidden flex flex-col">
-              <div className="flex items-center justify-between border-b border-white/5 bg-emerald-500/5 p-6">
+            <div className="w-full max-w-lg rounded-card border border-emerald-500/30 bg-surface shadow-card overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between border-b border-line bg-emerald-500/5 p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-input bg-success-tint border border-line text-success">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Save Your Secret Key</h3>
-                    <p className="text-xs text-emerald-400/80">{revealedKey.name}</p>
+                    <h3 className="text-lg font-bold text-ink">Save Your Secret Key</h3>
+                    <p className="text-xs text-success/80">{revealedKey.name}</p>
                   </div>
                 </div>
-                <button onClick={() => setRevealedKey(null)} className="rounded-full p-2 text-[#8995a3] hover:text-white transition-colors">
+                <button onClick={() => setRevealedKey(null)} className="rounded-full p-2 text-ink-muted hover:text-ink transition-colors">
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               <div className="p-6 space-y-5">
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-amber-200/90 leading-relaxed shadow-inner">
+                <div className="rounded-input border border-line bg-surface-muted p-4 text-xs text-ink-muted leading-relaxed shadow-inner">
                   <strong className="text-amber-300 block mb-1 text-sm">Please copy your secret key now.</strong>
                   For your security, you will not be able to view this full key again once this dialog is closed. If you lose it, you will need to rotate the key.
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">API Secret Key</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">API Secret Key</label>
                   <div className="flex items-center gap-2">
                     <input
                       readOnly
                       value={revealedKey.key}
-                      className="w-full h-12 rounded-xl border border-white/10 bg-[#070b10] px-4 font-mono text-xs sm:text-sm text-white selection:bg-[#2f9d78] outline-none shadow-inner"
+                      className="w-full h-12 rounded-input border border-line bg-bg px-4 font-mono text-xs sm:text-sm text-ink selection:bg-success-tint outline-none shadow-inner"
                     />
                     <button
                       onClick={() => copyToClipboard(revealedKey.key)}
-                      className="h-12 px-4 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 shrink-0 transition-all shadow-[0_0_15px_rgba(47,157,120,0.3)]"
+                      className="h-12 px-4 rounded-input bg-brand-500 hover:brightness-110 text-ink font-bold text-xs flex items-center gap-2 shrink-0 transition-all shadow-card"
                     >
                       {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       {copied ? "Copied" : "Copy"}
@@ -553,10 +553,10 @@ export default function ApiKeysPage() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/5">
+                <div className="pt-3 border-t border-line">
                   <button
                     onClick={() => setRevealedKey(null)}
-                    className="w-full h-11 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-white transition-colors"
+                    className="w-full h-11 rounded-input bg-surface-muted hover:bg-surface-muted text-xs font-bold text-ink transition-colors"
                   >
                     I have securely saved my key
                   </button>
@@ -569,38 +569,38 @@ export default function ApiKeysPage() {
         {/* Modal: Confirmation Dialog (Revoke / Rotate) */}
         {confirmAction && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0d131a] shadow-2xl p-6 space-y-5">
+            <div className="w-full max-w-md rounded-card border border-line bg-surface shadow-card p-6 space-y-5">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
-                  confirmAction.type === "revoke" ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                <div className={`flex h-10 w-10 items-center justify-center rounded-input border ${
+                  confirmAction.type === "revoke" ? "bg-danger-tint border-line text-danger" : "bg-surface-muted border-line text-pending"
                 }`}>
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-ink">
                     {confirmAction.type === "revoke" ? "Revoke API Key?" : "Rotate API Key?"}
                   </h3>
-                  <p className="text-xs text-[#8995a3]">{confirmAction.name}</p>
+                  <p className="text-xs text-ink-muted">{confirmAction.name}</p>
                 </div>
               </div>
 
               {actionError && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400">
+                <div className="rounded-input bg-danger-tint border border-line p-3 text-xs text-danger">
                   {actionError}
                 </div>
               )}
 
-              <p className="text-xs text-[#8995a3] leading-relaxed">
+              <p className="text-xs text-ink-muted leading-relaxed">
                 {confirmAction.type === "revoke"
                   ? "Any applications or servers using this key will immediately be blocked from making API requests. This action cannot be undone."
                   : "A new key will be generated immediately. Existing connections using the old key will cease functioning once rotated."}
               </p>
 
-              <div className="flex gap-3 pt-2 border-t border-white/5">
+              <div className="flex gap-3 pt-2 border-t border-line">
                 <button
                   type="button"
                   onClick={() => setConfirmAction(null)}
-                  className="w-1/2 h-11 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:bg-white/10 transition-colors"
+                  className="w-1/2 h-11 rounded-input border border-line bg-surface-muted text-xs font-bold text-ink hover:bg-surface-muted transition-colors"
                 >
                   Cancel
                 </button>
@@ -608,8 +608,8 @@ export default function ApiKeysPage() {
                   type="button"
                   disabled={actionLoading}
                   onClick={handleConfirmAction}
-                  className={`w-1/2 h-11 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors ${
-                    confirmAction.type === "revoke" ? "bg-red-600 hover:bg-red-500" : "bg-amber-600 hover:bg-amber-500"
+                  className={`w-1/2 h-11 rounded-input text-xs font-bold text-ink flex items-center justify-center gap-2 transition-colors ${
+                    confirmAction.type === "revoke" ? "bg-red-600 hover:bg-red-500" : "bg-pending hover:bg-pending"
                   }`}
                 >
                   {actionLoading ? <Spinner /> : confirmAction.type === "revoke" ? "Revoke Key" : "Rotate Key"}

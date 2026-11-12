@@ -1,14 +1,23 @@
-"use client";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, Receipt, LinkIcon, Wallet, 
-  Landmark, Settings, KeyRound, LogOut, Menu, X, 
-  Webhook, Users 
-} from "@/components/icons";
-import DashboardProviders, { useAuth } from "@/components/dashboard/DashboardProviders";
-import AppHeader from "@/components/dashboard/AppHeader";
-import { useState, useEffect } from "react";
+"use client"
+
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import {
+  LayoutDashboard,
+  LinkIcon,
+  Landmark,
+  LogOut,
+  Receipt,
+  Settings,
+  Users,
+  Wallet,
+  Webhook,
+  KeyRound,
+} from "@/components/icons"
+import DashboardProviders, { useAuth } from "@/components/dashboard/DashboardProviders"
+import AppHeader from "@/components/dashboard/AppHeader"
+import { useEffect } from "react"
+import { useState } from "react"
 
 const navigation = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
@@ -16,161 +25,143 @@ const navigation = [
   { name: "Payment Links", href: "/payment-links", icon: LinkIcon },
   { name: "Wallet", href: "/wallets", icon: Wallet },
   { name: "Withdrawals", href: "/withdrawals", icon: Landmark },
-];
+]
 
 const settingsNav = [
   { name: "Team Management", href: "/team", icon: Users },
   { name: "API Keys", href: "/api-keys", icon: KeyRound },
   { name: "Webhooks", href: "/webhooks", icon: Webhook },
   { name: "Settings", href: "/settings", icon: Settings },
-];
+]
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const { user, loading, logout } = useAuth();
+  const pathname = usePathname()
+  const router = useRouter()
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
+  const { user, loading, logout } = useAuth()
 
-  // 1. Define exactly what each role can access (URL based)
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading || !user) return
+    const role = user.role
+    if (role === "owner" || role === "admin") return
 
-    const role = user.role;
-    
-    // Admin & Owner can access everything.
-    if (role === "owner" || role === "admin") return;
+    const restrictedForDeveloper = ["/wallets", "/withdrawals", "/team"]
+    const restrictedForFinance = ["/api-keys", "/webhooks", "/team"]
+    const isRestricted = (paths: string[]) => paths.some((path) => pathname === path || pathname.startsWith(`${path}/`))
 
-    // Restricted Routes Map
-    const restrictedForDeveloper = ["/wallets", "/withdrawals", "/team"];
-    const restrictedForFinance = ["/api-keys", "/webhooks", "/team"];
+    if (role === "developer" && isRestricted(restrictedForDeveloper)) router.replace("/")
+    if (role === "finance" && isRestricted(restrictedForFinance)) router.replace("/")
+  }, [pathname, user, loading, router])
 
-    const isRestricted = (restrictedPaths: string[]) => 
-      restrictedPaths.some(path => pathname === path || pathname.startsWith(`${path}/`));
+  const getAllowedNav = <T extends { name: string }>(items: T[]) => {
+    if (!user || user.role === "owner" || user.role === "admin") return items
+    if (user.role === "developer") return items.filter((item) => !["Wallet", "Withdrawals", "Team Management"].includes(item.name))
+    if (user.role === "finance") return items.filter((item) => !["API Keys", "Webhooks", "Team Management"].includes(item.name))
+    return items
+  }
 
-    // 2. The Bouncer: Kick them out if they type a URL they shouldn't be at
-    if (role === "developer" && isRestricted(restrictedForDeveloper)) {
-      router.replace("/");
-    }
-
-    if (role === "finance" && isRestricted(restrictedForFinance)) {
-      router.replace("/");
-    }
-
-  }, [pathname, user, loading, router]);
-
-  const getAllowedNav = (navItems: typeof navigation) => {
-    return navItems.filter(item => {
-      if (!user) return false; 
-      const role = user.role;
-      
-      if (role === "owner" || role === "admin") return true;
-
-      if (role === "developer") {
-        return !["Wallet", "Withdrawals", "Team Management"].includes(item.name);
-      }
-
-      if (role === "finance") {
-        return !["API Keys", "Webhooks", "Team Management"].includes(item.name);
-      }
-
-      return true;
-    });
-  };
-
-  const allowedNavigation = getAllowedNav(navigation);
-  const allowedSettingsNav = getAllowedNav(settingsNav);
-
-  const NavItem = ({ item }: { item: typeof navigation[0] }) => {
-    const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-    return (
-      <Link 
-        href={item.href} 
-        className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group ${
-          isActive ? "text-[#35d5a4] bg-white/3" : "text-[#8995a3] hover:text-[#e8edf2] hover:bg-white/2"
-        }`}
-      >
-        <item.icon className={`h-4 w-4 ${isActive ? "text-[#35d5a4]" : "text-[#68747e] group-hover:text-[#8995a3]"}`} />
-        <span>{item.name}</span>
-      </Link>
-    );
-  };
+  const allowedNavigation = getAllowedNav(navigation)
+  const allowedSettingsNav = getAllowedNav(settingsNav)
+  const isRestricted = user?.role === "developer"
+    ? ["/wallets", "/withdrawals", "/team"]
+    : user?.role === "finance"
+      ? ["/api-keys", "/webhooks", "/team"]
+      : []
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#090d14]">
-        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-xl bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] shadow-[0_0_30px_rgba(47,157,120,0.3)] text-2xl font-black text-[#090d14]">
-          P
-        </div>
+      <div className="grid min-h-screen place-items-center bg-bg">
+        <div className="size-10 animate-pulse rounded-full bg-brand-500" aria-label="Loading dashboard" />
       </div>
-    );
+    )
   }
 
-  // Prevent rendering the restricted page layout while redirecting
-  const role = user?.role;
-  if (role === "developer" && ["/wallets", "/withdrawals", "/team"].some(p => pathname.startsWith(p))) return null;
-  if (role === "finance" && ["/api-keys", "/webhooks", "/team"].some(p => pathname.startsWith(p))) return null;
+  if (isRestricted.some((path) => pathname.startsWith(path))) return null
+
+  const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false"; size?: number }> } }) => {
+    const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+    return (
+      <Link
+        href={item.href}
+        className={`group flex min-h-11 items-center gap-3 rounded-input px-4 text-sm font-medium transition-colors ${
+          active ? "bg-surface-muted text-ink" : "text-ink-muted hover:bg-surface-muted hover:text-ink"
+        }`}
+      >
+        <item.icon size={19} className={active ? "text-brand-500" : "text-ink-muted group-hover:text-ink"} aria-hidden="true" />
+        <span>{item.name}</span>
+      </Link>
+    )
+  }
 
   return (
-    <div className="flex h-screen bg-[#090d14] font-sans text-[#e8edf2] selection:bg-[#2f9d78]/30 relative overflow-hidden">
-      <div className="fixed inset-0 z-0 pointer-events-none flex justify-center">
-        <div className="absolute inset-0 bg-[#090d14]" />
-        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
-        <div className="absolute top-[-10%] w-[60vw] h-[50vh] bg-gradient-to-b from-[#2f9d78]/10 to-transparent blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vh] bg-[#3f82b2]/5 blur-[150px] rounded-full" />
-      </div>
-      
-      <aside className="hidden w-70 flex-col border-r border-white/5 bg-[#090d14]/60 backdrop-blur-3xl md:flex z-20 shadow-[4px_0_24px_rgba(0,0,0,0.4)] shrink-0 relative">
-        <div className="flex h-20 items-center px-8 border-b border-white/5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] shadow-[0_0_20px_rgba(47,157,120,0.2)] text-lg font-black text-[#090d14]">P</div>
-          <span className="ml-3 text-xl font-bold tracking-tight text-white drop-shadow-md">Payflow</span>
-        </div>
-        
-        <div className="flex flex-1 flex-col overflow-y-auto px-4 pb-6 pt-8 custom-scrollbar">
-          <div className="space-y-1 mb-10">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-[#2f9d78] mb-4 drop-shadow-sm">Operations</p>
-            {allowedNavigation.map((item) => <NavItem key={item.name} item={item} />)}
+    <div className="dashboard-root min-h-screen bg-bg text-ink">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-surface px-4 py-6 shadow-card md:flex">
+        <Link href="/" className="mb-10 flex items-center gap-3 px-3" aria-label="Payflow overview">
+          <span className="grid size-9 place-items-center rounded-input bg-brand-900 text-lg font-bold text-surface">P</span>
+          <span className="text-lg font-bold tracking-[-0.03em] text-ink">Payflow</span>
+        </Link>
+        <nav className="flex-1 space-y-8" aria-label="Dashboard navigation">
+          <div>
+            <p className="mb-2 px-4 text-xs font-semibold text-ink-muted">Operations</p>
+            <div className="space-y-1">{allowedNavigation.map((item) => <NavItem key={item.href} item={item} />)}</div>
           </div>
-          
-          <div className="space-y-1 mt-auto">
-            {allowedSettingsNav.length > 0 && <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-[#2f9d78] mb-4 drop-shadow-sm">Developers</p>}
-            {allowedSettingsNav.map((item) => <NavItem key={item.name} item={item} />)}
-            
-            <div className="pt-4 mt-4 border-t border-white/5">
-              <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#8995a3] transition-colors hover:bg-red-500/10 hover:text-red-400">
-                <LogOut className="h-4 w-4" /> Sign Out
-              </button>
-            </div>
+          <div>
+            <p className="mb-2 px-4 text-xs font-semibold text-ink-muted">Workspace</p>
+            <div className="space-y-1">{allowedSettingsNav.map((item) => <NavItem key={item.href} item={item} />)}</div>
           </div>
-        </div>
+        </nav>
+        <button type="button" onClick={logout} className="flex min-h-11 items-center gap-3 rounded-input px-4 text-sm font-medium text-ink-muted hover:bg-danger-tint hover:text-danger">
+          <LogOut size={19} aria-hidden="true" /> Sign out
+        </button>
       </aside>
 
-      <div className="flex flex-1 flex-col overflow-hidden relative z-10">
-        <header className="flex h-16 items-center justify-between border-b border-white/5 bg-[#090d14]/80 backdrop-blur-xl px-6 md:hidden z-30">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] text-sm font-black text-[#090d14]">P</div>
-            <span className="font-bold text-white">Payflow</span>
-          </div>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-[#8995a3] hover:text-white transition-colors">
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </header>
-
-        <main className="relative flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
-          <AppHeader />
-          <div className="p-4 sm:p-6 lg:p-10 w-full flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {children}
-          </div>
-        </main>
+      <div className="min-h-screen md:pl-64">
+        <AppHeader />
+        <main className="px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pb-10">{children}</main>
       </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-surface/95 px-2 py-2 shadow-card backdrop-blur md:hidden" aria-label="Mobile dashboard navigation">
+        {allowedNavigation.slice(0, 4).map((item) => {
+          const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+          return (
+            <Link key={item.href} href={item.href} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-input text-[11px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${active ? "bg-surface-muted text-ink" : "text-ink-muted"}`}>
+              <item.icon size={19} className={active ? "text-brand-500" : ""} aria-hidden="true" />
+              <span>{item.name === "Payment Links" ? "Links" : item.name}</span>
+            </Link>
+          )
+        })}
+        <button
+          type="button"
+          onClick={() => setMobileMoreOpen((open) => !open)}
+          aria-expanded={mobileMoreOpen}
+          aria-controls="mobile-more-menu"
+          className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-input text-[11px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${mobileMoreOpen ? "bg-surface-muted text-ink" : "text-ink-muted"}`}
+        >
+          <Settings size={19} className={mobileMoreOpen ? "text-brand-500" : ""} aria-hidden="true" />
+          <span>More</span>
+        </button>
+      </nav>
+      {mobileMoreOpen ? (
+        <div id="mobile-more-menu" className="fixed inset-x-3 bottom-20 z-50 rounded-card bg-surface p-3 shadow-card md:hidden" aria-label="More dashboard navigation">
+          <div className="grid gap-1">
+            {[...allowedNavigation.slice(4), ...allowedSettingsNav].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMoreOpen(false)}
+                className="flex min-h-11 items-center gap-3 rounded-input px-3 text-sm font-medium text-ink-muted hover:bg-surface-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+              >
+                <item.icon size={18} aria-hidden="true" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
-  );
+  )
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <DashboardProviders>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
-    </DashboardProviders>
-  );
+  return <DashboardProviders><DashboardLayoutContent>{children}</DashboardLayoutContent></DashboardProviders>
 }

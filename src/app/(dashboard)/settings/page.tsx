@@ -9,12 +9,12 @@ import { User, Shield, Webhook, Copy, Check, Save, RefreshCw, AlertTriangle, Shi
 function SettingsSkeleton() {
   return (
     <div className="animate-pulse p-6 md:p-8 space-y-6">
-      <div className="h-6 w-48 bg-white/10 rounded-full mb-2" />
-      <div className="h-4 w-72 bg-white/5 rounded-full mb-8" />
+      <div className="h-6 w-48 bg-surface-muted rounded-full mb-2" />
+      <div className="h-4 w-72 bg-surface-muted rounded-full mb-8" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="h-12 bg-white/5 rounded-xl" />
-        <div className="h-12 bg-white/5 rounded-xl" />
-        <div className="md:col-span-2 h-12 bg-white/5 rounded-xl" />
+        <div className="h-12 bg-surface-muted rounded-input" />
+        <div className="h-12 bg-surface-muted rounded-input" />
+        <div className="md:col-span-2 h-12 bg-surface-muted rounded-input" />
       </div>
     </div>
   );
@@ -182,7 +182,7 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="flex items-center gap-3 text-[#35d5a4] bg-[#2f9d78]/10 px-6 py-3 rounded-full border border-[#2f9d78]/20 font-medium text-sm shadow-[0_0_20px_rgba(47,157,120,0.15)]">
+        <div className="flex items-center gap-3 text-brand-500 bg-success-tint px-6 py-3 rounded-pill border border-line font-medium text-sm shadow-card">
           <Spinner /> Synchronizing profile...
         </div>
       </div>
@@ -193,62 +193,62 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Configuration</p>
-          <h1 className="text-2xl font-bold text-white drop-shadow-sm mt-1">Merchant Settings</h1>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Configuration</p>
+          <h1 className="text-2xl font-bold text-ink drop-shadow-sm mt-1">Merchant Settings</h1>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-2">
-          <button onClick={() => handleTabChange('general')} className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${activeTab === 'general' ? 'bg-white/10 border-white/20 text-white shadow-lg' : 'bg-white/[0.02] border-white/5 text-[#8995a3] hover:bg-white/5 hover:text-white'}`}>
-            <div className={`p-2 rounded-xl ${activeTab === 'general' ? 'bg-[#35d5a4]/20 text-[#35d5a4]' : 'bg-white/5 text-[#68747e]'}`}><User className="h-4 w-4" /></div>
-            <div><p className="font-bold text-sm">General Profile</p><p className="text-[10px] uppercase tracking-wider text-[#68747e] mt-0.5">Brand & URLs</p></div>
+          <button onClick={() => handleTabChange('general')} className={`w-full flex items-center gap-3 p-4 rounded-card border transition-all text-left ${activeTab === 'general' ? 'bg-surface-muted border-line text-ink shadow-lg' : 'bg-surface/[0.02] border-line text-ink-muted hover:bg-surface-muted hover:text-ink'}`}>
+            <div className={`p-2 rounded-input ${activeTab === 'general' ? 'bg-success-tint text-brand-500' : 'bg-surface-muted text-ink-muted'}`}><User className="h-4 w-4" /></div>
+            <div><p className="font-bold text-sm">General Profile</p><p className="text-[10px] uppercase tracking-wider text-ink-muted mt-0.5">Brand & URLs</p></div>
           </button>
-          <button onClick={() => handleTabChange('security')} className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${activeTab === 'security' ? 'bg-white/10 border-white/20 text-white shadow-lg' : 'bg-white/[0.02] border-white/5 text-[#8995a3] hover:bg-white/5 hover:text-white'}`}>
-            <div className={`p-2 rounded-xl ${activeTab === 'security' ? 'bg-amber-500/20 text-amber-400' : 'bg-white/5 text-[#68747e]'}`}><Shield className="h-4 w-4" /></div>
-            <div><p className="font-bold text-sm">Security</p><p className="text-[10px] uppercase tracking-wider text-[#68747e] mt-0.5">Passwords</p></div>
+          <button onClick={() => handleTabChange('security')} className={`w-full flex items-center gap-3 p-4 rounded-card border transition-all text-left ${activeTab === 'security' ? 'bg-surface-muted border-line text-ink shadow-lg' : 'bg-surface/[0.02] border-line text-ink-muted hover:bg-surface-muted hover:text-ink'}`}>
+            <div className={`p-2 rounded-input ${activeTab === 'security' ? 'bg-amber-500/20 text-pending' : 'bg-surface-muted text-ink-muted'}`}><Shield className="h-4 w-4" /></div>
+            <div><p className="font-bold text-sm">Security</p><p className="text-[10px] uppercase tracking-wider text-ink-muted mt-0.5">Passwords</p></div>
           </button>
-          <button onClick={() => handleTabChange('webhooks')} className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${activeTab === 'webhooks' ? 'bg-white/10 border-white/20 text-white shadow-lg' : 'bg-white/[0.02] border-white/5 text-[#8995a3] hover:bg-white/5 hover:text-white'}`}>
-            <div className={`p-2 rounded-xl ${activeTab === 'webhooks' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-[#68747e]'}`}><Webhook className="h-4 w-4" /></div>
-            <div><p className="font-bold text-sm">Webhooks</p><p className="text-[10px] uppercase tracking-wider text-[#68747e] mt-0.5">HMAC Secrets</p></div>
+          <button onClick={() => handleTabChange('webhooks')} className={`w-full flex items-center gap-3 p-4 rounded-card border transition-all text-left ${activeTab === 'webhooks' ? 'bg-surface-muted border-line text-ink shadow-lg' : 'bg-surface/[0.02] border-line text-ink-muted hover:bg-surface-muted hover:text-ink'}`}>
+            <div className={`p-2 rounded-input ${activeTab === 'webhooks' ? 'bg-blue-500/20 text-blue-400' : 'bg-surface-muted text-ink-muted'}`}><Webhook className="h-4 w-4" /></div>
+            <div><p className="font-bold text-sm">Webhooks</p><p className="text-[10px] uppercase tracking-wider text-ink-muted mt-0.5">HMAC Secrets</p></div>
           </button>
         </div>
 
-        <section className="lg:col-span-3 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative min-h-[500px]">
+        <section className="lg:col-span-3 rounded-card border border-line bg-surface/[0.02] backdrop-blur-xl shadow-card overflow-hidden flex flex-col relative min-h-[500px]">
           {isTabLoading ? <SettingsSkeleton /> : (
             <>
               {activeTab === 'general' && (
                 <>
-                  <div className="border-b border-white/5 bg-white/[0.01] p-6 md:px-8">
-                    <h2 className="text-lg font-bold text-white">Business Profile</h2>
-                    <p className="text-xs text-[#8995a3] mt-1">Configure your brand identity and customer redirect flows.</p>
+                  <div className="border-b border-line bg-surface/[0.01] p-6 md:px-8">
+                    <h2 className="text-lg font-bold text-ink">Business Profile</h2>
+                    <p className="text-xs text-ink-muted mt-1">Configure your brand identity and customer redirect flows.</p>
                   </div>
                   <form onSubmit={handleGeneralSubmit} className="flex-1 flex flex-col">
                     <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Brand Name</label>
-                        <input type="text" value={generalForm.brand_name} onChange={(e) => setGeneralForm({ ...generalForm, brand_name: e.target.value })} className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm font-medium text-white placeholder:text-[#68747e] outline-none focus:border-[#35d5a4]/50 focus:ring-1 focus:ring-[#35d5a4]/50 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Brand Name</label>
+                        <input type="text" value={generalForm.brand_name} onChange={(e) => setGeneralForm({ ...generalForm, brand_name: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Website URL</label>
-                        <input type="url" value={generalForm.website_url} onChange={(e) => setGeneralForm({ ...generalForm, website_url: e.target.value })} className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm font-medium text-white placeholder:text-[#68747e] outline-none focus:border-[#35d5a4]/50 focus:ring-1 focus:ring-[#35d5a4]/50 transition-all shadow-inner" placeholder="https://yourwebsite.com" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Website URL</label>
+                        <input type="url" value={generalForm.website_url} onChange={(e) => setGeneralForm({ ...generalForm, website_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="https://yourwebsite.com" />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Logo URL</label>
-                        <input type="url" value={generalForm.logo_url} onChange={(e) => setGeneralForm({ ...generalForm, logo_url: e.target.value })} className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm font-medium text-white placeholder:text-[#68747e] outline-none focus:border-[#35d5a4]/50 focus:ring-1 focus:ring-[#35d5a4]/50 transition-all shadow-inner" placeholder="https://yourwebsite.com/logo.png" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Logo URL</label>
+                        <input type="url" value={generalForm.logo_url} onChange={(e) => setGeneralForm({ ...generalForm, logo_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="https://yourwebsite.com/logo.png" />
                       </div>
-                      <div className="md:col-span-2 pt-6 border-t border-white/5 mt-2"><h4 className="text-sm font-bold text-white mb-6">Checkout Redirection</h4></div>
+                      <div className="md:col-span-2 pt-6 border-t border-line mt-2"><h4 className="text-sm font-bold text-ink mb-6">Checkout Redirection</h4></div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Default Success URL</label>
-                        <input type="url" value={generalForm.success_url} onChange={(e) => setGeneralForm({ ...generalForm, success_url: e.target.value })} className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm font-medium text-white placeholder:text-[#68747e] outline-none focus:border-[#35d5a4]/50 focus:ring-1 focus:ring-[#35d5a4]/50 transition-all shadow-inner" placeholder="Redirect after successful payment" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Default Success URL</label>
+                        <input type="url" value={generalForm.success_url} onChange={(e) => setGeneralForm({ ...generalForm, success_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="Redirect after successful payment" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Default Cancel URL</label>
-                        <input type="url" value={generalForm.cancel_url} onChange={(e) => setGeneralForm({ ...generalForm, cancel_url: e.target.value })} className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm font-medium text-white placeholder:text-[#68747e] outline-none focus:border-[#35d5a4]/50 focus:ring-1 focus:ring-[#35d5a4]/50 transition-all shadow-inner" placeholder="Redirect if customer cancels" />
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Default Cancel URL</label>
+                        <input type="url" value={generalForm.cancel_url} onChange={(e) => setGeneralForm({ ...generalForm, cancel_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="Redirect if customer cancels" />
                       </div>
                     </div>
-                    <div className="border-t border-white/5 bg-white/[0.01] p-6 flex justify-end">
-                      <button type="submit" disabled={isSaving} className="flex items-center gap-2 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-6 py-2.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] border border-white/10 disabled:opacity-50">
+                    <div className="border-t border-line bg-surface/[0.01] p-6 flex justify-end">
+                      <button type="submit" disabled={isSaving} className="flex items-center gap-2 rounded-input bg-brand-500 px-6 py-2.5 text-sm font-bold text-ink transition-all hover:shadow-card border border-line disabled:opacity-50">
                         {isSaving ? <Spinner /> : <Save className="h-4 w-4" />} {isSaving ? 'Saving...' : 'Save Profile'}
                       </button>
                     </div>
@@ -258,23 +258,23 @@ export default function SettingsPage() {
 
               {activeTab === 'security' && (
                 <>
-                  <div className="border-b border-white/5 bg-white/[0.01] p-6 md:px-8">
-                    <h2 className="text-lg font-bold text-white">Change Password</h2>
-                    <p className="text-xs text-[#8995a3] mt-1">Ensure your account is using a long, random password to stay secure.</p>
+                  <div className="border-b border-line bg-surface/[0.01] p-6 md:px-8">
+                    <h2 className="text-lg font-bold text-ink">Change Password</h2>
+                    <p className="text-xs text-ink-muted mt-1">Ensure your account is using a long, random password to stay secure.</p>
                   </div>
                   <form onSubmit={handlePasswordSubmit} className="flex-1 flex flex-col">
                     <div className="p-6 md:p-8 space-y-6 max-w-lg flex-1">
                       
                       {/* SUCCESS BANNER */}
                       {passwordSuccessMessage && (
-                        <div className="rounded-xl border border-[#35d5a4]/30 bg-[#2f9d78]/10 p-4 text-xs font-semibold text-[#35d5a4] flex items-center gap-2 animate-in fade-in duration-200">
+                        <div className="rounded-input border border-line bg-success-tint p-4 text-xs font-semibold text-brand-500 flex items-center gap-2 animate-in fade-in duration-200">
                           <CheckCircle2 className="h-4 w-4 shrink-0" />
                           <span>{passwordSuccessMessage}</span>
                         </div>
                       )}
 
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Current Password</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Current Password</label>
                         <input
                           type="password"
                           value={passwordForm.current_password}
@@ -283,22 +283,22 @@ export default function SettingsPage() {
                             setPasswordErrors(prev => ({ ...prev, current_password: [] }));
                             setPasswordSuccessMessage('');
                           }}
-                          className={`h-11 w-full rounded-xl border bg-[#0a0f16] px-4 text-sm font-medium text-white outline-none focus:ring-1 transition-all shadow-inner ${
+                          className={`h-11 w-full rounded-input border bg-surface px-4 text-sm font-medium text-ink outline-none focus:ring-1 transition-all shadow-inner ${
                             passwordErrors.current_password?.length 
                               ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/50' 
-                              : 'border-white/10 focus:border-amber-500/50 focus:ring-amber-500/50'
+                              : 'border-line focus:border-amber-500/50 focus:ring-amber-500/50'
                           }`}
                           required
                         />
                         {passwordErrors.current_password?.length > 0 && (
-                          <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
+                          <p className="text-danger text-xs mt-1.5 flex items-center gap-1">
                             <XCircle className="h-3 w-3" /> {passwordErrors.current_password[0]}
                           </p>
                         )}
                       </div>
                       
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">New Password</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">New Password</label>
                         <input
                           type="password"
                           value={passwordForm.password}
@@ -307,26 +307,26 @@ export default function SettingsPage() {
                             setPasswordErrors(prev => ({ ...prev, password: [] }));
                             setPasswordSuccessMessage('');
                           }}
-                          className={`h-11 w-full rounded-xl border bg-[#0a0f16] px-4 text-sm font-medium text-white outline-none focus:ring-1 transition-all shadow-inner ${
+                          className={`h-11 w-full rounded-input border bg-surface px-4 text-sm font-medium text-ink outline-none focus:ring-1 transition-all shadow-inner ${
                             passwordErrors.password?.length 
                               ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/50' 
-                              : 'border-white/10 focus:border-amber-500/50 focus:ring-amber-500/50'
+                              : 'border-line focus:border-amber-500/50 focus:ring-amber-500/50'
                           }`}
                           required
                         />
-                        <p className="text-[#68747e] text-[10px] mt-1.5 uppercase tracking-wide">Must be at least 8 characters with upper, lower, numbers & symbols</p>
+                        <p className="text-ink-muted text-[10px] mt-1.5 uppercase tracking-wide">Must be at least 8 characters with upper, lower, numbers & symbols</p>
                         {passwordErrors.password?.length > 0 && (
-                          <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
+                          <p className="text-danger text-xs mt-1.5 flex items-center gap-1">
                             <XCircle className="h-3 w-3" /> {passwordErrors.password[0]}
                           </p>
                         )}
                       </div>
                       
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 flex justify-between">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 flex justify-between">
                           <span>Confirm New Password</span>
-                          {passwordsMatch && <span className="text-[#35d5a4] flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/> Matches</span>}
-                          {passwordsMismatch && <span className="text-red-400 flex items-center gap-1"><XCircle className="h-3 w-3"/> Mismatch</span>}
+                          {passwordsMatch && <span className="text-brand-500 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/> Matches</span>}
+                          {passwordsMismatch && <span className="text-danger flex items-center gap-1"><XCircle className="h-3 w-3"/> Mismatch</span>}
                         </label>
                         <input
                           type="password"
@@ -335,23 +335,23 @@ export default function SettingsPage() {
                             setPasswordForm({ ...passwordForm, password_confirmation: e.target.value });
                             setPasswordSuccessMessage('');
                           }}
-                          className={`h-11 w-full rounded-xl border bg-[#0a0f16] px-4 text-sm font-medium text-white outline-none focus:ring-1 transition-all shadow-inner ${
+                          className={`h-11 w-full rounded-input border bg-surface px-4 text-sm font-medium text-ink outline-none focus:ring-1 transition-all shadow-inner ${
                             passwordsMismatch 
                               ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/50'
                               : passwordsMatch 
-                                ? 'border-[#35d5a4]/50 focus:border-[#35d5a4]/50 focus:ring-[#35d5a4]/50'
-                                : 'border-white/10 focus:border-amber-500/50 focus:ring-amber-500/50'
+                                ? 'border-line focus:border-brand-500/50 focus:ring-brand-500/50'
+                                : 'border-line focus:border-amber-500/50 focus:ring-amber-500/50'
                           }`}
                           required
                         />
                       </div>
                     </div>
                     
-                    <div className="border-t border-white/5 bg-white/[0.01] p-6 flex justify-start md:px-8">
+                    <div className="border-t border-line bg-surface/[0.01] p-6 flex justify-start md:px-8">
                       <button
                         type="submit"
                         disabled={isSaving || passwordsMismatch}
-                        className="flex items-center gap-2 rounded-xl bg-linear-to-r from-amber-600 to-amber-700 px-6 py-2.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.4)] hover:brightness-110 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 rounded-input bg-linear-to-r from-pending to-pending px-6 py-2.5 text-sm font-bold text-ink transition-all hover:shadow-card hover:brightness-110 border border-line disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSaving ? <Spinner /> : <Shield className="h-4 w-4" />} 
                         {isSaving ? 'Updating...' : 'Update Password'}
@@ -363,26 +363,26 @@ export default function SettingsPage() {
 
               {activeTab === 'webhooks' && (
                 <>
-                  <div className="border-b border-white/5 bg-white/[0.01] p-6 md:px-8">
-                    <h2 className="text-lg font-bold text-white">HMAC Webhook Signing Secret</h2>
-                    <p className="text-xs text-[#8995a3] mt-1">Used to sign incoming webhook events via the <code className="bg-[#0a0f16] border border-white/10 px-1.5 py-0.5 rounded text-[10px] font-mono text-[#e8edf2] ml-1">x-gateway-signature</code> header.</p>
+                  <div className="border-b border-line bg-surface/[0.01] p-6 md:px-8">
+                    <h2 className="text-lg font-bold text-ink">HMAC Webhook Signing Secret</h2>
+                    <p className="text-xs text-ink-muted mt-1">Used to sign incoming webhook events via the <code className="bg-surface border border-line px-1.5 py-0.5 rounded text-[10px] font-mono text-ink ml-1">x-gateway-signature</code> header.</p>
                   </div>
                   <div className="p-6 md:p-8 flex-1">
                     <div className="max-w-xl">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Current Webhook Secret</label>
-                      <div className="flex items-center mb-8 h-12 rounded-xl border border-white/10 bg-[#0a0f16] shadow-inner overflow-hidden">
-                        <input type="text" readOnly value={webhookSecretMasked || 'No secret generated yet'} className="h-full w-full bg-transparent px-4 text-sm font-mono text-[#8995a3] outline-none cursor-not-allowed" />
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Current Webhook Secret</label>
+                      <div className="flex items-center mb-8 h-12 rounded-input border border-line bg-surface shadow-inner overflow-hidden">
+                        <input type="text" readOnly value={webhookSecretMasked || 'No secret generated yet'} className="h-full w-full bg-transparent px-4 text-sm font-mono text-ink-muted outline-none cursor-not-allowed" />
                       </div>
                       
-                      <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+                      <div className="rounded-card border border-line bg-danger-tint p-6">
                         <div className="flex items-center gap-2 mb-2">
-                          <AlertTriangle className="h-5 w-5 text-red-400" />
-                          <strong className="text-sm font-bold text-red-400">Danger Zone</strong>
+                          <AlertTriangle className="h-5 w-5 text-danger" />
+                          <strong className="text-sm font-bold text-danger">Danger Zone</strong>
                         </div>
                         <p className="text-xs text-red-300/80 mb-6 leading-relaxed">
                           Rotating your secret will immediately invalidate signatures generated with the old secret. For security reasons, the full secret is only displayed once upon rotation.
                         </p>
-                        <button type="button" disabled={isSaving} onClick={handleRotateWebhookSecret} className="flex items-center justify-center gap-2 rounded-xl bg-red-500/20 px-6 py-2.5 text-sm font-bold text-red-400 transition-all hover:bg-red-500/30 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
+                        <button type="button" disabled={isSaving} onClick={handleRotateWebhookSecret} className="flex items-center justify-center gap-2 rounded-input bg-danger-tint px-6 py-2.5 text-sm font-bold text-danger transition-all hover:bg-red-500/30 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
                           {isSaving ? <Spinner /> : <RefreshCw className="h-4 w-4" />}
                           {isSaving ? 'Processing...' : webhookSecretMasked ? 'Rotate Webhook Secret' : 'Generate Webhook Secret'}
                         </button>
@@ -398,30 +398,30 @@ export default function SettingsPage() {
 
       {revealedSecret && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-3xl border border-amber-500/30 bg-[#0d131a] shadow-2xl overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between border-b border-white/5 bg-amber-500/5 p-6">
+          <div className="w-full max-w-lg rounded-card border border-amber-500/30 bg-surface shadow-card overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between border-b border-line bg-amber-500/5 p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400"><ShieldCheck className="h-5 w-5" /></div>
-                <div><h3 className="text-lg font-bold text-white">Save Your Webhook Secret</h3><p className="text-xs text-amber-400/80">HMAC Signature Verification</p></div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-input bg-surface-muted border border-line text-pending"><ShieldCheck className="h-5 w-5" /></div>
+                <div><h3 className="text-lg font-bold text-ink">Save Your Webhook Secret</h3><p className="text-xs text-pending/80">HMAC Signature Verification</p></div>
               </div>
-              <button onClick={() => setRevealedSecret(null)} className="rounded-full p-2 text-[#8995a3] hover:text-white transition-colors"><X className="h-5 w-5" /></button>
+              <button onClick={() => setRevealedSecret(null)} className="rounded-full p-2 text-ink-muted hover:text-ink transition-colors"><X className="h-5 w-5" /></button>
             </div>
             <div className="p-6 space-y-5">
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-xs text-red-200/90 leading-relaxed shadow-inner">
-                <strong className="text-red-400 block mb-1 text-sm">Please copy your secret key now.</strong>
+              <div className="rounded-input border border-line bg-danger-tint p-4 text-xs text-red-200/90 leading-relaxed shadow-inner">
+                <strong className="text-danger block mb-1 text-sm">Please copy your secret key now.</strong>
                 For your security, you will not be able to view this secret again once this dialog is closed. If you lose it, you will need to rotate the secret again.
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e]">New Webhook Secret</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">New Webhook Secret</label>
                 <div className="flex items-center gap-2">
-                  <input readOnly value={revealedSecret} className="w-full h-12 rounded-xl border border-white/10 bg-[#070b10] px-4 font-mono text-xs sm:text-sm text-white selection:bg-amber-600 outline-none shadow-inner" />
-                  <button onClick={() => handleCopy(revealedSecret)} className="h-12 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center gap-2 shrink-0 transition-all shadow-[0_0_15px_rgba(217,119,6,0.3)]">
+                  <input readOnly value={revealedSecret} className="w-full h-12 rounded-input border border-line bg-bg px-4 font-mono text-xs sm:text-sm text-ink selection:bg-pending outline-none shadow-inner" />
+                  <button onClick={() => handleCopy(revealedSecret)} className="h-12 px-4 rounded-input bg-pending hover:bg-pending text-ink font-bold text-xs flex items-center gap-2 shrink-0 transition-all shadow-card">
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "Copied" : "Copy"}
                   </button>
                 </div>
               </div>
-              <div className="pt-3 border-t border-white/5">
-                <button onClick={() => setRevealedSecret(null)} className="w-full h-11 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-white transition-colors">I have securely saved my secret</button>
+              <div className="pt-3 border-t border-line">
+                <button onClick={() => setRevealedSecret(null)} className="w-full h-11 rounded-input bg-surface-muted hover:bg-surface-muted text-xs font-bold text-ink transition-colors">I have securely saved my secret</button>
               </div>
             </div>
           </div>

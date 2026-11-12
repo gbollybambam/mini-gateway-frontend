@@ -1,75 +1,55 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Bell, ChevronDown, Plus } from "@/components/icons";
-import { useToast } from "@/components/dashboard/ui";
-import { useAuth } from "@/components/dashboard/DashboardProviders"; // Injects Global Auth
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Bell, ChevronDown, Plus, Search } from "@/components/icons"
+import { useToast } from "@/components/dashboard/ui"
+import { useAuth } from "@/components/dashboard/DashboardProviders"
 
 const labels: Record<string, string> = {
-  "/": "Command Center",
-  "/transactions": "Payment Ledger",
-  "/payment-links": "Checkout Links",
-  "/wallets": "Wallet Management",
-  "/withdrawals": "Payouts & Withdrawals",
-  "/settings": "Merchant Settings",
-  "/api-keys": "Cryptographic Keys",
-  "/webhooks": "Webhook Endpoints",
-  "/team": "Team Management",
-};
+  "/": "Overview",
+  "/transactions": "Transactions",
+  "/payment-links": "Payment links",
+  "/wallets": "Wallet",
+  "/withdrawals": "Withdrawals",
+  "/settings": "Settings",
+  "/api-keys": "API keys",
+  "/webhooks": "Webhooks",
+  "/team": "Team management",
+}
 
 export default function AppHeader() {
-  const pathname = usePathname();
-  const toast = useToast();
-  const { user } = useAuth(); // Get the logged-in user profile
-  
-  const title = labels[pathname] ?? Object.entries(labels).find(([path]) => path !== "/" && pathname.startsWith(path))?.[1] ?? "Workspace";
-
-  const handleNotifications = () => {
-    toast.success("System: Infrastructure operating normally. No new alerts.");
-  };
+  const pathname = usePathname()
+  const toast = useToast()
+  const { user } = useAuth()
+  const title = labels[pathname] ?? Object.entries(labels).find(([path]) => path !== "/" && pathname.startsWith(path))?.[1] ?? "Workspace"
 
   return (
-    <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-white/5 bg-[#090d14]/70 px-6 backdrop-blur-xl lg:px-10">
-      <div className="flex flex-col justify-center">
-        <h1 className="text-xl font-bold text-[#e8edf2] tracking-tight">{title}</h1>
+    <header className="sticky top-0 z-20 flex min-h-20 items-center justify-between gap-4 border-b border-line bg-bg/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-10">
+      <div className="min-w-0">
+        <p className="truncate text-xs font-medium text-ink-muted">Merchant workspace</p>
+        <h1 className="truncate text-lg font-semibold tracking-[-0.02em] text-ink">{title}</h1>
       </div>
-      
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={handleNotifications}
-          aria-label="Notifications" 
-          className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/5 text-[#8995a3] transition-all hover:bg-white/10 hover:text-white" 
-          type="button"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[#35d5a4] ring-2 ring-[#090d14]" />
+      <div className="hidden min-w-56 flex-1 justify-center lg:flex">
+        <button type="button" className="flex h-11 w-full max-w-sm items-center justify-between rounded-input bg-surface px-4 text-sm text-ink-muted shadow-card" aria-label="Search">
+          <span className="flex items-center gap-2"><Search size={18} aria-hidden="true" /> What do you want to do today?</span>
+          <kbd className="rounded-input bg-surface-muted px-2 py-1 text-[11px] text-ink-muted">⌘K</kbd>
         </button>
-
-        <div className="h-8 w-px bg-white/10 hidden md:block mx-1" />
-
-        <Link 
-          href="/payment-links"
-          className="hidden md:flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2f9d78] to-[#1a6b50] px-5 text-sm font-bold text-white transition-all hover:shadow-[0_0_15px_rgba(47,157,120,0.4)] hover:brightness-110"
-        >
-          <Plus className="h-4 w-4" />
-          Initialize Link
+      </div>
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <button type="button" onClick={() => toast.success("No new alerts.")} aria-label="Notifications" className="relative grid size-10 place-items-center rounded-full bg-surface text-ink-muted shadow-card hover:text-ink">
+          <Bell size={18} aria-hidden="true" />
+          <span className="absolute right-2 top-2 size-2 rounded-full bg-brand-500" />
+        </button>
+        <Link href="/payment-links/create" className="hidden sm:inline-flex">
+          <span className="inline-flex h-10 items-center gap-2 rounded-pill bg-ink px-4 text-sm font-semibold text-surface hover:bg-ink/90"><Plus size={17} /> Create link</span>
         </Link>
-
-        {/* DYNAMIC USER IDENTITY BADGE */}
-        <button className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 p-1.5 pr-4 transition-all hover:bg-white/10" type="button">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] text-xs font-black text-[#090d14] uppercase">
-            {user?.name?.charAt(0) || "U"}
-          </div>
-          <div className="hidden md:flex flex-col items-start text-left">
-            <span className="text-xs font-bold text-white leading-tight">{user?.name || "Loading..."}</span>
-            <span className="text-[9px] uppercase tracking-widest text-[#35d5a4] font-bold mt-0.5">
-              {user?.role} @ {user?.business_name || "Merchant"}
-            </span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-[#8995a3] ml-1 hidden md:block" />
+        <button type="button" className="flex items-center gap-2 rounded-pill bg-surface px-2 py-1.5 text-left shadow-card" aria-label="Open account menu">
+          <span className="grid size-8 place-items-center rounded-full bg-brand-900 text-xs font-bold uppercase text-surface">{user?.name?.charAt(0) || "U"}</span>
+          <span className="hidden max-w-32 truncate text-xs font-semibold text-ink md:block">{user?.name || "Loading..."}</span>
+          <ChevronDown size={16} className="text-ink-muted" aria-hidden="true" />
         </button>
       </div>
     </header>
-  );
+  )
 }

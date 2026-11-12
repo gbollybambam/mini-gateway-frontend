@@ -21,12 +21,12 @@ function LedgerSkeleton() {
   return (
     <div className="animate-pulse flex flex-col mt-4">
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between py-6 px-4 md:px-8 border-b border-white/5">
-          <div className="h-4 w-24 md:w-32 bg-white/10 rounded-full"></div>
-          <div className="h-4 w-40 bg-white/5 rounded-full hidden md:block"></div>
-          <div className="h-4 w-20 md:w-24 bg-white/10 rounded-full"></div>
-          <div className="h-6 w-20 bg-white/5 rounded-full hidden sm:block"></div>
-          <div className="h-4 w-24 bg-white/5 rounded-full hidden lg:block"></div>
+        <div key={i} className="flex items-center justify-between py-6 px-4 md:px-8 border-b border-line">
+          <div className="h-4 w-24 md:w-32 bg-surface-muted rounded-full"></div>
+          <div className="h-4 w-40 bg-surface-muted rounded-full hidden md:block"></div>
+          <div className="h-4 w-20 md:w-24 bg-surface-muted rounded-full"></div>
+          <div className="h-6 w-20 bg-surface-muted rounded-full hidden sm:block"></div>
+          <div className="h-4 w-24 bg-surface-muted rounded-full hidden lg:block"></div>
         </div>
       ))}
     </div>
@@ -140,22 +140,22 @@ export default function TransactionsPage() {
     <div className="space-y-6 relative">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Money movement</p>
-          <h1 className="text-2xl font-bold text-white drop-shadow-sm mt-1">Transactions</h1>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Money movement</p>
+          <h1 className="text-2xl font-bold text-ink drop-shadow-sm mt-1">Transactions</h1>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#e8edf2] backdrop-blur-md shadow-inner w-fit">
-          <Wallet className="h-4 w-4 text-[#35d5a4]" />
+        <div className="flex items-center gap-2 rounded-input border border-line bg-surface-muted px-4 py-2 text-sm text-ink backdrop-blur-md shadow-inner w-fit">
+          <Wallet className="h-4 w-4 text-brand-500" />
           <span className="font-medium">{meta?.total || 0} records</span>
         </div>
       </header>
 
-      <section className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-4 sm:p-5 shadow-lg space-y-4">
+      <section className="rounded-card border border-line bg-surface backdrop-blur-xl p-4 sm:p-5 shadow-lg space-y-4">
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Search Ledger</label>
-          <div className="flex h-12 items-center gap-3 rounded-xl border border-white/10 bg-[#0a0f16] px-4 focus-within:border-[#35d5a4]/50 focus-within:ring-1 focus-within:ring-[#35d5a4]/50 transition-all shadow-inner">
-            <Search className="h-4 w-4 text-[#8995a3] shrink-0" />
+          <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Search Ledger</label>
+          <div className="flex h-12 items-center gap-3 rounded-input border border-line bg-surface px-4 focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all shadow-inner">
+            <Search className="h-4 w-4 text-ink-muted shrink-0" />
             <input 
-              className="w-full bg-transparent text-sm text-white placeholder:text-[#68747e] outline-none font-medium truncate" 
+              className="w-full bg-transparent text-sm text-ink placeholder:text-ink-muted outline-none font-medium truncate" 
               placeholder="Search amount, ref, or email..." 
               value={search} 
               onChange={handleFilterChange(setSearch)} 
@@ -165,27 +165,27 @@ export default function TransactionsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
           <div className="w-full">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Status</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Status</label>
             <select 
-              className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 pr-8 text-sm font-medium text-[#e8edf2] outline-none focus:border-[#35d5a4]/50 transition-all appearance-none cursor-pointer"
+              className="h-11 w-full rounded-input border border-line bg-surface px-4 pr-8 text-sm font-medium text-ink outline-none focus:border-brand-500/50 transition-all appearance-none cursor-pointer"
               value={status} 
               onChange={handleFilterChange(setStatus)}
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238995a3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '16px' }}
             >
-              <option value="" className="bg-[#0a0f16] text-white">Any Status</option>
-              <option value="SUCCESS" className="bg-[#0a0f16] text-white">Success</option>
-              <option value="PENDING" className="bg-[#0a0f16] text-white">Pending</option>
-              <option value="FAILED" className="bg-[#0a0f16] text-white">Failed</option>
+              <option value="" className="bg-surface text-ink">Any Status</option>
+              <option value="SUCCESS" className="bg-surface text-ink">Success</option>
+              <option value="PENDING" className="bg-surface text-ink">Pending</option>
+              <option value="FAILED" className="bg-surface text-ink">Failed</option>
             </select>
           </div>
 
           <div className="w-full sm:col-span-2 lg:col-span-1">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Start Date</label>
-            <div className="flex items-center rounded-xl border border-white/10 bg-[#0a0f16] px-3 h-11 gap-2">
-              <Calendar className="h-4 w-4 text-[#8995a3] shrink-0" />
+            <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Start Date</label>
+            <div className="flex items-center rounded-input border border-line bg-surface px-3 h-11 gap-2">
+              <Calendar className="h-4 w-4 text-ink-muted shrink-0" />
               <input 
                 type="date" 
-                className="bg-transparent text-sm text-white outline-none w-full [&::-webkit-calendar-picker-indicator]:invert-[0.8] cursor-pointer" 
+                className="bg-transparent text-sm text-ink outline-none w-full [&::-webkit-calendar-picker-indicator]:invert-[0.8] cursor-pointer" 
                 value={dateFrom}
                 onChange={handleFilterChange(setDateFrom)}
               />
@@ -193,17 +193,17 @@ export default function TransactionsPage() {
           </div>
 
           <div className="w-full">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Sort By</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Sort By</label>
             <select 
-              className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 pr-8 text-sm font-medium text-[#e8edf2] outline-none focus:border-[#35d5a4]/50 transition-all appearance-none cursor-pointer"
+              className="h-11 w-full rounded-input border border-line bg-surface px-4 pr-8 text-sm font-medium text-ink outline-none focus:border-brand-500/50 transition-all appearance-none cursor-pointer"
               value={sort} 
               onChange={handleFilterChange(setSort)}
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238995a3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '16px' }}
             >
-              <option value="created_at:desc" className="bg-[#0a0f16] text-white">Newest First</option>
-              <option value="created_at:asc" className="bg-[#0a0f16] text-white">Oldest First</option>
-              <option value="amount:desc" className="bg-[#0a0f16] text-white">Highest Amount</option>
-              <option value="amount:asc" className="bg-[#0a0f16] text-white">Lowest Amount</option>
+              <option value="created_at:desc" className="bg-surface text-ink">Newest First</option>
+              <option value="created_at:asc" className="bg-surface text-ink">Oldest First</option>
+              <option value="amount:desc" className="bg-surface text-ink">Highest Amount</option>
+              <option value="amount:asc" className="bg-surface text-ink">Lowest Amount</option>
             </select>
           </div>
 
@@ -211,7 +211,7 @@ export default function TransactionsPage() {
             <div className="w-full sm:col-span-2 lg:col-span-1">
               <button 
                 onClick={resetFilters}
-                className="h-11 w-full px-4 flex items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-colors"
+                className="h-11 w-full px-4 flex items-center justify-center gap-2 rounded-input border border-line bg-danger-tint text-xs font-bold text-danger hover:bg-danger-tint transition-colors"
               >
                 <FilterX className="h-4 w-4" /> Reset
               </button>
@@ -223,25 +223,25 @@ export default function TransactionsPage() {
       {error ? (
         <ErrorMessage message={error} retry={load} />
       ) : (
-        <section className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
+        <section className="rounded-card border border-line bg-surface backdrop-blur-xl shadow-card overflow-hidden flex flex-col relative">
           
-          <div className="flex items-center gap-3 border-b border-white/5 p-4 sm:p-6 md:px-8 bg-white/1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#e8edf2] shadow-inner shrink-0">
+          <div className="flex items-center gap-3 border-b border-line p-4 sm:p-6 md:px-8 bg-surface">
+            <div className="flex h-8 w-8 items-center justify-center rounded-input bg-surface-muted border border-line text-ink shadow-inner shrink-0">
               <Activity className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-bold text-white drop-shadow-sm">Payment Ledger</h2>
+            <h2 className="text-base font-bold text-ink drop-shadow-sm">Payment Ledger</h2>
           </div>
           
           <div className="overflow-x-auto flex-1 custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-white/1 border-b border-white/5">
+              <thead className="bg-surface border-b border-line">
                 <tr>
-                  <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Reference</th>
-                  <th className="hidden md:table-cell px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Customer</th>
-                  <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Amount</th>
-                  <th className="hidden sm:table-cell px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Status</th>
-                  <th className="hidden lg:table-cell px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Date</th>
-                  <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3] text-right">Action</th>
+                  <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Reference</th>
+                  <th className="hidden md:table-cell px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Customer</th>
+                  <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Amount</th>
+                  <th className="hidden sm:table-cell px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Status</th>
+                  <th className="hidden lg:table-cell px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted">Date</th>
+                  <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-ink-muted text-right">Action</th>
                 </tr>
               </thead>
               
@@ -251,12 +251,12 @@ export default function TransactionsPage() {
                 ) : items.length === 0 ? (
                   <tr>
                     <td colSpan={6}>
-                      <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white/1">
-                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <Receipt className="h-8 w-8 text-[#68747e]" />
+                      <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-surface">
+                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-card bg-surface-muted border border-line shadow-inner">
+                          <Receipt className="h-8 w-8 text-ink-muted" />
                         </div>
-                        <h3 className="text-lg font-bold text-white drop-shadow-sm">No results found</h3>
-                        <p className="mt-2 text-sm text-[#8995a3] max-w-xs sm:max-w-sm leading-relaxed whitespace-normal">
+                        <h3 className="text-lg font-bold text-ink drop-shadow-sm">No results found</h3>
+                        <p className="mt-2 text-sm text-ink-muted max-w-xs sm:max-w-sm leading-relaxed whitespace-normal">
                           We couldn&apos;t find any transactions matching your filters.
                         </p>
                       </div>
@@ -273,35 +273,35 @@ export default function TransactionsPage() {
                         {/* MAIN ROW (RESPONSIVE) */}
                         <tr 
                           onClick={() => toggleRow(item.id)}
-                          className={`transition-colors hover:bg-white/4 group cursor-pointer ${isExpanded ? 'bg-white/4' : ''}`}
+                          className={`transition-colors hover:bg-surface-muted group cursor-pointer ${isExpanded ? 'bg-surface-muted' : ''}`}
                         >
-                          <td className="px-4 md:px-8 py-5 font-bold text-[#e8edf2] group-hover:text-white transition-colors">
+                          <td className="px-4 md:px-8 py-5 font-bold text-ink group-hover:text-ink transition-colors">
                             {item.reference.substring(0, 12)}...
                           </td>
-                          <td className="hidden md:table-cell px-8 py-5 font-medium text-[#8995a3]">
-                            {item.customer_email || <span className="text-[#68747e] italic">Anonymous</span>}
+                          <td className="hidden md:table-cell px-8 py-5 font-medium text-ink-muted">
+                            {item.customer_email || <span className="text-ink-muted italic">Anonymous</span>}
                           </td>
                           <td className="px-4 md:px-8 py-5">
-                            <div className={`font-bold tracking-tight ${isSuccess ? "text-[#35d5a4]" : "text-[#e8edf2]"}`}>
+                            <div className={`font-bold tracking-tight ${isSuccess ? "text-brand-500" : "text-ink"}`}>
                               {formatAmount(item.amount, item.currency)}
                             </div>
-                            <div className="text-[10px] font-medium text-[#68747e] mt-0.5 sm:hidden">
+                            <div className="text-[10px] font-medium text-ink-muted mt-0.5 sm:hidden">
                               {item.status}
                             </div>
                           </td>
                           <td className="hidden sm:table-cell px-4 md:px-8 py-5">
                             <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider
-                              ${isSuccess ? "bg-[#2f9d78]/10 text-[#35d5a4] border border-[#2f9d78]/20" : 
-                                isPending ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : 
-                                "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
+                              ${isSuccess ? "bg-success-tint text-brand-500 border border-line" : 
+                                isPending ? "bg-surface-muted text-pending border border-line" : 
+                                "bg-danger-tint text-danger border border-line"}`}>
                               {item.status}
                             </span>
                           </td>
-                          <td className="hidden lg:table-cell px-8 py-5 font-medium text-[#8995a3]">
+                          <td className="hidden lg:table-cell px-8 py-5 font-medium text-ink-muted">
                             {formatDate(item.created_at)}
                           </td>
                           <td className="px-4 md:px-8 py-5 text-right">
-                            <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-[#8995a3] group-hover:text-white">
+                            <button className="p-2 hover:bg-surface-muted rounded-full transition-colors text-ink-muted group-hover:text-ink">
                               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                             </button>
                           </td>
@@ -309,49 +309,49 @@ export default function TransactionsPage() {
 
                         {/* EXPANDED DETAILS DROPDOWN */}
                         {isExpanded && (
-                          <tr className="bg-[#05080c]/40 shadow-inner border-b-2 border-[#2f9d78]/20">
+                          <tr className="bg-bg/40 shadow-inner border-b-2 border-line">
                             <td colSpan={6} className="p-0">
                               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 sm:p-8 animate-in slide-in-from-top-2 fade-in duration-200 whitespace-normal">
                                 
                                 <div className="space-y-4 lg:col-span-1">
-                                  <h4 className="text-xs font-bold uppercase tracking-widest text-[#8995a3] mb-4 flex items-center gap-2"><CreditCard className="h-4 w-4"/> Settlement</h4>
+                                  <h4 className="text-xs font-bold uppercase tracking-widest text-ink-muted mb-4 flex items-center gap-2"><CreditCard className="h-4 w-4"/> Settlement</h4>
                                   <div className="flex justify-between items-center text-sm">
-                                    <span className="text-[#68747e]">Gross Amount</span>
-                                    <span className="font-bold text-[#e8edf2]">{formatAmount(item.amount, item.currency)}</span>
+                                    <span className="text-ink-muted">Gross Amount</span>
+                                    <span className="font-bold text-ink">{formatAmount(item.amount, item.currency)}</span>
                                   </div>
                                   <div className="flex justify-between items-center text-sm">
-                                    <span className="text-[#68747e]">Processing Fee</span>
-                                    <span className="font-bold text-red-400">-{formatAmount(item.fee, item.currency)}</span>
+                                    <span className="text-ink-muted">Processing Fee</span>
+                                    <span className="font-bold text-danger">-{formatAmount(item.fee, item.currency)}</span>
                                   </div>
-                                  <div className="pt-3 border-t border-white/10 flex justify-between items-center">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-[#35d5a4]">Net Expected</span>
-                                    <span className="text-xl font-black text-[#35d5a4]">{formatAmount(item.net_amount || item.amount, item.currency)}</span>
+                                  <div className="pt-3 border-t border-line flex justify-between items-center">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-brand-500">Net Expected</span>
+                                    <span className="text-xl font-black text-brand-500">{formatAmount(item.net_amount || item.amount, item.currency)}</span>
                                   </div>
                                 </div>
 
-                                <div className="space-y-4 lg:col-span-2 border-t lg:border-t-0 lg:border-l border-white/5 pt-6 lg:pt-0 lg:pl-8">
-                                  <h4 className="text-xs font-bold uppercase tracking-widest text-[#8995a3] mb-4 flex items-center gap-2"><Hash className="h-4 w-4"/> Metadata</h4>
+                                <div className="space-y-4 lg:col-span-2 border-t lg:border-t-0 lg:border-l border-line pt-6 lg:pt-0 lg:pl-8">
+                                  <h4 className="text-xs font-bold uppercase tracking-widest text-ink-muted mb-4 flex items-center gap-2"><Hash className="h-4 w-4"/> Metadata</h4>
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Provider Reference</span>
-                                      <span className="text-sm font-medium text-white break-all">{(item as TransactionResource & { provider_reference?: string }).provider_reference || "N/A"}</span>
+                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-ink-muted">Provider Reference</span>
+                                      <span className="text-sm font-medium text-ink break-all">{(item as TransactionResource & { provider_reference?: string }).provider_reference || "N/A"}</span>
                                     </div>
                                     <div>
-                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Payment Method</span>
-                                      <span className="text-sm font-medium text-white capitalize">{item.payment_method || "N/A"}</span>
+                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-ink-muted">Payment Method</span>
+                                      <span className="text-sm font-medium text-ink capitalize">{item.payment_method || "N/A"}</span>
                                     </div>
                                     <div className="md:hidden">
-                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Customer Contact</span>
-                                      <span className="text-sm font-medium text-white break-all">{item.customer_email || "Anonymous"}</span>
+                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-ink-muted">Customer Contact</span>
+                                      <span className="text-sm font-medium text-ink break-all">{item.customer_email || "Anonymous"}</span>
                                     </div>
                                     <div className="lg:hidden">
-                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[#68747e]">Created At</span>
-                                      <span className="text-sm font-medium text-white">{formatDate(item.created_at)}</span>
+                                      <span className="block text-[10px] font-bold uppercase tracking-widest text-ink-muted">Created At</span>
+                                      <span className="text-sm font-medium text-ink">{formatDate(item.created_at)}</span>
                                     </div>
                                   </div>
                                   
                                   {isPending && (
-                                    <div className="mt-6 pt-6 border-t border-white/5 flex justify-end">
+                                    <div className="mt-6 pt-6 border-t border-line flex justify-end">
                                       <VerifyPaymentButton transactionId={item.id} onVerified={load} />
                                     </div>
                                   )}
@@ -370,22 +370,22 @@ export default function TransactionsPage() {
           </div>
 
           {meta && meta.last_page > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 p-4 sm:px-8 bg-white/1">
-              <p className="text-xs font-medium text-[#8995a3]">
-                Page <span className="text-white font-bold">{meta.current_page}</span> of <span className="text-white font-bold">{meta.last_page}</span>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-line p-4 sm:px-8 bg-surface">
+              <p className="text-xs font-medium text-ink-muted">
+                Page <span className="text-ink font-bold">{meta.current_page}</span> of <span className="text-ink font-bold">{meta.last_page}</span>
               </p>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   disabled={meta.current_page === 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1 rounded-input border border-line bg-surface-muted px-4 py-2 text-xs font-medium text-ink transition-all hover:bg-surface-muted disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" /> Prev
                 </button>
                 <button
                   disabled={meta.current_page === meta.last_page}
                   onClick={() => setPage(p => p + 1)}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1 rounded-input border border-line bg-surface-muted px-4 py-2 text-xs font-medium text-ink transition-all hover:bg-surface-muted disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next <ChevronRight className="h-3.5 w-3.5" />
                 </button>

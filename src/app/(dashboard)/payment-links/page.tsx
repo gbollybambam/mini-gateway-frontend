@@ -25,14 +25,14 @@ function LinksSkeleton() {
   return (
     <div className="animate-pulse flex flex-col mt-4">
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between py-6 px-4 sm:px-8 border-b border-white/5">
+        <div key={i} className="flex items-center justify-between py-6 px-4 sm:px-8 border-b border-line">
           <div className="space-y-2">
-            <div className="h-4 w-32 sm:w-40 bg-white/10 rounded-full"></div>
-            <div className="h-3 w-20 sm:w-24 bg-white/5 rounded-full"></div>
+            <div className="h-4 w-32 sm:w-40 bg-surface-muted rounded-full"></div>
+            <div className="h-3 w-20 sm:w-24 bg-surface-muted rounded-full"></div>
           </div>
-          <div className="h-4 w-24 bg-white/10 rounded-full hidden sm:block"></div>
-          <div className="h-6 w-20 bg-white/5 rounded-full hidden md:block"></div>
-          <div className="h-8 w-8 bg-white/5 rounded-full"></div>
+          <div className="h-4 w-24 bg-surface-muted rounded-full hidden sm:block"></div>
+          <div className="h-6 w-20 bg-surface-muted rounded-full hidden md:block"></div>
+          <div className="h-8 w-8 bg-surface-muted rounded-full"></div>
         </div>
       ))}
     </div>
@@ -127,28 +127,28 @@ export default function PaymentLinksPage() {
 
   return (
     <div className="space-y-6 relative">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-4 sm:p-6 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-card border border-line bg-surface backdrop-blur-xl p-4 sm:p-6 shadow-xl">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-sm">Payment Links</h1>
-          <p className="text-xs sm:text-sm text-[#8995a3] mt-1">Generate reusable checkout pages to collect payments globally.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight drop-shadow-sm">Payment Links</h1>
+          <p className="text-xs sm:text-sm text-ink-muted mt-1">Generate reusable checkout pages to collect payments globally.</p>
         </div>
         <Link 
           href="/payment-links/create" 
-          className="flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-6 py-3 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] hover:brightness-110 border border-white/10"
+          className="flex items-center justify-center gap-2 rounded-input bg-brand-500 px-6 py-3 text-sm font-bold text-ink transition-all hover:shadow-card hover:brightness-110 border border-line"
         >
           <Plus className="h-4 w-4" /> Create Link
         </Link>
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center text-sm font-medium text-red-500">
+        <div className="rounded-card border border-line bg-danger-tint p-6 text-center text-sm font-medium text-danger">
           {error}
         </div>
       ) : (
-        <div className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="rounded-card border border-line bg-surface backdrop-blur-xl shadow-card overflow-hidden">
           <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left text-sm text-[#e8edf2] whitespace-nowrap">
-              <thead className="border-b border-white/5 bg-white/1 text-[10px] font-bold uppercase tracking-widest text-[#68747e]">
+            <table className="w-full text-left text-sm text-ink whitespace-nowrap">
+              <thead className="border-b border-line bg-surface text-[10px] font-bold uppercase tracking-widest text-ink-muted">
                 <tr>
                   <th className="px-4 sm:px-8 py-5">Details</th>
                   <th className="hidden sm:table-cell px-8 py-5">Amount</th>
@@ -164,11 +164,11 @@ export default function PaymentLinksPage() {
                   <tr>
                     <td colSpan={5}>
                       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <LinkIcon className="h-8 w-8 text-[#68747e]" />
+                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-card bg-surface-muted border border-line shadow-inner">
+                          <LinkIcon className="h-8 w-8 text-ink-muted" />
                         </div>
-                        <h3 className="text-lg font-bold text-white drop-shadow-sm">No Payment Links Active</h3>
-                        <p className="mt-2 text-sm text-[#8995a3] max-w-sm leading-relaxed whitespace-normal">
+                        <h3 className="text-lg font-bold text-ink drop-shadow-sm">No Payment Links Active</h3>
+                        <p className="mt-2 text-sm text-ink-muted max-w-sm leading-relaxed whitespace-normal">
                           Create your first hosted checkout link to start accepting payments securely without writing any code.
                         </p>
                       </div>
@@ -187,37 +187,37 @@ export default function PaymentLinksPage() {
                         {/* MAIN ROW (RESPONSIVE) */}
                         <tr 
                           onClick={() => setExpandedId(isExpanded ? null : link.id)}
-                          className={`transition-colors cursor-pointer group ${isDeactivated || isExpired ? 'opacity-60' : ''} ${isExpanded ? 'bg-white/4' : 'hover:bg-white/2'}`}
+                          className={`transition-colors cursor-pointer group ${isDeactivated || isExpired ? 'opacity-60' : ''} ${isExpanded ? 'bg-surface-muted' : 'hover:bg-surface'}`}
                         >
                           <td className="px-4 sm:px-8 py-5">
-                            <p className={`font-bold transition-colors truncate max-w-37.5 sm:max-w-62.5 ${isActive || isCompleted ? 'text-white group-hover:text-[#35d5a4]' : 'text-[#8995a3]'}`}>
+                            <p className={`font-bold transition-colors truncate max-w-37.5 sm:max-w-62.5 ${isActive || isCompleted ? 'text-ink group-hover:text-brand-500' : 'text-ink-muted'}`}>
                               {link.description}
                             </p>
-                            <p className="text-xs text-[#8995a3] mt-0.5">{link.reference}</p>
+                            <p className="text-xs text-ink-muted mt-0.5">{link.reference}</p>
                             {/* Show Amount & Status on mobile only */}
                             <div className="sm:hidden flex items-center gap-2 mt-2">
-                              <span className="font-bold text-[#e8edf2] text-xs">{formatAmount(link.amount, link.currency)}</span>
-                              <span className="text-[10px] uppercase text-[#68747e]">• {link.status}</span>
+                              <span className="font-bold text-ink text-xs">{formatAmount(link.amount, link.currency)}</span>
+                              <span className="text-[10px] uppercase text-ink-muted">• {link.status}</span>
                             </div>
                           </td>
-                          <td className={`hidden sm:table-cell px-8 py-5 font-bold ${isActive || isCompleted ? 'text-[#e8edf2]' : 'text-[#8995a3]'}`}>
+                          <td className={`hidden sm:table-cell px-8 py-5 font-bold ${isActive || isCompleted ? 'text-ink' : 'text-ink-muted'}`}>
                             {formatAmount(link.amount, link.currency)}
                           </td>
                           <td className="hidden md:table-cell px-8 py-5">
                             <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                               isCompleted ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                              isActive ? 'bg-[#2f9d78]/10 text-[#35d5a4] border border-[#2f9d78]/20' : 
-                              isExpired ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                              'bg-red-500/10 text-red-400 border border-red-500/20'
+                              isActive ? 'bg-success-tint text-brand-500 border border-line' : 
+                              isExpired ? 'bg-surface-muted text-pending border border-line' :
+                              'bg-danger-tint text-danger border border-line'
                             }`}>
                               {link.status}
                             </span>
                           </td>
-                          <td className="hidden lg:table-cell px-8 py-5 text-[#8995a3] font-medium">
+                          <td className="hidden lg:table-cell px-8 py-5 text-ink-muted font-medium">
                             {formatDate(link.created_at)}
                           </td>
                           <td className="px-4 sm:px-8 py-5 text-right">
-                             <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-[#8995a3] group-hover:text-white">
+                             <button className="p-2 hover:bg-surface-muted rounded-full transition-colors text-ink-muted group-hover:text-ink">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                              </button>
                           </td>
@@ -225,56 +225,56 @@ export default function PaymentLinksPage() {
 
                         {/* EXPANDED DROPDOWN (RESPONSIVE) */}
                         {isExpanded && (
-                          <tr className="bg-[#05080c]/40 shadow-inner border-b-2 border-[#2f9d78]/20">
+                          <tr className="bg-bg/40 shadow-inner border-b-2 border-line">
                             <td colSpan={5} className="p-0">
                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-8 animate-in slide-in-from-top-2 fade-in duration-200 whitespace-normal">
                                   
                                   {/* Left Col: Metadata & Usage Details */}
                                   <div className="space-y-5">
                                      <div>
-                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><LinkIcon className="h-3 w-3"/> Hosted URL</h4>
-                                        <a href={link.checkout_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-[#35d5a4] hover:underline break-all">
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-1 flex items-center gap-2"><LinkIcon className="h-3 w-3"/> Hosted URL</h4>
+                                        <a href={link.checkout_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-brand-500 hover:underline break-all">
                                           {link.checkout_url}
                                         </a>
                                      </div>
                                      
                                      {isCompleted ? (
-                                       <div className="rounded-xl border border-[#3f82b2]/20 bg-[#3f82b2]/10 p-4">
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#79b8e8] mb-1 flex items-center gap-2">
+                                       <div className="rounded-input border border-line bg-surface-muted p-4">
+                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-1 flex items-center gap-2">
                                             <UserCheck className="h-3 w-3"/> Payer Details
                                           </h4>
-                                          <p className="text-sm font-medium text-white break-all">
+                                          <p className="text-sm font-medium text-ink break-all">
                                             {link.payment?.customer_email || link.customer_information?.email || "Anonymous Payer"}
                                           </p>
-                                          <p className="text-xs text-[#79b8e8] mt-1 font-bold">Successfully Collected</p>
+                                          <p className="text-xs text-ink-muted mt-1 font-bold">Successfully Collected</p>
                                        </div>
                                      ) : (
                                        <div>
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><UserCheck className="h-3 w-3"/> Designated Customer</h4>
-                                          <p className="text-sm font-medium text-white break-all">{link.customer_information?.email || "General (Open to anyone)"}</p>
+                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-1 flex items-center gap-2"><UserCheck className="h-3 w-3"/> Designated Customer</h4>
+                                          <p className="text-sm font-medium text-ink break-all">{link.customer_information?.email || "General (Open to anyone)"}</p>
                                        </div>
                                      )}
 
                                      <div className="grid grid-cols-2 gap-4">
                                        <div className="md:hidden">
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><Activity className="h-3 w-3"/> Status</h4>
-                                          <p className="text-sm font-medium text-white">{link.status}</p>
+                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-1 flex items-center gap-2"><Activity className="h-3 w-3"/> Status</h4>
+                                          <p className="text-sm font-medium text-ink">{link.status}</p>
                                        </div>
                                        <div>
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><Clock className="h-3 w-3"/> Expiry Date</h4>
-                                          <p className="text-sm font-medium text-white">{formatDate(link.expiry)}</p>
+                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-1 flex items-center gap-2"><Clock className="h-3 w-3"/> Expiry Date</h4>
+                                          <p className="text-sm font-medium text-ink">{formatDate(link.expiry)}</p>
                                        </div>
                                      </div>
                                   </div>
 
                                   {/* Right Col: Actions */}
-                                  <div className="flex flex-col gap-3 justify-center md:border-l border-white/5 md:pl-8">
+                                  <div className="flex flex-col gap-3 justify-center md:border-l border-line md:pl-8">
                                      <button 
                                       onClick={(e) => handleCopy(e, link.id, link.checkout_url)}
                                       disabled={!isActive}
-                                      className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-bold text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="flex h-12 w-full items-center justify-center gap-2 rounded-input border border-line bg-surface-muted px-4 text-sm font-bold text-ink hover:bg-surface-muted transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                      >
-                                      {copiedId === link.id ? <Check className="h-4 w-4 text-[#35d5a4]" /> : <Copy className="h-4 w-4" />}
+                                      {copiedId === link.id ? <Check className="h-4 w-4 text-brand-500" /> : <Copy className="h-4 w-4" />}
                                       {copiedId === link.id ? "Copied" : "Copy Checkout Link"}
                                      </button>
 
@@ -282,7 +282,7 @@ export default function PaymentLinksPage() {
                                       href={link.checkout_url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#3f82b2]/20 bg-[#3f82b2]/10 px-4 text-sm font-bold text-[#79b8e8] hover:bg-[#3f82b2]/20 transition-all ${!isActive && 'opacity-50 pointer-events-none'}`}
+                                      className={`flex h-12 w-full items-center justify-center gap-2 rounded-input border border-line bg-surface-muted px-4 text-sm font-bold text-ink-muted hover:bg-surface-muted transition-all ${!isActive && 'opacity-50 pointer-events-none'}`}
                                      >
                                       <ExternalLink className="h-4 w-4" /> Open Payment Page
                                      </a>
@@ -290,10 +290,10 @@ export default function PaymentLinksPage() {
                                      {!isCompleted && !isExpired && (
                                       <button 
                                         onClick={(e) => toggleStatus(e, link.id, link.status)}
-                                        className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold transition-all ${
+                                        className={`flex h-12 w-full items-center justify-center gap-2 rounded-input border px-4 text-sm font-bold transition-all ${
                                           isActive 
-                                            ? 'border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20' 
-                                            : 'border-amber-500/20 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                                            ? 'border-line bg-danger-tint text-danger hover:bg-danger-tint' 
+                                            : 'border-line bg-surface-muted text-pending hover:bg-pending/20'
                                         }`}
                                       >
                                         {isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}

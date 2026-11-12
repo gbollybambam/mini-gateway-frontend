@@ -91,50 +91,50 @@ export default function CreatePaymentLinkPage() {
 
   return (
     <div className="w-full space-y-8">
-      <Link href="/payment-links" className="inline-flex items-center gap-2 text-sm font-bold text-[#8995a3] hover:text-white transition-colors">
+      <Link href="/payment-links" className="inline-flex items-center gap-2 text-sm font-bold text-ink-muted hover:text-ink transition-colors">
         <ArrowLeft className="h-5 w-5" /> Back to Ledger
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-16">
         
-        <div className="lg:col-span-7 xl:col-span-8 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-6 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden min-h-175">
-          <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-[#2f9d78]/5 blur-[100px] pointer-events-none" />
+        <div className="lg:col-span-7 xl:col-span-8 rounded-card border border-line bg-surface backdrop-blur-xl p-6 sm:p-8 md:p-12 shadow-card relative overflow-hidden min-h-175">
+          <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-success-tint blur-[100px] pointer-events-none" />
 
           <div className="flex items-center gap-5 mb-10 sm:mb-12">
-            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-[#2f9d78]/10 text-[#35d5a4] border border-[#2f9d78]/20 shadow-inner shrink-0">
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-card bg-success-tint text-brand-500 border border-line shadow-inner shrink-0">
               <LinkIcon className="h-6 w-6 sm:h-8 sm:w-8" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight drop-shadow-sm">Initialize Link</h1>
-              <p className="text-sm sm:text-base text-[#8995a3] mt-1">Configure parameters for your hosted checkout.</p>
+              <h1 className="text-xl sm:text-3xl font-black text-ink tracking-tight drop-shadow-sm">Initialize Link</h1>
+              <p className="text-sm sm:text-base text-ink-muted mt-1">Configure parameters for your hosted checkout.</p>
             </div>
           </div>
 
           {error && (
-            <div className="mb-8 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-bold text-red-500">
+            <div className="mb-8 rounded-input border border-line bg-danger-tint p-5 text-sm font-bold text-danger">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
             <div className="space-y-6 sm:space-y-8">
-              <h2 className="text-sm sm:text-base font-bold text-white border-b border-white/10 pb-3">1. Payment Details</h2>
+              <h2 className="text-sm sm:text-base font-bold text-ink border-b border-line pb-3">1. Payment Details</h2>
               
               <div className="space-y-3">
-                <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Payment Description</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Payment Description</label>
                 <input 
                   required
                   name="description"
                   value={form.description}
                   onChange={handleChange}
                   placeholder="e.g. Software Consultation"
-                  className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/50 px-5 text-base font-medium text-[#e8edf2] placeholder:text-[#68747e] outline-none transition-all focus:border-[#2f9d78] focus:bg-white/5 focus:ring-1 focus:ring-[#2f9d78] shadow-inner"
+                  className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                 <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Amount</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Amount</label>
                   <input 
                     required
                     type="text"
@@ -142,17 +142,17 @@ export default function CreatePaymentLinkPage() {
                     value={displayAmount}
                     onChange={handleAmountChange}
                     placeholder="0.00"
-                    className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/50 px-5 text-base font-medium text-[#e8edf2] placeholder:text-[#68747e] outline-none transition-all focus:border-[#2f9d78] focus:bg-white/5 focus:ring-1 focus:ring-[#2f9d78] shadow-inner"
+                    className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Currency</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Currency</label>
                   <select 
                     name="currency"
                     value={form.currency}
                     onChange={handleChange}
-                    className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/90 px-5 text-base font-medium text-[#e8edf2] outline-none transition-all focus:border-[#2f9d78] focus:ring-1 focus:ring-[#2f9d78] shadow-inner appearance-none cursor-pointer"
+                    className="h-14 w-full rounded-input border border-line bg-bg/90 px-5 text-base font-medium text-ink outline-none transition-all focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-inner appearance-none cursor-pointer"
                   >
                     <option value="NGN">NGN (₦)</option>
                     <option value="USD">USD ($)</option>
@@ -163,53 +163,53 @@ export default function CreatePaymentLinkPage() {
             </div>
 
             <div className="space-y-6 sm:space-y-8">
-              <h2 className="text-sm sm:text-base font-bold text-white border-b border-white/10 pb-3">2. Security & Triggers</h2>
+              <h2 className="text-sm sm:text-base font-bold text-ink border-b border-line pb-3">2. Security & Triggers</h2>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                 <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Transaction Reference</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Transaction Reference</label>
                   <input 
                     required
                     type="text"
                     name="reference"
                     value={form.reference}
                     onChange={handleChange}
-                    className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/50 px-5 text-base font-medium text-[#e8edf2] outline-none transition-all focus:border-[#2f9d78] focus:bg-white/5 focus:ring-1 focus:ring-[#2f9d78] shadow-inner"
+                    className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Customer Email (Optional)</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Customer Email (Optional)</label>
                   <input 
                     type="email"
                     name="customer_email"
                     value={form.customer_email}
                     onChange={handleChange}
                     placeholder="client@example.com"
-                    className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/50 px-5 text-base font-medium text-[#e8edf2] placeholder:text-[#68747e] outline-none transition-all focus:border-[#2f9d78] focus:bg-white/5 focus:ring-1 focus:ring-[#2f9d78] shadow-inner"
+                    className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Link Expiry (Optional)</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Link Expiry (Optional)</label>
                 <input 
                   type="datetime-local"
                   name="expiry"
                   min={minDateTime}
                   value={form.expiry}
                   onChange={handleChange}
-                  className="h-14 w-full rounded-xl border border-white/10 bg-[#090d14]/50 px-5 text-base font-medium text-[#e8edf2] placeholder:text-[#68747e] outline-none transition-all focus:border-[#2f9d78] focus:bg-white/5 focus:ring-1 focus:ring-[#2f9d78] shadow-inner scheme-dark cursor-pointer"
+                  className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner scheme-dark cursor-pointer"
                 />
-                <p className="text-xs text-[#68747e] mt-2">If set, checkout page will become inaccessible after this time.</p>
+                <p className="text-xs text-ink-muted mt-2">If set, checkout page will become inaccessible after this time.</p>
               </div>
             </div>
 
-            <div className="pt-8 border-t border-white/5">
+            <div className="pt-8 border-t border-line">
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="flex h-14 sm:h-16 w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-8 text-sm sm:text-base font-bold text-white transition-all hover:shadow-[0_0_30px_rgba(47,157,120,0.4)] hover:brightness-110 disabled:opacity-50 border border-white/10"
+                className="flex h-14 sm:h-16 w-full items-center justify-center gap-3 rounded-card bg-brand-500 px-8 text-sm sm:text-base font-bold text-ink transition-all hover:shadow-card hover:brightness-110 disabled:opacity-50 border border-line"
               >
                 {isSubmitting ? <Spinner /> : <Plus className="h-5 w-5 sm:h-6 sm:w-6" />}
                 {isSubmitting ? "Generating Link..." : "Deploy Payment Link"}
@@ -221,16 +221,16 @@ export default function CreatePaymentLinkPage() {
         {/* RIGHT COLUMN: PREVIEW */}
         <div className="lg:col-span-5 xl:col-span-4 hidden lg:block">
           <div className="sticky top-32 space-y-6">
-            <div className="flex items-center gap-3 text-[#8995a3] mb-6">
+            <div className="flex items-center gap-3 text-ink-muted mb-6">
               <Eye className="h-5 w-5" />
               <span className="text-sm font-bold uppercase tracking-widest">Customer Preview</span>
             </div>
 
-            <div className="rounded-[2.5rem] bg-[#ffffff] p-10 shadow-2xl transition-all duration-300 border border-gray-100 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-[#2f9d78] to-[#1a6b50]" />
+            <div className="rounded-card bg-surface p-10 shadow-card transition-all duration-300 border border-line relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-brand-500" />
               
               <div className="flex justify-center mb-10">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#090d14] text-white font-black text-2xl shadow-xl">
+                <div className="flex h-16 w-16 items-center justify-center rounded-card bg-bg text-ink font-black text-2xl shadow-xl">
                   P
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function CreatePaymentLinkPage() {
                 <h3 className="text-2xl font-bold text-gray-900 wrap-break-word leading-tight">
                   {form.description || "Payment Description"}
                 </h3>
-                <p className="text-4xl xl:text-5xl font-black text-[#090d14] tracking-tighter py-6 wrap-break-word">
+                <p className="text-4xl xl:text-5xl font-black text-ink tracking-tighter py-6 wrap-break-word">
                   {formattedPreview}
                 </p>
                 <p className="text-sm font-medium text-gray-400">
@@ -251,16 +251,16 @@ export default function CreatePaymentLinkPage() {
               </div>
 
               <div className="space-y-4">
-                <div className="h-14 w-full rounded-2xl bg-gray-50 flex items-center px-5 border border-gray-200">
+                <div className="h-14 w-full rounded-card bg-gray-50 flex items-center px-5 border border-gray-200">
                   <CreditCard className="h-6 w-6 text-gray-400 mr-4 shrink-0" />
                   <div className="h-4 w-full max-w-37.5 bg-gray-200 rounded animate-pulse" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-14 rounded-2xl bg-gray-50 border border-gray-200" />
-                  <div className="h-14 rounded-2xl bg-gray-50 border border-gray-200" />
+                  <div className="h-14 rounded-card bg-gray-50 border border-gray-200" />
+                  <div className="h-14 rounded-card bg-gray-50 border border-gray-200" />
                 </div>
-                <div className="h-16 w-full rounded-2xl bg-[#090d14] flex items-center justify-center mt-8 shadow-lg">
-                  <span className="text-white font-bold text-sm xl:text-base">Pay {formattedPreview}</span>
+                <div className="h-16 w-full rounded-card bg-bg flex items-center justify-center mt-8 shadow-lg">
+                  <span className="text-ink font-bold text-sm xl:text-base">Pay {formattedPreview}</span>
                 </div>
               </div>
 
