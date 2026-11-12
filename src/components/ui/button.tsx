@@ -7,7 +7,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-pill border text-sm font-semibold whitespace-nowrap transition duration-200 ease-out outline-none select-none hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:translate-y-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-input border text-sm font-semibold whitespace-nowrap transition-colors duration-120 ease-out outline-none select-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -16,7 +16,7 @@ const buttonVariants = cva(
         outline: "border-line bg-surface text-ink shadow-none hover:bg-surface-muted",
         secondary: "border-line bg-surface text-ink hover:bg-surface-muted",
         ghost: "border-transparent text-ink hover:bg-surface-muted",
-        "ghost-link": "border-transparent px-0 text-brand-500 hover:text-brand-900",
+        "ghost-link": "border-transparent px-0 text-brand-500 hover:text-ink",
         destructive: "border-danger/20 bg-danger-tint text-danger hover:bg-danger/20",
         link: "border-transparent px-0 text-brand-500 underline-offset-4 hover:underline",
       },
@@ -52,7 +52,7 @@ function Button({
     arrow?: boolean
   }) {
   const Comp = asChild ? Slot.Root : "button"
-  const showArrow = arrow ?? variant === "primary"
+  const showArrow = arrow ?? false
 
   return (
     <Comp

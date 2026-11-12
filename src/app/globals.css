@@ -28,9 +28,9 @@
   --cat-transfer: #F5B73B;
   --shadow-card-token: 0 4px 24px rgba(17, 17, 17, 0.06);
   --shadow-dialog-token: 0 20px 60px rgba(15, 42, 20, 0.18);
-  --radius-card-token: 24px;
-  --radius-input-token: 14px;
-  --radius-pill-token: 999px;
+  --radius-card-token: 12px;
+  --radius-hero-token: 16px;
+  --radius-input-token: 8px;
 
   /* Compatibility aliases for existing pages. */
   --beige-100: var(--surface-muted);
@@ -223,7 +223,7 @@
   --shadow-dialog: var(--shadow-dialog-token);
   --radius-card: var(--radius-card-token);
   --radius-input: var(--radius-input-token);
-  --radius-pill: var(--radius-pill-token);
+  --radius-pill: 999px;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -288,7 +288,7 @@
 
   .dashboard-root { font-size: 0.875rem; font-weight: 400; letter-spacing: 0; line-height: 1.45; }
   .dashboard-root :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
-  .dashboard-root .dashboard-card { border-radius: var(--radius-card-token); background: var(--surface); box-shadow: var(--shadow-card-token); }
+  .dashboard-root .dashboard-card { border-radius: var(--radius-card-token); background: var(--surface); }
   .dashboard-root .dashboard-enter { animation: dashboard-enter 220ms var(--ease-out) both; }
   .dashboard-root .dashboard-chart-enter { transform-origin: bottom; animation: dashboard-chart-enter 220ms var(--ease-out) both; }
   .dashboard-root input, .dashboard-root select { border: 1px solid var(--line); border-radius: var(--radius-input-token); background: var(--surface); color: var(--ink); }

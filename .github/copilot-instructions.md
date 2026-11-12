@@ -9,8 +9,11 @@ Read HANDOFF.md first in every session.
 - Reuse shared components from /components/ui. Do not create one-off styled elements when a shared component exists. If a needed component is missing, add it to the design system first, then use it.
 - Mobile-first. Test at 390px and 1440px.
 - Accessibility: semantic HTML, labeled icon buttons, visible focus, AA contrast.
-- Owner bans: no uppercase/tracked labels, icon chips/tinted circles, tinted banners, gradients/glows/dotted patterns, top accent bars, status pills, `"NGN "` prefixes, duplicate titles, multiple primary buttons, or inline-expanding/tinted rows.
-- Card anatomy: title left, quiet value or link right, hairline divider, content. Use the shared `formatMoney` helper for all money.
+- Owner bans: no `rounded-full` except avatars, `rounded-2xl`/`rounded-3xl`, uppercase/tracked labels, gradients/glows/dotted patterns, tinted banners, icon chips, status pills, `"NGN "` prefixes, duplicate titles, more than one `variant="primary"` per route, or inline-expanding/tinted rows.
+- Surface hierarchy: the page background is the canvas. Filled surfaces are limited to the BalanceCard hero, a Sheet/Dialog, and at most one other elevated surface per screen; maximum three. Tables, lists, forms, and settings sit directly on the page.
+- Radii: card 12px, dark hero 16px, controls/inputs/buttons 8px, tables 0. No pill tokens. Status is colored sentence-case text with a 6px dot.
+- Type: Plus Jakarta Sans, exactly 12/14/16/20/28px plus 40px hero balance, weights 400/500/600, tabular numerals, no tracking.
+- Card anatomy where applicable: title left, quiet value or link right, hairline divider, content. Use the shared `formatMoney` helper for all money.
 ## Verification loop (mandatory for every UI task)
 1. Run the dev server.
 2. Use the Playwright MCP to screenshot the page at 390px and 1440px.

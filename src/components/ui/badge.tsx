@@ -2,11 +2,11 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = {
-  default: "bg-surface-muted text-ink",
-  success: "bg-success-tint text-success",
-  pending: "bg-pending/15 text-pending",
-  failed: "bg-danger-tint text-danger",
-  danger: "bg-danger-tint text-danger",
+  default: "text-ink",
+  success: "text-success",
+  pending: "text-pending",
+  failed: "text-danger",
+  danger: "text-danger",
 } as const
 
 type BadgeVariant = keyof typeof badgeVariants
@@ -17,13 +17,13 @@ function Badge({
   ...props
 }: React.HTMLAttributes<HTMLSpanElement> & { variant?: BadgeVariant }) {
   return (
-    <span data-slot="badge" className={cn("inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold", badgeVariants[variant], className)} {...props} />
+    <span data-slot="badge" className={cn("inline-flex items-center gap-1.5 text-xs font-medium", badgeVariants[variant], className)} {...props} />
   )
 }
 
 function StatusBadge({ status, className }: { status: "success" | "pending" | "failed" | "danger"; className?: string }) {
   const labels = { success: "Successful", pending: "Pending", failed: "Failed", danger: "Failed" }
-  return <Badge variant={status} className={className}>{labels[status]}</Badge>
+  return <Badge variant={status} className={className}><span aria-hidden="true" className="size-1.5 rounded-full bg-current" />{labels[status]}</Badge>
 }
 
 export { Badge, StatusBadge }

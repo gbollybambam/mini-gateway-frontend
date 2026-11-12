@@ -1,13 +1,13 @@
 # DESIGN.md: Design tokens (source of truth)
 
-Brand direction: Naija-first green fintech. Mobile-first app UI (dark green hero card, soft white cards, green progress bars, Pidgin microcopy). The marketing/campaign page uses the same green as primary, with PayFlow-style orange/yellow as accents only. Colors below are eyeballed from the reference images. Verify each with an eyedropper on the originals in /design/reference and correct them here. Never hardcode a color anywhere else.
+Brand direction: Naija-first green fintech. The app is a flat canvas with one dark balance hero and restrained green status accents. Marketing may use the campaign accents below; app surfaces may not.
 
 ## Colors
 | Token | Hex | Use |
 |---|---|---|
 | --bg | #FAFAFA | App background |
 | --surface | #FFFFFF | Cards |
-| --surface-muted | #F2F1EF | Landing section bands |
+| --surface-muted | #F2F1EF | Quiet controls and skeletons |
 | --ink | #111111 | Primary text, black pill buttons |
 | --ink-muted | #6B7280 | Secondary text, labels |
 | --line | #ECECEC | Dividers, card borders |
@@ -30,26 +30,27 @@ Brand direction: Naija-first green fintech. Mobile-first app UI (dark green hero
 | --accent-cream | #FDF3E7 | Landing only |
 
 ## Typography
-- Font: Plus Jakarta Sans (fallback Inter, system-ui). Verify against the reference; swap the single token if wrong.
-- Balance amount: 40px / 700. Section title: 20px / 500. Body: 16px / 400. Label/caption: 14px / 400. Micro (legend, timestamps): 12-13px. Replica measurements use the rendered 2x crop as the source of truth: 32px crop-to-content inset, 8px progress bars, and 12px outer crop margin at CSS scale.
+- Font: Plus Jakarta Sans (fallback Inter, system-ui).
+- App scale is exactly 12 / 14 / 16 / 20 / 28px, with 40px reserved for the balance hero amount. Weights are 400, 500, and 600 only.
+- Page H1: 28px / 600. Section title: 14px / 600 with a hairline below. Body: 14px / 400. Use tabular numerals for money and counts. No tracking or all-caps labels.
 - Currency: always ₦ (Naira sign), thousands separators, 2 decimals on balances (₦2,480.00).
 - Landing hero H1: 64-72px / 700, tight leading (1.05), letter-spacing -0.02em.
 
 ## Spacing and shape
-- Spacing scale (px): 4, 8, 12, 16, 20, 24, 32, 48, 64, 96.
-- Card padding: 20-24px. Gap between cards: 16px (mobile), 24px (desktop).
-- Radius: card 24px, hero card 24px, input 14px, pill/button 999px, icon circle 50%.
-- Shadow: soft, e.g. `0 4px 24px rgba(0,0,0,0.06)`. No hard borders on app cards.
-- Landing tiles: radius 28px.
+- Spacing scale: 8px grid. Page padding is 32px desktop and 16px mobile. Section gap is 40px. App content max-width is 1120px; tables may reach 1280px.
+- Radius: card 12px, dark hero 16px, controls/inputs/buttons 8px, tables 0. Avatars alone are circular. No pill tokens.
+- The page background is the canvas. Filled surfaces are allowed only for the BalanceCard hero, a Sheet/Dialog, and at most one other elevated surface per screen. Maximum three filled surfaces per screen.
+- Hairlines separate sections and rows. Avoid card chrome for tables, lists, forms, and settings.
 
 ## Motion
-- 150-200ms ease-out for hover/press. Progress bars animate width on mount (600ms). Respect prefers-reduced-motion.
+- Hover/focus transitions use 120ms. Sheets and dialogs enter in 200ms ease-out. Only the hero balance may roll numbers; charts may draw in. Respect prefers-reduced-motion.
 
 ## Voice (microcopy)
 Light Nigerian Pidgin in the app UI, e.g. "Your balance na", "Account details na", "You don save", "You don send {name} money", "Japa saving". Keep error and security messages in plain English for clarity.
 
 ## Owner rules
-- Banned: uppercase or tracked labels, icon chips or tinted circles on KPI/stat cards, tinted banners, gradients, glows, dotted patterns, top accent bars, status pills, the `"NGN "` prefix, duplicate titles, more than one primary button per screen, and inline-expanding or tinted rows. Circular tinted icons are allowed only in TransactionRow and NotificationCard.
+- Banned: `rounded-full` except avatars, `rounded-2xl`, `rounded-3xl`, uppercase or tracked labels, gradients, glows, dotted patterns, tinted banners, icon chips, status pills, the `"NGN "` prefix, duplicate titles, more than one `variant="primary"` per route, and inline-expanding or tinted rows.
+- Status is colored sentence-case text with a 6px dot. The only filled surfaces in a screen are the BalanceCard hero, a Sheet/Dialog, and at most one other elevated surface.
 - Money always uses the shared `formatMoney` helper: `₦` with thousands separators; credits use green `+₦`, debits use ink `-₦`.
-- Card anatomy: title left, quiet value or link right, hairline divider, then content. Cards have 24px radius, no border, and a soft shadow.
+- Card anatomy where a surface is justified: title left, quiet value or link right, hairline divider, then content. Cards use the radius token above; no default shadow on canvas sections.
 - Navigation hover darkens text only. Active navigation uses muted fill only. Keep the existing navigation icons and search bar.
