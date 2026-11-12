@@ -31,7 +31,7 @@ Brand direction: Naija-first green fintech. Mobile-first app UI (dark green hero
 
 ## Typography
 - Font: Plus Jakarta Sans (fallback Inter, system-ui). Verify against the reference; swap the single token if wrong.
-- Balance amount: 40px / 700. Section title: 20px / 600. Body: 16px / 400. Label/caption: 14px / 400. Micro (legend, timestamps): 12-13px.
+- Balance amount: 40px / 700. Section title: 20px / 500. Body: 16px / 400. Label/caption: 14px / 400. Micro (legend, timestamps): 12-13px. Replica measurements use the rendered 2x crop as the source of truth: 32px crop-to-content inset, 8px progress bars, and 12px outer crop margin at CSS scale.
 - Currency: always ₦ (Naira sign), thousands separators, 2 decimals on balances (₦2,480.00).
 - Landing hero H1: 64-72px / 700, tight leading (1.05), letter-spacing -0.02em.
 
@@ -49,7 +49,7 @@ Brand direction: Naija-first green fintech. Mobile-first app UI (dark green hero
 Light Nigerian Pidgin in the app UI, e.g. "Your balance na", "Account details na", "You don save", "You don send {name} money", "Japa saving". Keep error and security messages in plain English for clarity.
 
 ## Owner rules
-- Banned: uppercase or tracked labels, icon chips or tinted circles, tinted banners, gradients, glows, dotted patterns, top accent bars, status pills, the `"NGN "` prefix, duplicate titles, more than one primary button per screen, and inline-expanding or tinted rows.
+- Banned: uppercase or tracked labels, icon chips or tinted circles on KPI/stat cards, tinted banners, gradients, glows, dotted patterns, top accent bars, status pills, the `"NGN "` prefix, duplicate titles, more than one primary button per screen, and inline-expanding or tinted rows. Circular tinted icons are allowed only in TransactionRow and NotificationCard.
 - Money always uses the shared `formatMoney` helper: `₦` with thousands separators; credits use green `+₦`, debits use ink `-₦`.
 - Card anatomy: title left, quiet value or link right, hairline divider, then content. Cards have 24px radius, no border, and a soft shadow.
 - Navigation hover darkens text only. Active navigation uses muted fill only. Keep the existing navigation icons and search bar.

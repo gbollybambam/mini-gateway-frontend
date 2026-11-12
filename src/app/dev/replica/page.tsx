@@ -13,38 +13,15 @@ import {
 } from "@/components/replica/ReplicaCards"
 
 const cards = [
-  { id: "balance", label: "Balance card", width: 880, height: 350, component: <ReplicaBalanceCard />, crop: "/dev-reference/balance.png" },
-  { id: "goal", label: "Japa saving", width: 880, height: 360, component: <ReplicaGoalCard />, crop: "/dev-reference/goal.png" },
-  { id: "savings", label: "Savings tracker", width: 880, height: 170, component: <ReplicaSavingsTracker />, crop: "/dev-reference/savings.png" },
-  { id: "limit", label: "Daily limit", width: 880, height: 282, component: <ReplicaLimitCard />, crop: "/dev-reference/limit.png" },
-  { id: "spending", label: "Spending tracker", width: 880, height: 202, component: <ReplicaSpendingTracker />, crop: "/dev-reference/spending.png" },
-  { id: "notification", label: "Notification", width: 880, height: 330, component: <ReplicaNotificationCard />, crop: "/dev-reference/notification.png" },
-  { id: "success", label: "Successful transaction", width: 880, height: 185, component: <ReplicaTransactionCard />, crop: "/dev-reference/success.png" },
-  { id: "pending", label: "Pending transaction", width: 880, height: 185, component: <ReplicaTransactionCard pending />, crop: "/dev-reference/pending.png" },
+  { id: "balance", label: "Balance card", width: 733, height: 312, component: <ReplicaBalanceCard />, crop: "/dev-reference/balance.png" },
+  { id: "goal", label: "Japa saving", width: 733, height: 325, component: <ReplicaGoalCard />, crop: "/dev-reference/goal.png" },
+  { id: "savings", label: "Savings tracker", width: 733, height: 179, component: <ReplicaSavingsTracker />, crop: "/dev-reference/savings.png" },
+  { id: "limit", label: "Daily limit", width: 733, height: 268, component: <ReplicaLimitCard />, crop: "/dev-reference/limit.png" },
+  { id: "spending", label: "Spending tracker", width: 733, height: 201, component: <ReplicaSpendingTracker />, crop: "/dev-reference/spending.png" },
+  { id: "notification", label: "Notification", width: 733, height: 312, component: <ReplicaNotificationCard />, crop: "/dev-reference/notification.png" },
+  { id: "success", label: "Successful transaction", width: 733, height: 188, component: <ReplicaTransactionCard />, crop: "/dev-reference/success.png" },
+  { id: "pending", label: "Pending transaction", width: 733, height: 189, component: <ReplicaTransactionCard pending />, crop: "/dev-reference/pending.png" },
 ]
-
-function ScaledReplica({ width, height, children }: { width: number; height: number; children: React.ReactNode }) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const [scale, setScale] = React.useState(1)
-
-  React.useEffect(() => {
-    const node = containerRef.current
-    if (!node) return
-    const update = () => setScale(Math.min(node.clientWidth / width, 1))
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [width])
-
-  return (
-    <div ref={containerRef} className="relative w-full overflow-hidden rounded-card bg-surface" style={{ height: height * scale }}>
-      <div className="absolute left-0 top-0" style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}>
-        {children}
-      </div>
-    </div>
-  )
-}
 
 export default function ReplicaPage() {
   const [overlay, setOverlay] = React.useState(false)
@@ -66,14 +43,12 @@ export default function ReplicaPage() {
           {cards.map((card) => (
             <section key={card.id} data-replica-card={card.id} className="min-w-0">
               <h2 className="mb-3 text-sm font-medium text-ink-muted">{card.label}</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="relative overflow-hidden rounded-card bg-surface-muted p-2" style={{ aspectRatio: `${card.width} / ${card.height}` }}>
-                  <div className="relative h-full w-full">
-                    <Image src={card.crop} alt={`${card.label} reference crop`} fill sizes="(min-width: 640px) 50vw, 100vw" className="object-contain" unoptimized />
-                    {overlay ? <div className="pointer-events-none absolute inset-2 opacity-50"><ScaledReplica width={card.width} height={card.height}>{card.component}</ScaledReplica></div> : null}
-                  </div>
+              <div className="flex min-w-0 gap-4 overflow-x-auto pb-2" data-replica-pair={card.id}>
+                <div className="relative shrink-0 overflow-hidden rounded-card bg-surface-muted" style={{ width: card.width / 2, height: card.height / 2 }}>
+                  <Image src={card.crop} alt={`${card.label} reference crop`} width={card.width} height={card.height} className="block h-full w-full" unoptimized />
+                  {overlay ? <div className="pointer-events-none absolute inset-0 p-3 opacity-50">{card.component}</div> : null}
                 </div>
-                <ScaledReplica width={card.width} height={card.height}>{card.component}</ScaledReplica>
+                <div className="relative shrink-0 p-3" data-replica-render style={{ width: card.width / 2, height: card.height / 2 }}>{card.component}</div>
               </div>
             </section>
           ))}

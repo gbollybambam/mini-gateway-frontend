@@ -17,7 +17,10 @@ async function walk(directory) {
         [/\bNGN\s/, '"NGN " prefix'],
         [/rounded-full[\s\S]{0,80}bg-(?:success|danger|pending)-tint/, "icon-chip or tinted circle"],
       ]
-      const matched = rules.filter(([pattern]) => pattern.test(source)).map(([, label]) => label)
+      const matched = rules.filter(([pattern, label]) => {
+        if (label === "icon-chip or tinted circle" && /(?:TransactionRow|NotificationCard|ReplicaTransactionCard|ReplicaNotificationCard)/.test(entry.name)) return false
+        return pattern.test(source)
+      }).map(([, label]) => label)
       if (matched.length) failures.push(`${relative(process.cwd(), path)} (${matched.join(", ")})`)
     }
   }
