@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
-import { ArrowLeft, Link as LinkIcon, Plus, Eye, ShieldCheck, CreditCard } from "lucide-react";
+import { ArrowLeft, Link as LinkIcon, Plus, Eye, ShieldCheck, CreditCard } from "@/components/icons";
 import Link from "next/link";
 import { Spinner, useToast } from "@/components/dashboard/ui";
 

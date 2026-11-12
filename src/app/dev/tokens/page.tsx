@@ -50,10 +50,6 @@ const colors = [
   ["cat-tfare", "bg-cat-tfare"],
   ["cat-data", "bg-cat-data"],
   ["cat-transfer", "bg-cat-transfer"],
-  ["accent-mint", "bg-accent-mint"],
-  ["accent-orange", "bg-accent-orange"],
-  ["accent-yellow", "bg-accent-yellow"],
-  ["accent-cream", "bg-accent-cream"],
 ] as const
 
 function TokenLabel({ children }: { children: React.ReactNode }) {

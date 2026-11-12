@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { ShieldCheck, ArrowRight, AlertCircle } from "lucide-react";
+import { ShieldCheck, ArrowRight, AlertCircle } from "@/components/icons";
 
 function AcceptInviteLogic() {
   const searchParams = useSearchParams();

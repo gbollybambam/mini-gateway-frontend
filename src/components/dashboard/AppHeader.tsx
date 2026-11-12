@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, ChevronDown, Plus } from "lucide-react";
+import { Bell, ChevronDown, Plus } from "@/components/icons";
 import { useToast } from "@/components/dashboard/ui";
 import { useAuth } from "@/components/dashboard/DashboardProviders"; // Injects Global Auth
 

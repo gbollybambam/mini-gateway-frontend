@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { Lock, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Lock, ShieldAlert, ShieldCheck } from "@/components/icons";
 
 function ResetPasswordFormContent() {
   const searchParams = useSearchParams();

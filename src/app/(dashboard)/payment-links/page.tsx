@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
-import { Plus, Link as LinkIcon, Copy, Check, ExternalLink, Power, PowerOff, ChevronDown, ChevronUp, Clock, UserCheck, Activity } from "lucide-react";
+import { Plus, Link as LinkIcon, Copy, Check, ExternalLink, Power, PowerOff, ChevronDown, ChevronUp, Clock, UserCheck, Activity } from "@/components/icons";
 import { useToast } from "@/components/dashboard/ui";
 
 interface PaymentLink {

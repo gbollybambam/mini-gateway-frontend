@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { 
   Terminal, Shield, Webhook, CreditCard, CheckCircle2, Copy, Check, Lock
-} from "lucide-react";
+} from "@/components/icons";
 
 type CodeLang = "curl" | "node" | "php";
 

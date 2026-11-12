@@ -6,7 +6,7 @@ import Link from "next/link";
 import { isAxiosError } from "axios";
 import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { MonitorSmartphone, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
+import { MonitorSmartphone, ArrowRight, AlertCircle, RefreshCw } from "@/components/icons";
 
 function VerifyDeviceLogic() {
   const searchParams = useSearchParams();

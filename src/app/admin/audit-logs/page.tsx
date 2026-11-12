@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { ArrowLeft, Shield, ChevronLeft, ChevronRight, Eye, X, Terminal } from "lucide-react";
+import { ArrowLeft, Shield, ChevronLeft, ChevronRight, Eye, X, Terminal } from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface AuditLog {

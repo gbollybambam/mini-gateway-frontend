@@ -6,7 +6,7 @@ import Link from "next/link";
 import { isAxiosError } from "axios";
 import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { ShieldCheck, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
+import { ShieldCheck, ArrowRight, AlertCircle, RefreshCw } from "@/components/icons";
 
 function VerifyOtpLogic() {
   const searchParams = useSearchParams();

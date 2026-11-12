@@ -1,5 +1,7 @@
+"use client"
+
 import * as React from "react"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight } from "@/components/icons"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"

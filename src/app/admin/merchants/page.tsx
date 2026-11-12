@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { Users, FilterX, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { Users, FilterX, ChevronLeft, ChevronRight, ArrowLeft } from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface Merchant {

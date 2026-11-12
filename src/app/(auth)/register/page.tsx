@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AuthForm from "@/components/auth/AuthForm";
-import { Cpu, Network } from "lucide-react";
+import { Cpu, Network } from "@/components/icons";
 
 export default function RegisterPage() {
   return (

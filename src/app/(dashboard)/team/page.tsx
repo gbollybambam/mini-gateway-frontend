@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { 
   UserPlus, Trash2, CheckCircle2, 
   AlertTriangle, X, ChevronDown, Mail, ShieldAlert, ShieldBan, ShieldCheck
-} from "lucide-react";
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import { Spinner, useToast } from "@/components/dashboard/ui";

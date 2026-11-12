@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { User, Shield, Webhook, Copy, Check, Save, RefreshCw, AlertTriangle, ShieldCheck, X, CheckCircle2, XCircle } from "lucide-react";
+import { User, Shield, Webhook, Copy, Check, Save, RefreshCw, AlertTriangle, ShieldCheck, X, CheckCircle2, XCircle } from "@/components/icons";
 
 function SettingsSkeleton() {
   return (

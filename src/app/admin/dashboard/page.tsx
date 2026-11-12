@@ -9,7 +9,7 @@ import {
   Users, Activity, TrendingUp, ArrowDownRight, 
   ShieldCheck, ListOrdered, ServerCrash, ChevronRight,
   Clock, CheckCircle2, ArrowUpRight, LogOut
-} from "lucide-react";
+} from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface DashboardData {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
-import { ShieldCheck, Lock } from "lucide-react";
+import { ShieldCheck, Lock } from "@/components/icons";
 import { Spinner, useToast } from "@/components/dashboard/ui";
 
 export default function AdminLoginPage() {

@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
-import { ArrowLeft, Landmark, CheckCircle2, ShieldCheck, Wallet, ArrowUpRight, Search, Building2, ChevronDown, Check } from "lucide-react";
+import { ArrowLeft, Landmark, CheckCircle2, ShieldCheck, Wallet, ArrowUpRight, Search, Building2, ChevronDown, Check } from "@/components/icons";
 import Link from "next/link";
 import { Spinner, useToast } from "@/components/dashboard/ui";
 import type { WalletResponse, WalletResource } from "@/types/api";

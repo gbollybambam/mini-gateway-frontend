@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Landmark, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, AlertCircle, Building2, User, ChevronDown, ChevronUp, Plus, CreditCard } from "lucide-react";
+import { Landmark, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, AlertCircle, Building2, User, ChevronDown, ChevronUp, Plus, CreditCard } from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import type { WithdrawalListResponse, WithdrawalResource, WalletResponse, WalletResource } from "@/types/api";

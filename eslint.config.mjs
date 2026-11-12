@@ -8,7 +8,19 @@ const eslintConfig = defineConfig([
   // ADD YOUR CUSTOM RULES HERE:
   {
     rules: {
-      "tailwindcss/enforces-negative-arbitrary-values": "off"
+      "tailwindcss/enforces-negative-arbitrary-values": "off",
+      "no-restricted-imports": ["error", {
+        "paths": [
+          { "name": "lucide-react", "message": "Import icons from @/components/icons." },
+          { "name": "@phosphor-icons/react", "message": "Import icons from @/components/icons." }
+        ]
+      }]
+    }
+  },
+  {
+    files: ["src/components/icons.tsx"],
+    rules: {
+      "no-restricted-imports": "off"
     }
   },
   // Override default ignores of eslint-config-next.

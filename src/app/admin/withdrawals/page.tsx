@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { ArrowLeft, ArrowDownRight,  X } from "lucide-react";
+import { ArrowLeft, ArrowDownRight,  X } from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface Withdrawal {

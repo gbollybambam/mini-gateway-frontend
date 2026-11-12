@@ -5,7 +5,7 @@ import { isAxiosError } from "axios";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { KeyRound, ShieldAlert } from "lucide-react";
+import { KeyRound, ShieldAlert } from "@/components/icons";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

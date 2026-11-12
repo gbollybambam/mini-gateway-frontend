@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import { Spinner, ErrorMessage, useToast } from "@/components/dashboard/ui";
-import { ArrowLeft, ShieldAlert, CheckCircle, Activity, ArrowDownRight, Wallet, Banknote, AlertCircle } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle, Activity, ArrowDownRight, Wallet, Banknote, AlertCircle } from "@/components/icons";
 
 interface MerchantDetails {
   merchant: {

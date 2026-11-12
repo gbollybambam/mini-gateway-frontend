@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Receipt, LinkIcon, Wallet, 
   Landmark, Settings, KeyRound, LogOut, Menu, X, 
   Webhook, Users 
-} from "lucide-react";
+} from "@/components/icons";
 import DashboardProviders, { useAuth } from "@/components/dashboard/DashboardProviders";
 import AppHeader from "@/components/dashboard/AppHeader";
 import { useState, useEffect } from "react";

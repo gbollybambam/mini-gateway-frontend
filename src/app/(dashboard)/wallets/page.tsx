@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { 
   Wallet as WalletIcon, ArrowDownRight, ArrowUpRight, 
   Clock, Activity, FileText, ChevronLeft, ChevronRight, Lock, Hash, CreditCard, ChevronDown, ChevronUp 
-} from "lucide-react";
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import type { LedgerEntryResource, LedgerListResponse, WalletResponse, WalletResource } from "@/types/api";

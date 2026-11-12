@@ -5,7 +5,7 @@ import {
   Webhook, Send, RefreshCw, CheckCircle2, XCircle, 
   Copy, Check, ShieldCheck, Terminal, AlertCircle, ChevronLeft, ChevronRight,
   RotateCcw, X, Plus
-} from "lucide-react";
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import { Spinner } from "@/components/dashboard/ui";

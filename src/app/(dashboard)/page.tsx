@@ -5,7 +5,7 @@ import { isAxiosError } from "axios";
 import { 
   ArrowUpRight, Banknote, Clock3, CreditCard, Landmark, 
   Plus, Receipt, TriangleAlert, Wallet, Activity, BarChart3, ArrowDownToLine
-} from "lucide-react";
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import Link from "next/link";
 import type { TransactionResource } from "@/types/api";

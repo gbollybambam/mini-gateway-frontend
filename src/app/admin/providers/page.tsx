@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
-import { ArrowLeft, Server, Activity, Power, Settings, ShieldCheck, AlertTriangle, X } from "lucide-react";
+import { ArrowLeft, Server, Activity, Power, Settings, ShieldCheck, AlertTriangle, X } from "@/components/icons";
 import { Spinner, ErrorMessage, useToast } from "@/components/dashboard/ui";
 
 interface PaymentProvider {

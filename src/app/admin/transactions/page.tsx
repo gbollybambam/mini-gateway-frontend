@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import {  FilterX, ChevronLeft, ChevronRight, ArrowLeft, Activity, X} from "lucide-react";
+import {  FilterX, ChevronLeft, ChevronRight, ArrowLeft, Activity, X} from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
 
 interface Transaction {

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import { 
   Activity, Search, Wallet, Receipt, ChevronLeft, ChevronRight, 
   Calendar, FilterX, CreditCard, Hash, ChevronDown, ChevronUp 
-} from "lucide-react";
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import type { TransactionResource } from "@/types/api";

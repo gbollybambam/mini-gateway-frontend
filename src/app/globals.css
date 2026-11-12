@@ -25,10 +25,6 @@
   --cat-tfare: #F58233;
   --cat-data: #1DB954;
   --cat-transfer: #F5B73B;
-  --accent-mint: #52E8A8;
-  --accent-orange: #F58233;
-  --accent-yellow: #FFD966;
-  --accent-cream: #FDF3E7;
   --shadow-card-token: 0 4px 24px rgba(17, 17, 17, 0.06);
   --shadow-dialog-token: 0 20px 60px rgba(15, 42, 20, 0.18);
   --radius-card-token: 24px;
@@ -43,25 +39,25 @@
   --grey-500: var(--ink-muted);
   --grey-900: var(--ink);
   --green: var(--brand-500);
-  --yellow: var(--accent-yellow);
-  --cyan: var(--accent-mint);
+  --yellow: var(--pending);
+  --cyan: var(--brand-500);
   --navy: var(--ink-muted);
   --red: var(--danger);
   --purple: var(--cat-food);
   --purple-light: var(--brand-500);
   --turquoise: var(--brand-800);
-  --brown: var(--accent-orange);
-  --magenta: var(--accent-orange);
+  --brown: var(--pending);
+  --magenta: var(--pending);
   --blue: var(--cat-food);
   --navy-grey: var(--ink-muted);
   --army-green: var(--brand-500);
-  --gold: var(--accent-yellow);
-  --orange: var(--accent-orange);
-  --mint: var(--accent-mint);
+  --gold: var(--pending);
+  --orange: var(--pending);
+  --mint: var(--brand-500);
   --amber: var(--pending);
   --coral: var(--danger);
   --sky: var(--cat-food);
-  --pink: var(--accent-orange);
+  --pink: var(--pending);
   --white: var(--surface);
 
   /* shadcn semantic aliases now resolve to the product tokens. */
@@ -99,6 +95,13 @@
   --sidebar-ring: var(--brand-500);
 }
 
+[data-surface="marketing"] {
+  --marketing-accent-mint: #52E8A8;
+  --marketing-accent-orange: #F58233;
+  --marketing-accent-yellow: #FFD966;
+  --marketing-accent-cream: #FDF3E7;
+}
+
 @theme inline {
   --font-sans: var(--font-plus-jakarta);
 
@@ -130,10 +133,10 @@
   --color-cat-tfare: var(--cat-tfare);
   --color-cat-data: var(--cat-data);
   --color-cat-transfer: var(--cat-transfer);
-  --color-accent-mint: var(--accent-mint);
-  --color-accent-orange: var(--accent-orange);
-  --color-accent-yellow: var(--accent-yellow);
-  --color-accent-cream: var(--accent-cream);
+  --color-accent-mint: var(--marketing-accent-mint);
+  --color-accent-orange: var(--marketing-accent-orange);
+  --color-accent-yellow: var(--marketing-accent-yellow);
+  --color-accent-cream: var(--marketing-accent-cream);
   --color-beige-100: var(--beige-100);
   --color-beige-500: var(--beige-500);
   --color-grey-100: var(--grey-100);

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 const badgeVariants = {
   default: "bg-surface-muted text-ink",
   success: "bg-success-tint text-success",
-  pending: "bg-accent-yellow/25 text-pending",
+  pending: "bg-pending/15 text-pending",
   failed: "bg-danger-tint text-danger",
   danger: "bg-danger-tint text-danger",
 } as const

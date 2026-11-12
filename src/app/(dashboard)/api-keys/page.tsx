@@ -5,7 +5,7 @@ import {
   Key, Plus, Copy, Check, RotateCcw, Trash2, 
   ShieldAlert, AlertTriangle, X, Terminal, ShieldCheck,
   Calendar, Lock, Unlock
-} from "lucide-react";
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import { ErrorMessage, Spinner } from "@/components/dashboard/ui";

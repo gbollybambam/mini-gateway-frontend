@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AuthForm from "@/components/auth/AuthForm";
-import { ShieldCheck, Activity } from "lucide-react";
+import { ShieldCheck, Activity } from "@/components/icons";
 
 export default function LoginPage() {
   return (

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { AlertCircle, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react"
+import { AlertCircle, CheckCircle2, LockKeyhole, ShieldCheck } from "@/components/icons"
 import { Badge, StatusBadge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -135,7 +135,7 @@ function CheckoutStatusCard({ status, session }: { status: CheckoutStatus; sessi
   return (
     <Card className="checkout-enter text-center">
       <CardContent className="space-y-5">
-        <div className={cn("mx-auto flex size-16 items-center justify-center rounded-full", isPending ? "bg-accent-yellow/25 text-pending" : "bg-danger-tint text-danger")}>
+        <div className={cn("mx-auto flex size-16 items-center justify-center rounded-full", isPending ? "bg-pending/15 text-pending" : "bg-danger-tint text-danger")}>
           {isPending ? <LockKeyhole className="size-8" aria-hidden="true" /> : <AlertCircle className="size-8" aria-hidden="true" />}
         </div>
         <div>
