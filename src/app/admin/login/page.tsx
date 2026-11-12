@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
-import { api } from "@/lib/api";
+import { api, getCsrfCookie } from "@/lib/api";
 import { ShieldCheck, Lock } from "@/components/icons";
 import { Spinner, useToast } from "@/components/dashboard/ui";
 
@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
 
     try {
       // 1. Initialize CSRF protection
-      await api.get('/sanctum/csrf-cookie', { baseURL: 'http://localhost:8000' });
+      await getCsrfCookie();
       
       // 2. Post to the specific Admin Auth Controller
       await api.post("/admin/login", { email, password });

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { isAxiosError } from "axios";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
 import { KeyRound, ShieldAlert } from "@/components/icons";
 
@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await api.get("/sanctum/csrf-cookie", { baseURL: "http://localhost:8000" });
+      await getCsrfCookie();
       const response = await api.post("/auth/forgot-password", { email });
       
       setIsSent(true);

@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { isAxiosError } from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
 import { Lock, ShieldAlert, ShieldCheck } from "@/components/icons";
 
@@ -34,7 +34,7 @@ function ResetPasswordFormContent() {
     setIsSubmitting(true);
 
     try {
-      await api.get("/sanctum/csrf-cookie", { baseURL: "http://localhost:8000" });
+      await getCsrfCookie();
       await api.post("/auth/reset-password", {
         email,
         token,
