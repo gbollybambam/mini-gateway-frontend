@@ -1,4 +1,6 @@
 # Copilot instructions (save as .github/copilot-instructions.md)
+
+Read HANDOFF.md first in every session.
  
 ## Frontend rules
 - Before any UI work, read /design/DESIGN.md, /design/COMPONENTS.md and /design/PAGES.md, then look at the matching image in /design/reference.
@@ -7,6 +9,8 @@
 - Reuse shared components from /components/ui. Do not create one-off styled elements when a shared component exists. If a needed component is missing, add it to the design system first, then use it.
 - Mobile-first. Test at 390px and 1440px.
 - Accessibility: semantic HTML, labeled icon buttons, visible focus, AA contrast.
+- Owner bans: no uppercase/tracked labels, icon chips/tinted circles, tinted banners, gradients/glows/dotted patterns, top accent bars, status pills, `"NGN "` prefixes, duplicate titles, multiple primary buttons, or inline-expanding/tinted rows.
+- Card anatomy: title left, quiet value or link right, hairline divider, content. Use the shared `formatMoney` helper for all money.
 ## Verification loop (mandatory for every UI task)
 1. Run the dev server.
 2. Use the Playwright MCP to screenshot the page at 390px and 1440px.

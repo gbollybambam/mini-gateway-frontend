@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises"
 import { join, relative } from "node:path"
 
-const root = join(process.cwd(), "src", "app")
+const root = join(process.cwd(), "src", "app", "dev", "replica")
 const failures = []
 
 async function walk(directory) {
@@ -10,7 +10,15 @@ async function walk(directory) {
     if (entry.isDirectory()) await walk(path)
     else if (/\.(css|ts|tsx)$/.test(entry.name) && entry.name !== "globals.css") {
       const source = await readFile(path, "utf8")
-      if (/\baccent-(?:mint|orange|yellow|cream)\b/.test(source)) failures.push(relative(process.cwd(), path))
+      const rules = [
+        [/\baccent-(?:mint|orange|yellow|cream)\b/, "marketing accent token"],
+        [/\b(?:uppercase|tracking-(?:wide|wider|widest)|tracking-\[[^\]]+\])\b/, "uppercase or tracked label class"],
+        [/\b(?:bg|from|via|to)-[^\s"'`]*gradient\b|\bgradient-/, "gradient"],
+        [/\bNGN\s/, '"NGN " prefix'],
+        [/rounded-full[\s\S]{0,80}bg-(?:success|danger|pending)-tint/, "icon-chip or tinted circle"],
+      ]
+      const matched = rules.filter(([pattern]) => pattern.test(source)).map(([, label]) => label)
+      if (matched.length) failures.push(`${relative(process.cwd(), path)} (${matched.join(", ")})`)
     }
   }
 }

@@ -84,10 +84,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       <Link
         href={item.href}
         className={`group flex min-h-11 items-center gap-3 rounded-input px-4 text-sm font-medium transition-colors ${
-          active ? "bg-surface-muted text-ink" : "text-ink-muted hover:bg-surface-muted hover:text-ink"
+          active ? "bg-surface-muted text-ink" : "text-ink-muted hover:text-ink"
         }`}
       >
-        <item.icon size={19} className={active ? "text-brand-500" : "text-ink-muted group-hover:text-ink"} aria-hidden="true" />
+        <item.icon size={19} className="text-ink-muted group-hover:text-ink" aria-hidden="true" />
         <span>{item.name}</span>
       </Link>
     )
@@ -110,7 +110,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="space-y-1">{allowedSettingsNav.map((item) => <NavItem key={item.href} item={item} />)}</div>
           </div>
         </nav>
-        <button type="button" onClick={logout} className="flex min-h-11 items-center gap-3 rounded-input px-4 text-sm font-medium text-ink-muted hover:bg-danger-tint hover:text-danger">
+        <button type="button" onClick={logout} className="flex min-h-11 items-center gap-3 rounded-input px-4 text-sm font-medium text-ink-muted hover:text-ink">
           <LogOut size={19} aria-hidden="true" /> Sign out
         </button>
       </aside>
@@ -149,7 +149,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMoreOpen(false)}
-                className="flex min-h-11 items-center gap-3 rounded-input px-3 text-sm font-medium text-ink-muted hover:bg-surface-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+                className="flex min-h-11 items-center gap-3 rounded-input px-3 text-sm font-medium text-ink-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
               >
                 <item.icon size={18} aria-hidden="true" />
                 {item.name}

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:app-palette": "node scripts/check-app-palette.mjs"
+    "check:app-palette": "node scripts/check-app-palette.mjs",
+    "compare:replica": "node scripts/compare-replica.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",
@@ -33,6 +34,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
