@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
-// Assuming you are using Manrope based on your globals.css variables
-import { Manrope } from "next/font/google"; 
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const manrope = Manrope({ 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FAFAFA" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F2A14" },
+  ],
+} as const;
+
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-manrope" 
+  variable: "--font-plus-jakarta",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -19,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={manrope.variable}>
+    <html lang="en" className={cn("font-sans", plusJakartaSans.variable)}>
       <body>
         {children}
       </body>

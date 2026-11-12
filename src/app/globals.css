@@ -1,43 +1,106 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 @config "../../tailwind.config.ts";
 
 :root {
-  --beige-100: #f7f8fa;
-  --beige-500: #7e8791;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-muted: #F2F1EF;
+  --ink: #111111;
+  --ink-muted: #6B7280;
+  --line: #ECECEC;
+  --track: #E8ECEA;
+  --brand-900: #0F2A14;
+  --brand-800: #163A1C;
+  --brand-500: #5CC76A;
+  --success: #1DB954;
+  --success-tint: #E6F7EA;
+  --danger: #E5191B;
+  --danger-tint: #FDE7E7;
+  --pending: #E8B923;
+  --cat-food: #1F5EE6;
+  --cat-tfare: #F58233;
+  --cat-data: #1DB954;
+  --cat-transfer: #F5B73B;
+  --accent-mint: #52E8A8;
+  --accent-orange: #F58233;
+  --accent-yellow: #FFD966;
+  --accent-cream: #FDF3E7;
+  --shadow-card-token: 0 4px 24px rgba(17, 17, 17, 0.06);
+  --shadow-dialog-token: 0 20px 60px rgba(15, 42, 20, 0.18);
+  --radius-card-token: 24px;
+  --radius-input-token: 14px;
+  --radius-pill-token: 999px;
 
-  --grey-100: #edf0f2;
-  --grey-300: #c7ced3;
-  --grey-500: #68747e;
-  --grey-900: #151b21;
+  /* Compatibility aliases for existing pages. */
+  --beige-100: var(--surface-muted);
+  --beige-500: var(--ink-muted);
+  --grey-100: var(--line);
+  --grey-300: var(--ink-muted);
+  --grey-500: var(--ink-muted);
+  --grey-900: var(--ink);
+  --green: var(--brand-500);
+  --yellow: var(--accent-yellow);
+  --cyan: var(--accent-mint);
+  --navy: var(--ink-muted);
+  --red: var(--danger);
+  --purple: var(--cat-food);
+  --purple-light: var(--brand-500);
+  --turquoise: var(--brand-800);
+  --brown: var(--accent-orange);
+  --magenta: var(--accent-orange);
+  --blue: var(--cat-food);
+  --navy-grey: var(--ink-muted);
+  --army-green: var(--brand-500);
+  --gold: var(--accent-yellow);
+  --orange: var(--accent-orange);
+  --mint: var(--accent-mint);
+  --amber: var(--pending);
+  --coral: var(--danger);
+  --sky: var(--cat-food);
+  --pink: var(--accent-orange);
+  --white: var(--surface);
 
-  --green: #2f9d78;
-  --yellow: #ffd9a8;
-  --cyan: #b9f3e5;
-  --navy: #626070;
-  --red: #d84c5a;
-  --purple: #4d8fc7;
-  --purple-light: #78b7df;
-  --turquoise: #597c7c;
-  --brown: #93674f;
-  --magenta: #934f6f;
-  --blue: #3f82b2;
-  --navy-grey: #97a0ac;
-  --army-green: #7f9161;
-  --gold: #cab361;
-  --orange: #be6c49;
-  --mint: #35d5a4;
-  --amber: #f2b84b;
-  --coral: #f27d72;
-  --sky: #79b8e8;
-  --pink: #e277b6;
-  --white: #ffffff;
-
-  --background: var(--beige-100);
-  --foreground: var(--grey-900);
+  /* shadcn semantic aliases now resolve to the product tokens. */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--surface);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--surface-muted);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand-500);
+  --chart-1: var(--brand-500);
+  --chart-2: var(--track);
+  --chart-3: var(--cat-food);
+  --chart-4: var(--cat-tfare);
+  --chart-5: var(--cat-transfer);
+  --radius: var(--radius-card-token);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--brand-500);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: var(--surface-muted);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand-500);
 }
 
 @theme inline {
-  --font-sans: var(--font-manrope), sans-serif;
+  --font-sans: var(--font-plus-jakarta);
 
   --breakpoint-sm: 375px;
   --breakpoint-md: 768px;
@@ -48,6 +111,29 @@
   --container-md: 768px;
   --container-xl: 1440px;
 
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-track: var(--track);
+  --color-brand-900: var(--brand-900);
+  --color-brand-800: var(--brand-800);
+  --color-brand-500: var(--brand-500);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-pending: var(--pending);
+  --color-cat-food: var(--cat-food);
+  --color-cat-tfare: var(--cat-tfare);
+  --color-cat-data: var(--cat-data);
+  --color-cat-transfer: var(--cat-transfer);
+  --color-accent-mint: var(--accent-mint);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-cream: var(--accent-cream);
   --color-beige-100: var(--beige-100);
   --color-beige-500: var(--beige-500);
   --color-grey-100: var(--grey-100);
@@ -99,28 +185,89 @@
   --text-preset-5-bold: 0.75rem;
   --text-preset-5-bold--line-height: 1.5;
   --text-preset-5-bold--font-weight: 700;
+  --font-heading: var(--font-plus-jakarta);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --shadow-card: var(--shadow-card-token);
+  --shadow-dialog: var(--shadow-dialog-token);
+  --radius-card: var(--radius-card-token);
+  --radius-input: var(--radius-input-token);
+  --radius-pill: var(--radius-pill-token);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
   * {
-    border-color: var(--grey-100);
+    border-color: var(--line);
+    @apply border-border outline-ring/50;
   }
 
   body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-plus-jakarta), Inter, system-ui, sans-serif;
     font-weight: 400;
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 250, 0.98)), radial-gradient(circle at 8% 0%, rgba(185, 243, 229, 0.26), transparent 26rem), radial-gradient(circle at 100% 18%, rgba(255, 217, 168, 0.2), transparent 25rem);
+    @apply bg-bg text-ink;
   }
 
   button, a, input, select {
     -webkit-tap-highlight-color: transparent;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+  }
+
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  input, textarea, select {
+    font-size: 16px;
+  }
+
   ::selection {
     background: var(--cyan);
     color: var(--grey-900);
+  }
+  html {
+    @apply font-sans;
   }
 }
 
@@ -490,7 +637,60 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .checkout-enter {
+    animation: checkout-enter 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
   }
+
+  .checkout-success-icon {
+    animation: checkout-success-icon 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  @keyframes checkout-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes checkout-success-icon {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .checkout-enter, .checkout-success-icon { animation: none; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+}
+
+.dark {
+  --background: var(--brand-900);
+  --foreground: var(--surface);
+  --card: var(--brand-800);
+  --card-foreground: var(--surface);
+  --popover: var(--brand-800);
+  --popover-foreground: var(--surface);
+  --primary: var(--brand-500);
+  --primary-foreground: var(--ink);
+  --secondary: var(--brand-800);
+  --secondary-foreground: var(--surface);
+  --muted: var(--brand-800);
+  --muted-foreground: var(--track);
+  --accent: var(--brand-800);
+  --accent-foreground: var(--surface);
+  --destructive: var(--danger);
+  --border: color-mix(in srgb, var(--surface) 16%, transparent);
+  --input: color-mix(in srgb, var(--surface) 18%, transparent);
+  --ring: var(--brand-500);
+  --chart-1: var(--brand-500);
+  --chart-2: var(--track);
+  --chart-3: var(--cat-food);
+  --chart-4: var(--cat-tfare);
+  --chart-5: var(--cat-transfer);
+  --sidebar: var(--brand-900);
+  --sidebar-foreground: var(--surface);
+  --sidebar-primary: var(--brand-500);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: var(--brand-800);
+  --sidebar-accent-foreground: var(--surface);
+  --sidebar-border: color-mix(in srgb, var(--surface) 16%, transparent);
+  --sidebar-ring: var(--brand-500);
 }

@@ -86,13 +86,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     return (
       <Link 
         href={item.href} 
-        className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group overflow-hidden ${
+        className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group ${
           isActive ? "text-[#35d5a4] bg-white/3" : "text-[#8995a3] hover:text-[#e8edf2] hover:bg-white/2"
         }`}
       >
-        {isActive && <div className="absolute left-0 top-0 h-full w-1 bg-[#35d5a4] shadow-[0_0_10px_#35d5a4]" />}
-        <item.icon className={`h-4 w-4 relative z-10 ${isActive ? "text-[#35d5a4]" : "text-[#68747e] group-hover:text-[#8995a3]"}`} />
-        <span className="relative z-10">{item.name}</span>
+        <item.icon className={`h-4 w-4 ${isActive ? "text-[#35d5a4]" : "text-[#68747e] group-hover:text-[#8995a3]"}`} />
+        <span>{item.name}</span>
       </Link>
     );
   };
