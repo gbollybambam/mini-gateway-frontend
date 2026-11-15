@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "@/components/icons";
+import Spinner from "@/components/Spinner";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 
@@ -31,7 +32,7 @@ export default function VerifyWithdrawalButton({ id, onVerified }: { id: string,
       disabled={verifying}
       className="flex items-center gap-1.5 rounded-lg border border-[#3f82b2]/30 bg-[#3f82b2]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#79b8e8] transition-all hover:bg-[#3f82b2]/20 hover:text-[#90c6ec] disabled:opacity-50"
     >
-      <RefreshCw className={`h-3 w-3 ${verifying ? "animate-spin" : ""}`} />
+      {verifying ? <Spinner size={12} /> : <RefreshCw className="h-3 w-3" />}
       {verifying ? "Syncing..." : "Verify"}
     </button>
   );

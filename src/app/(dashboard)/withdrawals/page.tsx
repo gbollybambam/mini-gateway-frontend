@@ -1,38 +1,66 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { Landmark, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, AlertCircle, Building2, User, ChevronDown, ChevronUp, Plus, CreditCard } from "lucide-react";
+import {
+  Landmark, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, AlertCircle, Building2, User,
+  ChevronDown, Plus,
+} from "@/components/icons";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 import type { WithdrawalListResponse, WithdrawalResource, WalletResponse, WalletResource } from "@/types/api";
 import { ErrorMessage, Spinner } from "@/components/dashboard/ui";
 import VerifyWithdrawalButton from "@/components/VerifyWithdrawalButton";
+import { Banner, EmptyBlock, PageHeader, Pill, SectionHead, btnPrimary, cardCls, type Tone } from "@/components/dashboard/kit";
+import { AnimatedNumber } from "@/components/dashboard/motion";
 
-const formatAmount = (value: number, currency: string) => 
-  new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "USD", maximumFractionDigits: 2 }).format(value);
+const formatAmount = (value: number, currency: string) =>
+  new Intl.NumberFormat("en-NG", { style: "currency", currency: currency || "NGN", maximumFractionDigits: 2 }).format(value || 0);
 
-const formatDate = (value: string) => 
+const formatCount = (value: number) => new Intl.NumberFormat("en-NG").format(Math.round(value));
+
+const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 
 interface ExtendedWithdrawal extends WithdrawalResource {
-  bank_account?: { bank_code: string; account_number: string; account_name: string; };
+  bank_account?: { bank_code: string; account_number: string; account_name: string };
   failure_reason?: string;
+}
+
+type Meta = { current_page: number; last_page: number; total: number };
+
+const PENDING = ["PENDING", "PROCESSING", "REQUESTED"];
+const SUCCESS = ["SUCCESS", "SUCCESSFUL"];
+const FAILED = ["FAILED", "REVERSED", "CANCELLED"];
+
+function statusInfo(status: string): { tone: Tone; kind: "success" | "pending" | "failed"; icon: React.ReactNode } {
+  const s = status.toUpperCase();
+  if (SUCCESS.includes(s)) return { tone: "success", kind: "success", icon: <CheckCircle2 className="h-3 w-3" /> };
+  if (PENDING.includes(s)) return { tone: "warning", kind: "pending", icon: <Clock className="h-3 w-3" /> };
+  return { tone: "danger", kind: "failed", icon: <XCircle className="h-3 w-3" /> };
 }
 
 function WithdrawalSkeleton() {
   return (
-    <div className="animate-pulse flex flex-col">
+    <div className="flex flex-col">
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between py-6 px-4 md:px-8 border-b border-white/5">
-          <div className="h-4 w-24 md:w-32 bg-white/10 rounded-full"></div>
-          <div className="h-4 w-20 md:w-24 bg-white/5 rounded-full hidden sm:block"></div>
-          <div className="h-4 w-16 bg-white/10 rounded-full hidden md:block"></div>
-          <div className="h-6 w-20 bg-white/5 rounded-full"></div>
-          <div className="h-4 w-24 bg-white/5 rounded-full hidden lg:block"></div>
-          <div className="h-8 w-8 bg-white/5 rounded-full"></div>
+        <div key={i} className="flex items-center justify-between border-b border-[var(--pm-line)] px-7 py-5">
+          <div className="pm-skeleton h-4 w-32 rounded-full" />
+          <div className="pm-skeleton hidden h-4 w-24 rounded-full sm:block" />
+          <div className="pm-skeleton hidden h-4 w-16 rounded-full md:block" />
+          <div className="pm-skeleton h-6 w-24 rounded-full" />
+          <div className="pm-skeleton h-6 w-12 rounded-[6px]" />
         </div>
       ))}
+    </div>
+  );
+}
+
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-2.5 text-[13px]">
+      <span className="shrink-0 text-[#71717A]">{label}</span>
+      <span className="text-right font-medium text-[#09090B]">{children}</span>
     </div>
   );
 }
@@ -40,245 +68,243 @@ function WithdrawalSkeleton() {
 export default function WithdrawalsPage() {
   const [wallet, setWallet] = useState<WalletResource | null>(null);
   const [items, setItems] = useState<ExtendedWithdrawal[]>([]);
-  const [meta, setMeta] = useState<{ current_page: number; last_page: number; total: number } | null>(null);
-  
+  const [meta, setMeta] = useState<Meta | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const isPollingRef = useRef(false);
 
-  const loadData = useCallback(async (currentPage: number) => {
-    try { 
+  const loadData = useCallback(async (currentPage: number, silent = false) => {
+    if (!silent) setLoading(true);
+    try {
       const [walletRes, withdrawalsRes] = await Promise.all([
         api.get<WalletResponse>("/wallet"),
-        api.get<WithdrawalListResponse>("/withdrawals", { params: { page: currentPage, per_page: 15 } })
+        api.get<WithdrawalListResponse>("/withdrawals", { params: { page: currentPage, per_page: 15 } }),
       ]);
       setWallet(walletRes.data.data);
-      setItems(withdrawalsRes.data.data); 
-      // @ts-expect-error - meta mapping
-      setMeta(withdrawalsRes.data.meta);
-      setError("");
-    } catch (err: unknown) { 
-      setError(isAxiosError(err) ? err.response?.data?.message || "Unable to load payouts." : "Unable to load payouts."); 
-    } finally { 
-      setLoading(false); 
-    } 
+      setItems(withdrawalsRes.data.data as ExtendedWithdrawal[]);
+      setMeta((withdrawalsRes.data as unknown as { meta: Meta }).meta);
+      if (!silent) setError("");
+    } catch (err: unknown) {
+      if (!silent) setError(isAxiosError(err) ? err.response?.data?.message || "Unable to load payouts." : "Unable to load payouts.");
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, []);
-  
-  // 1. Initial Load
-  useEffect(() => { 
-    const timer = setTimeout(() => {
-      void loadData(page);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [loadData, page]); 
 
-  // 2. THE MAGIC: Silent Background Polling
-  const isPollingRef = React.useRef(false);
-  
   useEffect(() => {
-    const hasPending = items.some((item) => {
-      const status = item.status.toUpperCase();
-      return status === "PENDING" || status === "PROCESSING" || status === "REQUESTED";
-    });
+    const t = setTimeout(() => { void loadData(page); }, 0);
+    return () => clearTimeout(t);
+  }, [loadData, page]);
 
+  const hasPending = useMemo(() => items.some((i) => PENDING.includes(i.status.toUpperCase())), [items]);
+
+  useEffect(() => {
     if (!hasPending) return;
-
-    const interval = window.setInterval(() => {
+    const id = window.setInterval(() => {
       if (isPollingRef.current) return;
       isPollingRef.current = true;
-      
-      api.get<WithdrawalListResponse>("/withdrawals", { params: { page: page, per_page: 15 } })
-        .then(res => {
-          setItems(res.data.data);
-          // @ts-expect-error - meta mapping
-          setMeta(res.data.meta);
-        })
-        .catch(() => {
-          // Silent fail for polling
-        })
-        .finally(() => {
-          isPollingRef.current = false;
-        });
+      loadData(page, true).finally(() => { isPollingRef.current = false; });
     }, 5000);
+    return () => window.clearInterval(id);
+  }, [hasPending, loadData, page]);
 
-    return () => window.clearInterval(interval);
-  }, [items, page]);
+  const counts = useMemo(() => {
+    const c = { pending: 0, success: 0, failed: 0 };
+    items.forEach((i) => { c[statusInfo(i.status).kind]++; });
+    return c;
+  }, [items]);
 
-  if (error) return <ErrorMessage message={error} retry={() => { setLoading(true); void loadData(page); }} />;
+  const goTo = (p: number) => { setExpandedId(null); setPage(p); };
+
+  if (error) return <ErrorMessage message={error} retry={() => { void loadData(page); }} />;
+
+  const initialLoad = loading && !wallet;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 relative">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Payouts</p>
-          <h1 className="text-2xl font-bold text-white drop-shadow-sm mt-1">Withdrawals</h1>
-        </div>
-        <Link 
-          href="/withdrawals/create"
-          className={`flex items-center gap-2 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-6 py-2.5 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] hover:brightness-110 border border-white/10 ${loading && !wallet ? 'opacity-50 pointer-events-none' : ''}`}
-        >
-          <Plus className="h-4 w-4" /> Request Payout
-        </Link>
-      </header>
+    <div className="space-y-6 bg-white pb-10 font-sans text-[#09090B]">
+      <PageHeader
+        eyebrow="Payouts"
+        title="Withdrawals"
+        description="Move settled funds to your bank account and track every transfer."
+        action={
+          <Link href="/withdrawals/create" aria-disabled={initialLoad} className={`${btnPrimary} w-fit ${initialLoad ? "pointer-events-none opacity-50" : ""}`}>
+            <Plus className="h-4 w-4" /> Request Payout
+          </Link>
+        }
+      />
 
-      <section className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="col-span-2 rounded-[12px] border border-[var(--pm-line)] bg-white p-5 transition-all hover:border-[#D4D4D8] hover:shadow-[0_8px_24px_-12px_rgba(9,9,11,0.12)] lg:col-span-1">
+          <p className="text-[13px] font-medium text-[#71717A]">Available to withdraw</p>
+          {initialLoad ? <div className="pm-skeleton mt-2 h-7 w-32 rounded" /> : (
+            <p className="mt-1.5 truncate text-[24px] font-bold leading-none tracking-[-0.02em] tabular-nums">
+              <AnimatedNumber value={wallet?.available_balance ?? 0} format={(value) => formatAmount(value, wallet?.currency ?? "NGN")} />
+            </p>
+          )}
+          <p className="mt-3 text-[12px] text-[#A1A1AA]">Ready for payout</p>
+        </div>
+        {[
+          { label: "Processing", value: counts.pending, hint: "On this page" },
+          { label: "Completed", value: counts.success, hint: "On this page" },
+          { label: "Failed", value: counts.failed, hint: "Reversed to wallet" },
+        ].map((s) => (
+          <div key={s.label} className="rounded-[12px] border border-[var(--pm-line)] bg-white p-5 transition-all hover:border-[#D4D4D8] hover:shadow-[0_8px_24px_-12px_rgba(9,9,11,0.12)]">
+            <p className="text-[13px] font-medium text-[#71717A]">{s.label}</p>
+            <p className="mt-1.5 text-[24px] font-bold leading-none tracking-[-0.02em] tabular-nums">
+              <AnimatedNumber value={s.value} format={formatCount} />
+            </p>
+            <p className="mt-3 text-[12px] text-[#A1A1AA]">{s.hint}</p>
+          </div>
+        ))}
+      </div>
+
+      <section className={`${cardCls} relative overflow-hidden`}>
         {loading && items.length > 0 && (
-          <div className="absolute inset-0 bg-[#05080c]/40 z-10 flex items-center justify-center backdrop-blur-[1px]">
-             <Spinner />
-          </div>
+          <div className="absolute inset-0 z-10 grid place-items-center bg-white/60 backdrop-blur-[1px]"><Spinner /></div>
         )}
+        <SectionHead
+          icon={<Landmark className="h-4 w-4" />}
+          title="Transfer History"
+          subtitle="Track bank payouts and settlements"
+          right={
+            <div className="flex items-center gap-3">
+              {hasPending && (
+                <span className="inline-flex items-center gap-1.5 text-[12px] text-[#B45309]">
+                  <span className="pm-dot-pulse size-2 rounded-full bg-[#F59E0B]" aria-hidden="true" />
+                  Live
+                </span>
+              )}
+              {meta && <span className="text-[12px] text-[#71717A] tabular-nums">{meta.total} transfers</span>}
+            </div>
+          }
+        />
 
-        <div className="flex items-center gap-3 border-b border-white/5 p-4 sm:p-6 md:px-8 bg-white/1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#3f82b2]/10 border border-[#3f82b2]/20 text-[#79b8e8] shadow-inner shrink-0">
-            <Landmark className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-white drop-shadow-sm">Transfer History</h2>
-            <p className="text-xs font-medium text-[#8995a3]">Track bank payouts and settlements</p>
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto flex-1 custom-scrollbar">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-white/1 border-b border-white/5">
+        <div className="custom-scrollbar overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead className="border-b border-[var(--pm-line)] bg-[var(--pm-band)]">
               <tr>
-                <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Reference</th>
-                <th className="hidden sm:table-cell px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Amount</th>
-                <th className="hidden md:table-cell px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Fee</th>
-                <th className="px-4 md:px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Status</th>
-                <th className="hidden lg:table-cell px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Date</th>
-                <th className="px-4 md:px-8 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Actions</th>
+                {[
+                  { h: "Reference", c: "" },
+                  { h: "Amount", c: "hidden sm:table-cell" },
+                  { h: "Fee", c: "hidden md:table-cell" },
+                  { h: "Status", c: "" },
+                  { h: "Date", c: "hidden lg:table-cell" },
+                  { h: "", c: "text-right" },
+                ].map((col, i) => (
+                  <th key={i} className={`px-4 py-3.5 text-[12px] font-medium uppercase tracking-wide text-[#71717A] sm:px-7 ${col.c}`}>
+                    {col.h || <span className="sr-only">Actions</span>}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="bg-white">
               {loading && !items.length ? (
                 <tr><td colSpan={6}><WithdrawalSkeleton /></td></tr>
               ) : items.length === 0 ? (
                 <tr>
                   <td colSpan={6}>
-                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                        <Landmark className="h-8 w-8 text-[#68747e]" />
-                      </div>
-                      <h3 className="text-lg font-bold text-white drop-shadow-sm">No withdrawals yet</h3>
-                      <p className="mt-2 text-sm text-[#8995a3] max-w-sm leading-relaxed mb-6 whitespace-normal">
-                        When you request a transfer to your bank account, it will appear here.
-                      </p>
-                    </div>
+                    <EmptyBlock
+                      icon={<Landmark className="h-6 w-6" />}
+                      title="No withdrawals yet"
+                      description="When you request a transfer to your bank account, it will appear here."
+                      action={<Link href="/withdrawals/create" className={btnPrimary}><Plus className="h-4 w-4" /> Request your first payout</Link>}
+                    />
                   </td>
                 </tr>
               ) : (
                 items.map((item) => {
-                  const statusLabel = item.status.toUpperCase();
-                  const isSuccess = statusLabel === "SUCCESS" || statusLabel === "SUCCESSFUL";
-                  const isPending = statusLabel === "PENDING" || statusLabel === "PROCESSING" || statusLabel === "REQUESTED";
-                  const isFailed = statusLabel === "FAILED" || statusLabel === "REVERSED" || statusLabel === "CANCELLED";
+                  const info = statusInfo(item.status);
+                  const isPending = info.kind === "pending";
+                  const isFailed = info.kind === "failed";
                   const isExpanded = expandedId === item.id;
+                  const net = (item.amount || 0) - (item.fee || 0);
 
                   return (
                     <React.Fragment key={item.id}>
-                      <tr 
+                      <tr
                         onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                        className={`transition-colors cursor-pointer group ${isExpanded ? 'bg-white/4' : 'hover:bg-white/2'}`}
+                        aria-expanded={isExpanded}
+                        className={`group cursor-pointer border-b border-[var(--pm-line)] transition-colors hover:bg-[var(--pm-band-hover)] ${isExpanded ? "bg-[var(--pm-band)]" : ""}`}
                       >
-                        <td className="px-4 md:px-8 py-5">
-                          <p className="font-bold text-[#e8edf2] group-hover:text-white transition-colors truncate max-w-37.5 sm:max-w-xs">
-                            {item.reference}
-                          </p>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mt-1 sm:hidden">
-                            {formatAmount(item.amount, item.currency)}
-                          </p>
+                        <td className={`px-4 py-4 sm:px-7 sm:py-5 ${isExpanded ? "shadow-[inset_3px_0_0_#09090B]" : ""}`}>
+                          <p className="max-w-[180px] truncate font-mono text-[13px] font-medium sm:max-w-xs" title={item.reference}>{item.reference}</p>
+                          <p className="mt-1 text-[12px] font-semibold tabular-nums text-[#52525B] sm:hidden">{formatAmount(item.amount, item.currency)}</p>
                         </td>
-                        <td className="hidden sm:table-cell px-4 md:px-8 py-5 font-bold tracking-tight text-[#e8edf2]">
-                          {formatAmount(item.amount, item.currency)}
+                        <td className="hidden whitespace-nowrap px-4 py-4 text-[14px] font-semibold tabular-nums sm:table-cell sm:px-7 sm:py-5">{formatAmount(item.amount, item.currency)}</td>
+                        <td className="hidden whitespace-nowrap px-4 py-4 text-[14px] tabular-nums text-[#DC2626] sm:px-7 sm:py-5 md:table-cell">−{formatAmount(item.fee, item.currency)}</td>
+                        <td className="whitespace-nowrap px-4 py-4 sm:px-7 sm:py-5">
+                          <Pill tone={info.tone} dot={false}>{info.icon}<span className="capitalize">{item.status.toLowerCase()}</span></Pill>
                         </td>
-                        <td className="hidden md:table-cell px-8 py-5 text-red-400 font-medium">
-                          -{formatAmount(item.fee, item.currency)}
-                        </td>
-                        <td className="px-4 md:px-8 py-5">
-                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider
-                            ${isSuccess ? "bg-[#2f9d78]/10 text-[#35d5a4] border border-[#2f9d78]/20" : 
-                              isPending ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : 
-                              "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
-                            {isSuccess ? <CheckCircle2 className="h-3 w-3" /> : isPending ? <Clock className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                            {statusLabel}
-                          </span>
-                        </td>
-                        <td className="hidden lg:table-cell px-8 py-5 font-medium text-[#8995a3]">
-                          {formatDate(item.created_at)}
-                        </td>
-                        <td className="px-4 md:px-8 py-5 text-right">
-                          <div className="flex items-center justify-end gap-3">
+                        <td className="hidden whitespace-nowrap px-4 py-4 text-[14px] text-[#52525B] sm:px-7 sm:py-5 lg:table-cell">{formatDate(item.created_at)}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-right sm:px-7 sm:py-5">
+                          <div className="flex items-center justify-end gap-2">
                             {isPending && (
                               <div onClick={(e) => e.stopPropagation()}>
-                                <VerifyWithdrawalButton id={item.id} onVerified={() => loadData(page)} />
+                                <VerifyWithdrawalButton id={item.id} onVerified={() => loadData(page, true)} />
                               </div>
                             )}
-                            <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-[#8995a3] group-hover:text-white">
-                              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            </button>
+                            <span className={`inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1.5 text-[13px] font-medium transition-colors ${isExpanded ? "bg-[#09090B] text-white" : "text-[#52525B] group-hover:bg-[var(--pm-active)] group-hover:text-[#09090B]"}`}>
+                              {isExpanded ? "Close" : "View"}
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                            </span>
                           </div>
                         </td>
                       </tr>
 
-                      {/* DROPDOWN EXPANSION */}
                       {isExpanded && (
-                        <tr className="bg-[#05080c]/40 shadow-inner border-b-2 border-white/5">
+                        <tr className="border-b border-[var(--pm-line)] bg-[var(--pm-band)]">
                           <td colSpan={6} className="p-0">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-8 animate-in slide-in-from-top-2 fade-in duration-200 whitespace-normal">
-                              
-                              <div className="space-y-4">
-                                <h4 className="text-xs font-bold uppercase tracking-widest text-[#8995a3] mb-4 flex items-center gap-2">
-                                  <Building2 className="h-4 w-4"/> Destination Details
-                                </h4>
-                                <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/2 p-4">
-                                  <User className="h-8 w-8 text-[#2f9d78]" />
-                                  <div>
-                                    <p className="text-xs font-medium text-[#8995a3] mb-0.5">Account Name</p>
-                                    <p className="text-sm font-bold text-white uppercase">{item.bank_account?.account_name || "N/A"}</p>
-                                  </div>
+                            <div className="animate-in fade-in slide-in-from-top-1 px-4 py-5 duration-200 sm:px-7 sm:py-6" onClick={(e) => e.stopPropagation()}>
+                              <div className="mb-5 flex flex-col gap-3 rounded-[12px] border border-[var(--pm-line)] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                                <div>
+                                  <p className="text-[24px] font-bold leading-none tracking-[-0.02em] tabular-nums">{formatAmount(item.amount, item.currency)}</p>
+                                  <p className="mt-1.5 text-[12px] text-[#71717A]">Requested {formatDate(item.created_at)}</p>
                                 </div>
-                                <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/2 p-4">
-                                  <Building2 className="h-8 w-8 text-[#3f82b2]" />
-                                  <div>
-                                    <p className="text-sm font-bold text-white">{item.bank_account?.account_number || "N/A"}</p>
-                                    <p className="text-xs font-medium text-[#8995a3]">Bank Code: {item.bank_account?.bank_code || "N/A"}</p>
-                                  </div>
-                                </div>
+                                <Pill tone={info.tone}><span className="capitalize">{item.status.toLowerCase()}</span></Pill>
                               </div>
 
-                              <div className="space-y-4 md:border-l border-white/5 md:pl-8">
-                                <h4 className="text-xs font-bold uppercase tracking-widest text-[#8995a3] mb-4 flex items-center gap-2">
-                                  <CreditCard className="h-4 w-4"/> Financial Breakdown
-                                </h4>
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="text-[#68747e]">Gross Withdrawal</span>
-                                  <span className="font-bold text-[#e8edf2]">{formatAmount(item.amount, item.currency)}</span>
+                              {isFailed && (
+                                <div className="mb-5">
+                                  <Banner tone="danger" title="Transfer failed">
+                                    {item.failure_reason || "Bank network rejected the transfer."} Funds have been automatically reversed to your wallet.
+                                  </Banner>
                                 </div>
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="text-[#68747e]">Network Fee</span>
-                                  <span className="font-bold text-red-400">-{formatAmount(item.fee, item.currency)}</span>
-                                </div>
-                                <div className="pt-3 border-t border-white/10 flex justify-between items-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-[#35d5a4]">Expected Credit</span>
-                                  <span className="text-xl font-black text-[#35d5a4]">
-                                    {formatAmount(item.amount - item.fee, item.currency)}
-                                  </span>
-                                </div>
+                              )}
 
-                                {isFailed && (
-                                  <div className="mt-6 flex items-start gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-4">
-                                    <AlertCircle className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
-                                    <div>
-                                      <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Transfer Failed</p>
-                                      <p className="text-sm font-medium text-[#e8edf2]">{item.failure_reason || "Bank network rejected transfer"}</p>
-                                      <p className="text-xs text-[#8995a3] mt-1">Funds have been automatically reversed to your wallet.</p>
+                              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <div className="rounded-[12px] border border-[var(--pm-line)] bg-white p-5">
+                                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#A1A1AA]">Destination</h4>
+                                  <div className="mb-3 flex items-center gap-3 rounded-[10px] border border-[var(--pm-line)] bg-[var(--pm-band)] p-3.5">
+                                    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-[#52525B] ring-1 ring-[var(--pm-line)]"><User className="h-4 w-4" /></div>
+                                    <div className="min-w-0">
+                                      <p className="text-[11px] text-[#71717A]">Account name</p>
+                                      <p className="truncate text-[13px] font-semibold uppercase">{item.bank_account?.account_name || "N/A"}</p>
                                     </div>
                                   </div>
-                                )}
-                              </div>
+                                  <div className="flex items-center gap-3 rounded-[10px] border border-[var(--pm-line)] bg-[var(--pm-band)] p-3.5">
+                                    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-[#52525B] ring-1 ring-[var(--pm-line)]"><Building2 className="h-4 w-4" /></div>
+                                    <div className="min-w-0">
+                                      <p className="font-mono text-[13px] font-semibold">{item.bank_account?.account_number || "N/A"}</p>
+                                      <p className="text-[11px] text-[#71717A]">Bank code: {item.bank_account?.bank_code || "N/A"}</p>
+                                    </div>
+                                  </div>
+                                </div>
 
+                                <div className="rounded-[12px] border border-[var(--pm-line)] bg-white p-5">
+                                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#A1A1AA]">Financial breakdown</h4>
+                                  <div className="divide-y divide-[var(--pm-line)]">
+                                    <DetailRow label="Gross withdrawal"><span className="tabular-nums">{formatAmount(item.amount, item.currency)}</span></DetailRow>
+                                    <DetailRow label="Network fee"><span className="tabular-nums text-[#DC2626]">−{formatAmount(item.fee, item.currency)}</span></DetailRow>
+                                  </div>
+                                  <div className="mt-1 flex items-center justify-between border-t border-[var(--pm-line)] pt-3">
+                                    <span className="text-[13px] font-semibold">Expected credit</span>
+                                    <span className="text-[16px] font-bold tabular-nums">{formatAmount(net, item.currency)}</span>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -292,23 +318,15 @@ export default function WithdrawalsPage() {
         </div>
 
         {meta && meta.last_page > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 p-4 sm:px-8 bg-white/1">
-            <p className="text-xs font-medium text-[#8995a3]">
-              Page <span className="text-white font-bold">{meta.current_page}</span> of <span className="text-white font-bold">{meta.last_page}</span>
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-[var(--pm-line)] bg-white p-4 sm:flex-row sm:px-6">
+            <p className="text-[12px] font-medium text-[#71717A]">
+              Page <span className="font-bold text-[#09090B]">{meta.current_page}</span> of <span className="font-bold text-[#09090B]">{meta.last_page}</span>
             </p>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                disabled={meta.current_page === 1}
-                onClick={() => { setLoading(true); setPage(p => Math.max(1, p - 1)); }}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <button type="button" disabled={meta.current_page === 1} onClick={() => goTo(Math.max(1, page - 1))} className="flex flex-1 items-center justify-center gap-1 rounded-[8px] border border-[var(--pm-line)] bg-white px-3.5 py-1.5 text-[12px] font-medium shadow-sm transition-colors hover:bg-[var(--pm-band-hover)] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none">
                 <ChevronLeft className="h-3.5 w-3.5" /> Prev
               </button>
-              <button
-                disabled={meta.current_page === meta.last_page}
-                onClick={() => { setLoading(true); setPage(p => p + 1); }}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <button type="button" disabled={meta.current_page === meta.last_page} onClick={() => goTo(page + 1)} className="flex flex-1 items-center justify-center gap-1 rounded-[8px] border border-[var(--pm-line)] bg-white px-3.5 py-1.5 text-[12px] font-medium shadow-sm transition-colors hover:bg-[var(--pm-band-hover)] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none">
                 Next <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>

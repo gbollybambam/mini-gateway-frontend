@@ -23,7 +23,7 @@ export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
     if (!user) {
       router.replace("/login");
     } else if (!isAuthorized) {
-      router.replace("/"); // Send unauthorized users back to the dashboard home
+      router.replace("/overview"); // Send unauthorized users back to the dashboard home
     }
   }, [user, loading, isAuthorized, router]);
 
@@ -31,7 +31,7 @@ export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
   if (loading || !isAuthorized) {
     return (
       <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-xl bg-gradient-to-br from-[#b9f3e5] to-[#2f9d78] shadow-[0_0_30px_rgba(47,157,120,0.3)] text-2xl font-black text-[#090d14]">
+        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full bg-brand-900 text-2xl font-black text-surface">
           P
         </div>
       </div>

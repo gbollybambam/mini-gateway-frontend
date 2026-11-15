@@ -6,235 +6,123 @@ import Link from "next/link";
 import { isAxiosError } from "axios";
 import { api, getCsrfCookie } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { MonitorSmartphone, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
+import { AuthShell, AuthHeading, OtpInput, ResendRow, SubmitButton, FormAlert, authLink, authFormCls } from "@/components/auth/ui";
 
-function VerifyDeviceLogic() {
+function VerifyDeviceForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const toast = useToast();
-  
   const challenge = searchParams.get("challenge");
-  
+
   const [code, setCode] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading">("idle");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  const [resendStatus, setResendStatus] = useState<"idle" | "loading">("idle");
+  const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
-  // Initialize timer from Session Storage to survive page reloads
   useEffect(() => {
     if (!challenge) return;
-    
-    const storageKey = `device_otp_timer_${challenge}`;
-    const savedTime = sessionStorage.getItem(storageKey);
-    
-    if (savedTime) {
-      const expirationTime = parseInt(savedTime, 10);
-      const timeRemaining = Math.floor((expirationTime - Date.now()) / 1000);
-      
-      if (timeRemaining > 0) {
-        // Defer state update to satisfy React strict mode
-        setTimeout(() => setCountdown(timeRemaining), 0);
-      } else {
-        sessionStorage.removeItem(storageKey);
-      }
-    }
+    const key = `device_otp_timer_${challenge}`;
+    const saved = sessionStorage.getItem(key);
+    if (!saved) return;
+    const remaining = Math.floor((parseInt(saved, 10) - Date.now()) / 1000);
+    if (remaining > 0) setTimeout(() => setCountdown(remaining), 0);
+    else sessionStorage.removeItem(key);
   }, [challenge]);
 
-  // Handle the active countdown
   useEffect(() => {
     if (countdown <= 0) return;
-    
-    const storageKey = `device_otp_timer_${challenge}`;
-    const timerId = setInterval(() => {
+    const key = `device_otp_timer_${challenge}`;
+    const id = setInterval(() => {
       setCountdown((prev) => {
-        if (prev <= 1) {
-          sessionStorage.removeItem(storageKey);
-          return 0;
-        }
+        if (prev <= 1) { sessionStorage.removeItem(key); return 0; }
         return prev - 1;
       });
     }, 1000);
-    
-    return () => clearInterval(timerId);
+    return () => clearInterval(id);
   }, [countdown, challenge]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setError("");
-
-    if (!challenge) {
-      setError("Session expired. Please log in again.");
-      return;
-    }
-
-    if (code.length !== 6) {
-      setError("Please enter the full 6-digit code.");
-      return;
-    }
-
-    setStatus("loading");
-
+    if (!challenge) { setError("Your session expired. Please sign in again."); return; }
+    if (code.length !== 6) { setError("Enter all 6 digits."); return; }
+    setLoading(true);
     try {
       await getCsrfCookie();
-      
-      await api.post("/auth/device/verify", {
-        challenge,
-        code: code,
-      });
-
-      toast.success("Device verified successfully. Welcome back!");
-      router.push("/");
-      
+      await api.post("/auth/device/verify", { challenge, code });
+      toast.success("Device verified. Welcome back!");
+      router.push("/overview");
     } catch (err: unknown) {
-      setStatus("idle");
+      setLoading(false);
       if (isAxiosError(err)) {
-        if (err.response?.status === 429) {
-          setError("Too many attempts. Please wait 60 seconds before trying again.");
-        } else {
-          setError(err.response?.data?.message || "Invalid or expired verification code.");
-        }
-      } else {
-        setError("An unexpected network error occurred.");
-      }
+        setError(err.response?.status === 429 ? "Too many attempts. Wait 60 seconds and try again." : err.response?.data?.message || "That code is wrong or has expired.");
+      } else setError("Network error. Check your connection and try again.");
     }
   }
 
   async function handleResend() {
     if (countdown > 0 || !challenge) return;
-    
-    setResendStatus("loading");
+    setResendLoading(true);
     setError("");
-
     try {
       await getCsrfCookie();
       await api.post("/auth/device/resend", { challenge });
-      
-      toast.success("New security code dispatched!");
-      
-      // Set timer state for 60s and persist to session storage
+      toast.success("A new code is on its way.");
       setCountdown(60);
-      const expirationTime = Date.now() + 60 * 1000;
-      sessionStorage.setItem(`device_otp_timer_${challenge}`, expirationTime.toString());
-      
+      sessionStorage.setItem(`device_otp_timer_${challenge}`, String(Date.now() + 60 * 1000));
     } catch (err: unknown) {
-      if (isAxiosError(err)) {
-        if (err.response?.status === 429) {
-          setError("Too many resend attempts. Please wait 60 seconds.");
-        } else {
-          setError(err.response?.data?.message || "Failed to resend code.");
-        }
-      } else {
-        setError("Network error.");
-      }
+      if (isAxiosError(err)) setError(err.response?.status === 429 ? "Too many requests. Wait 60 seconds." : err.response?.data?.message || "Could not send a new code.");
+      else setError("Network error.");
     } finally {
-      setResendStatus("idle");
+      setResendLoading(false);
     }
   }
 
   return (
-    <div className="relative z-10 mx-auto w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
-      <div className="rounded-[2.5rem] border border-white/10 bg-[#0d131a]/80 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl relative overflow-hidden text-center">
-        
-        {/* Subtle inner glow (Blue for Device Verification) */}
-        <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-[#3f82b2]/5 blur-[80px] pointer-events-none" />
-
-        <div className="mb-8 flex h-20 w-20 mx-auto items-center justify-center rounded-3xl bg-[#3f82b2]/10 border border-[#3f82b2]/20 text-[#79b8e8] shadow-inner relative z-10">
-          <MonitorSmartphone className="h-10 w-10" />
-        </div>
-
-        <h2 className="mb-3 text-2xl sm:text-3xl font-black tracking-tight text-white relative z-10">
-          Unrecognized Device
-        </h2>
-        
-        <p className="mb-10 text-[#8995a3] text-sm leading-relaxed relative z-10">
-          For your security, we need to verify this new device. Please enter the 6-digit code sent to your email.
-        </p>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 relative z-10">
-          
-          <div className="relative">
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="••••••"
-              required
-              className="h-20 w-full rounded-2xl border border-white/10 bg-[#05080c]/80 px-4 text-center text-4xl font-black tracking-[0.5em] text-white placeholder:text-[#68747e] outline-none transition-all focus:border-[#3f82b2] focus:bg-[#05080c] focus:ring-1 focus:ring-[#3f82b2] shadow-inner"
-            />
-          </div>
-
-          {error && (
-            <div className="flex items-center gap-3 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400 font-medium text-left animate-in slide-in-from-top-2">
-              <AlertCircle className="h-5 w-5 shrink-0" />
-              <p>{error}</p>
+    <>
+      <div className="mx-auto w-full min-w-0 max-w-[390px]">
+        <AuthHeading title="Confirm this device" sub="You are signing in from a device we do not know. Enter the 6-digit code we emailed you." />
+        <form onSubmit={handleSubmit} className={authFormCls}>
+          <div className="w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-[#E4E4E7] bg-white p-3 sm:p-4">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A1A1AA]">Device verification code</p>
+            <div className="mt-4">
+              <OtpInput value={code} onChange={setCode} />
             </div>
-          )}
-
-          <button 
-            type="submit" 
-            disabled={status === "loading" || code.length !== 6}
-            className="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#3f82b2] to-[#2c658f] px-6 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(63,130,178,0.4)] hover:brightness-110 disabled:opacity-50 border border-white/10"
-          >
-            {status === "loading" ? <Spinner /> : "Trust Device & Continue"}
-            {status !== "loading" && <ArrowRight className="h-4 w-4" />}
-          </button>
-        </form>
-
-        <div className="mt-10 flex flex-col gap-4 text-sm relative z-10 pt-6 border-t border-white/5">
-          <div className="flex items-center justify-center gap-2 text-[#68747e]">
-            <span className="opacity-80">Didn&apos;t receive the code?</span>
-            <button 
-              onClick={handleResend}
-              type="button"
-              disabled={countdown > 0 || resendStatus === "loading"}
-              className={`font-bold transition-all flex items-center gap-1.5 ${countdown > 0 ? "text-[#68747e] cursor-not-allowed" : "text-[#79b8e8] hover:text-white"}`}
-            >
-              {resendStatus === "loading" ? (
-                <Spinner />
-              ) : countdown > 0 ? (
-                `Resend available in ${countdown}s`
-              ) : (
-                <><RefreshCw className="h-3.5 w-3.5" /> Dispatch New Code</>
-              )}
-            </button>
           </div>
-
-          <p className="text-[#68747e] flex items-center justify-center gap-2">
-            Not your account?{" "}
-            <Link href="/login" className="font-bold text-[#e8edf2] hover:text-white transition-colors">
-              Return to login
-            </Link>
+          {error && <FormAlert>{error}</FormAlert>}
+          <SubmitButton loading={loading} disabled={code.length !== 6}>Trust this device</SubmitButton>
+        </form>
+        <div className="mt-6 grid gap-3 rounded-2xl border border-[#E4E4E7] bg-[#FAFAFA] px-4 py-4">
+          <ResendRow prompt="No code yet?" countdown={countdown} loading={resendLoading} onResend={handleResend} />
+          <div className="h-px bg-[#E4E4E7]" />
+          <p className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-center text-[14px] leading-6 text-[#71717A]">
+            <span>Not you?</span>
+            <Link href="/login" className={authLink}>Back to sign in</Link>
           </p>
         </div>
-
       </div>
-    </div>
+    </>
   );
 }
 
 export default function VerifyDevicePage() {
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-[#05080c] relative overflow-hidden p-4 sm:p-6">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-[-20%] left-[-10%] h-[500px] w-[500px] rounded-full bg-[#3f82b2]/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] h-[500px] w-[500px] rounded-full bg-[#2f9d78]/10 blur-[120px] pointer-events-none" />
-
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_20%,transparent_100%)] pointer-events-none" />
-
-      <Suspense fallback={
-        <div className="flex flex-col items-center gap-4 text-[#79b8e8]">
-          <Spinner />
-          <p className="text-xs font-bold uppercase tracking-widest text-[#8995a3]">Initializing Security Module...</p>
-        </div>
-      }>
-        <VerifyDeviceLogic />
+    <AuthShell
+      art={{
+        variant: "orange", hero: "shield", accent: "lock",
+        title: "New device, quick check.",
+        sub: "A one-time code keeps your money safe.",
+        chips: [
+          { icon: "device", tone: "yellow", title: "New sign-in", sub: "Code sent to your email" },
+          { icon: "check", tone: "mint", title: "Trust it once", sub: "No code next time" },
+        ],
+      }}
+      splitAt="sm"
+    >
+      <Suspense fallback={<div className="flex justify-center p-8"><Spinner /></div>}>
+        <VerifyDeviceForm />
       </Suspense>
-    </main>
+    </AuthShell>
   );
 }

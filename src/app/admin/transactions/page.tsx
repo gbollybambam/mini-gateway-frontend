@@ -1,10 +1,21 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Link from "next/link";
 import { api } from "@/lib/api";
-import {  FilterX, ChevronLeft, ChevronRight, ArrowLeft, Activity, X} from "lucide-react";
+import { Activity, FilterX, X } from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
+import { PageHeader, selectChevron } from "@/components/dashboard/kit";
+import {
+  Pagination,
+  StatusPill,
+  TABLE,
+  TABLE_SHELL,
+  TBODY,
+  TD,
+  TH,
+  THEAD,
+  TR,
+} from "@/components/admin/AdminUI";
 
 interface Transaction {
   id: string;
@@ -27,16 +38,15 @@ interface PaginationMeta {
   total: number;
 }
 
-const formatCurrency = (amount: number, currency: string = "NGN") => {
-  return new Intl.NumberFormat("en-NG", {
+const formatCurrency = (amount: number, currency: string = "NGN") =>
+  new Intl.NumberFormat("en-NG", {
     style: "currency",
-    currency: currency,
+    currency,
     maximumFractionDigits: 2,
   }).format(amount);
-};
 
-const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat("en-US", {
+const formatDate = (dateString: string) =>
+  new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -44,7 +54,6 @@ const formatDate = (dateString: string) => {
     minute: "2-digit",
     second: "2-digit",
   }).format(new Date(dateString));
-};
 
 export default function AdminTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -56,11 +65,9 @@ export default function AdminTransactionsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
-  // We use a ref to prevent race conditions if multiple requests fire
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const loadTransactions = useCallback(async (currentPage: number, currentStatus: string) => {
-    // Cancel any in-flight request if a new one is triggered
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -68,16 +75,16 @@ export default function AdminTransactionsPage() {
 
     setIsLoading(true);
     setError("");
-    
+
     try {
       const res = await api.get("/admin/transactions", {
         params: {
           page: currentPage,
           status: currentStatus || null,
         },
-        signal: abortControllerRef.current.signal
+        signal: abortControllerRef.current.signal,
       });
-      
+
       const paginatedData = res.data.data;
       setTransactions(paginatedData.data || paginatedData);
       setMeta({
@@ -85,16 +92,8 @@ export default function AdminTransactionsPage() {
         last_page: paginatedData.last_page || 1,
         total: paginatedData.total || 0,
       });
-    } catch (err: unknown) {
-      // Ignore AbortErrors, handle real errors
-      if (err instanceof Error && err.name !== 'CanceledError') {
-        setError("Failed to load global transaction ledger.");
-      } else if (typeof err === 'object' && err !== null && 'name' in err && (err as Error).name !== 'CanceledError') {
-        // Fallback for Axios cancellation errors which might not strictly inherit from Error
-        setError("Failed to load global transaction ledger.");
-      } else {
-        setError("Failed to load global transaction ledger.");
-      }
+    } catch {
+      setError("Failed to load global transaction ledger.");
     } finally {
       setIsLoading(false);
     }
@@ -102,14 +101,13 @@ export default function AdminTransactionsPage() {
 
   useEffect(() => {
     let isMounted = true;
-    
-    // Safely execute the fetch without triggering ESLint cascading state warnings
+
     const fetchData = async () => {
       if (isMounted) {
         await loadTransactions(page, statusFilter);
       }
     };
-    
+
     void fetchData();
 
     return () => {
@@ -121,116 +119,111 @@ export default function AdminTransactionsPage() {
   }, [loadTransactions, page, statusFilter]);
 
   return (
-    <div className="space-y-6">
-      <div className="mb-2">
-        <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-xs font-bold text-[#8995a3] hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to Command Center
-        </Link>
-      </div>
+    <div className="space-y-6 pb-10">
+      <PageHeader
+        eyebrow="Operations"
+        title="Global transaction ledger"
+        description="Platform-wide immutable record of every processed payment."
+        action={
+          <span className="inline-flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2 text-[12px] font-medium text-[#52525B] shadow-sm">
+            <Activity size={14} className="text-[#71717A]" aria-hidden="true" />
+            {meta?.total || 0} records
+          </span>
+        }
+      />
 
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Global Transaction Ledger</h1>
-          <p className="text-sm text-[#8995a3] mt-1">Platform-wide immutable record of all processed payments.</p>
-        </div>
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#e8edf2] backdrop-blur-md">
-          <Activity className="h-4 w-4 text-[#35d5a4]" />
-          <span className="font-medium">{meta?.total || 0} Total Records</span>
-        </div>
-      </header>
-
-      {/* Filter Bar */}
-      <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl p-5 flex items-center gap-4">
-        <div className="flex-1 min-w-[200px]">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-2 block">Filter by Status</label>
-          <select 
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="h-11 w-full rounded-xl border border-white/10 bg-[#0a0f16] px-4 text-sm font-medium text-[#e8edf2] outline-none focus:border-[#35d5a4]/50 transition-all appearance-none cursor-pointer"
+      <div className="flex flex-col gap-4 rounded-[12px] border border-[#E5E7EB] bg-white p-4 shadow-sm sm:flex-row sm:items-end">
+        <div className="w-full sm:max-w-[240px]">
+          <label
+            htmlFor="tx-status"
+            className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.08em] text-[#71717A]"
           >
-            <option value="" className="bg-[#0a0f16]">All Statuses</option>
-            <option value="SUCCESS" className="bg-[#0a0f16]">SUCCESS</option>
-            <option value="INITIALIZED" className="bg-[#0a0f16]">INITIALIZED</option>
-            <option value="PENDING" className="bg-[#0a0f16]">PENDING</option>
-            <option value="PROCESSING" className="bg-[#0a0f16]">PROCESSING</option>
-            <option value="FAILED" className="bg-[#0a0f16]">FAILED</option>
+            Filter by status
+          </label>
+          <select
+            id="tx-status"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="h-10 w-full cursor-pointer appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-3.5 pr-9 text-[13px] font-medium text-[#09090B] shadow-[0_1px_2px_rgba(9,9,11,0.04)] outline-none transition-all hover:border-[#D4D4D8] focus:border-[#D4D4D8] focus:shadow-[0_0_0_3px_rgba(9,9,11,0.06)]"
+            style={selectChevron}
+          >
+            <option value="">All statuses</option>
+            <option value="SUCCESS">Success</option>
+            <option value="INITIALIZED">Initialized</option>
+            <option value="PENDING">Pending</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="FAILED">Failed</option>
           </select>
         </div>
         {statusFilter && (
-          <div className="flex items-end h-11">
-            <button 
-              onClick={() => { setStatusFilter(""); setPage(1); }}
-              className="h-11 px-4 flex items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
-            >
-              <FilterX className="h-4 w-4" /> Reset Filter
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setStatusFilter("");
+              setPage(1);
+            }}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-3 text-[12px] font-semibold text-[#DC2626] transition-colors hover:bg-[#FEE2E2]"
+          >
+            <FilterX size={14} aria-hidden="true" /> Reset filter
+          </button>
         )}
       </div>
 
       {isLoading && !transactions.length ? (
-        <div className="flex h-64 items-center justify-center"><Spinner /></div>
+        <div className="flex h-64 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white">
+          <Spinner />
+        </div>
       ) : error ? (
-        // FIX: Provide an inline arrow function to satisfy TypeScript's zero-argument requirement
         <ErrorMessage message={error} retry={() => void loadTransactions(page, statusFilter)} />
       ) : (
-        <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-white/[0.01] border-b border-white/5">
+        <div className={TABLE_SHELL}>
+          <div className="overflow-x-auto">
+            <table className={TABLE}>
+              <thead className={THEAD}>
                 <tr>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Reference / ID</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Merchant</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Amount</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Provider</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Status</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3] text-right">Timestamp</th>
+                  <th className={TH}>Reference / ID</th>
+                  <th className={TH}>Merchant</th>
+                  <th className={TH}>Amount</th>
+                  <th className={TH}>Provider</th>
+                  <th className={TH}>Status</th>
+                  <th className={`${TH} text-right`}>Timestamp</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
-                {transactions.map((tx) => {
-                  const isSuccess = tx.status === "SUCCESS";
-                  const isPending = tx.status === "PENDING" || tx.status === "PROCESSING" || tx.status === "INITIALIZED";
-                  
-                  return (
-                    <tr 
-                      key={tx.id} 
-                      onClick={() => setSelectedTx(tx)}
-                      className="transition-colors hover:bg-white/[0.04] group cursor-pointer"
-                    >
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-white group-hover:text-[#35d5a4] transition-colors">{tx.reference}</p>
-                        <p className="text-[10px] text-[#68747e] font-mono mt-0.5">{tx.id}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-[#e8edf2]">{tx.merchant?.business_name || 'Direct / Unknown'}</p>
-                        <p className="text-[10px] text-[#68747e] font-mono mt-0.5">{tx.merchant?.id?.substring(0, 8)}...</p>
-                      </td>
-                      <td className="px-6 py-4 font-bold tracking-tight text-white">
-                        {formatCurrency(tx.amount, tx.currency)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center rounded-md bg-white/5 px-2 py-1 text-[10px] font-bold uppercase text-[#8995a3] border border-white/5">
-                          {tx.provider || 'Cray'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider
-                          ${isSuccess ? "bg-[#2f9d78]/10 text-[#35d5a4] border border-[#2f9d78]/20" : 
-                            isPending ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : 
-                            "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
-                          {tx.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right text-xs font-medium text-[#8995a3]">
-                        {formatDate(tx.created_at)}
-                      </td>
-                    </tr>
-                  );
-                })}
+              <tbody className={TBODY}>
+                {transactions.map((tx) => (
+                  <tr key={tx.id} onClick={() => setSelectedTx(tx)} className={`${TR} group cursor-pointer`}>
+                    <td className={TD}>
+                      <p className="font-semibold text-[#09090B] transition-colors group-hover:text-[#047857]">
+                        {tx.reference}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[11px] text-[#A1A1AA]">{tx.id}</p>
+                    </td>
+                    <td className={TD}>
+                      <p className="font-medium text-[#09090B]">{tx.merchant?.business_name || "Direct / Unknown"}</p>
+                      <p className="mt-0.5 font-mono text-[11px] text-[#A1A1AA]">{tx.merchant?.id?.substring(0, 8)}…</p>
+                    </td>
+                    <td className={`${TD} font-semibold tabular-nums text-[#09090B]`}>
+                      {formatCurrency(tx.amount, tx.currency)}
+                    </td>
+                    <td className={TD}>
+                      <span className="inline-flex items-center rounded-[6px] border border-[#E5E7EB] bg-[#F8F8F6] px-2 py-1 text-[11px] font-medium uppercase text-[#52525B]">
+                        {tx.provider || "Cray"}
+                      </span>
+                    </td>
+                    <td className={TD}>
+                      <StatusPill status={tx.status} />
+                    </td>
+                    <td className={`${TD} text-right text-[12px] text-[#71717A]`}>
+                      {formatDate(tx.created_at)}
+                    </td>
+                  </tr>
+                ))}
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-[#68747e]">
+                    <td colSpan={6} className="px-5 py-14 text-center text-[13px] text-[#71717A]">
                       No transactions recorded on the platform yet.
                     </td>
                   </tr>
@@ -238,91 +231,71 @@ export default function AdminTransactionsPage() {
               </tbody>
             </table>
           </div>
-          
-          {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-white/5 px-6 py-4 bg-white/[0.01]">
-              <p className="text-xs font-medium text-[#8995a3]">
-                Page <span className="text-white font-bold">{meta.current_page}</span> of {meta.last_page}
-              </p>
-              <div className="flex items-center gap-2">
-                <button 
-                  disabled={meta.current_page === 1} 
-                  onClick={() => setPage(p => p - 1)} 
-                  className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 disabled:opacity-50 cursor-pointer"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" /> Prev
-                </button>
-                <button 
-                  disabled={meta.current_page === meta.last_page} 
-                  onClick={() => setPage(p => p + 1)} 
-                  className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 disabled:opacity-50 cursor-pointer"
-                >
-                  Next <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
+
+          <Pagination meta={meta} onPage={setPage} />
         </div>
       )}
 
-      {/* Transaction Detail Modal */}
+      {/* Transaction detail modal */}
       {selectedTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-[#0a0f16] p-6 shadow-2xl relative space-y-6">
-            
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Transaction Audit</p>
-                <h2 className="text-lg font-bold text-white mt-0.5">{selectedTx.reference}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#09090B]/40 p-4 backdrop-blur-[2px]">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_24px_60px_-12px_rgba(9,9,11,0.3)]">
+            <div className="flex items-start justify-between gap-4 border-b border-[#E5E7EB] bg-[#F8F8F6] px-5 py-4">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#71717A]">
+                  Transaction audit
+                </p>
+                <h2 className="mt-0.5 truncate text-[16px] font-semibold tracking-tight text-[#09090B]">
+                  {selectedTx.reference}
+                </h2>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => setSelectedTx(null)}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 text-[#8995a3] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-[#71717A] transition-colors hover:bg-[#ECECE9] hover:text-[#09090B]"
               >
-                <X className="h-4 w-4" />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
 
-            <div className="space-y-4 text-sm">
-              <div className="flex justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-[#8995a3]">Internal ID</span>
-                <span className="font-mono text-white text-xs">{selectedTx.id}</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-[#8995a3]">Merchant</span>
-                <span className="font-bold text-white">{selectedTx.merchant?.business_name || 'N/A'}</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-[#8995a3]">Amount</span>
-                <span className="font-bold text-[#35d5a4]">{formatCurrency(selectedTx.amount, selectedTx.currency)}</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-[#8995a3]">Status</span>
-                <span className="font-bold uppercase text-white">{selectedTx.status}</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-[#8995a3]">Provider</span>
-                <span className="font-bold uppercase text-white">{selectedTx.provider || 'Cray'}</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-[#8995a3]">Timestamp</span>
-                <span className="font-medium text-white">{formatDate(selectedTx.created_at)}</span>
-              </div>
+            <div className="space-y-2.5 p-5">
+              {[
+                { label: "Internal ID", value: selectedTx.id, mono: true },
+                { label: "Merchant", value: selectedTx.merchant?.business_name || "N/A" },
+                { label: "Amount", value: formatCurrency(selectedTx.amount, selectedTx.currency), strong: true },
+                { label: "Status", value: selectedTx.status },
+                { label: "Provider", value: selectedTx.provider || "Cray" },
+                { label: "Timestamp", value: formatDate(selectedTx.created_at) },
+              ].map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between gap-4 rounded-[9px] border border-[#E5E7EB] bg-[#FAFAF9] px-3.5 py-2.5"
+                >
+                  <span className="text-[12px] text-[#71717A]">{row.label}</span>
+                  <span
+                    className={`truncate text-right text-[12px] ${
+                      row.mono ? "font-mono" : ""
+                    } ${row.strong ? "font-semibold text-[#047857]" : "font-medium text-[#09090B]"}`}
+                  >
+                    {row.value}
+                  </span>
+                </div>
+              ))}
             </div>
 
-            <div className="pt-2">
-              <button 
+            <div className="border-t border-[#E5E7EB] px-5 py-4">
+              <button
+                type="button"
                 onClick={() => setSelectedTx(null)}
-                className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/10"
+                className="inline-flex h-10 w-full items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[12px] font-semibold text-[#09090B] shadow-sm transition-colors hover:bg-[#F1F1EE]"
               >
-                Close Inspection
+                Close inspection
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

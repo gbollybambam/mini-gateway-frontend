@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { api } from "@/lib/api";
-import { ArrowLeft, Shield, ChevronLeft, ChevronRight, Eye, X, Terminal } from "lucide-react";
+import { Eye, Shield, Terminal, X } from "@/components/icons";
 import { Spinner, ErrorMessage } from "@/components/dashboard/ui";
+import { PageHeader } from "@/components/dashboard/kit";
+import {
+  Pagination,
+  TABLE,
+  TABLE_SHELL,
+  TBODY,
+  TD,
+  TH,
+  THEAD,
+  TR,
+} from "@/components/admin/AdminUI";
 
 interface AuditLog {
   id: string;
@@ -23,7 +33,6 @@ interface PaginationMeta {
   total: number;
 }
 
-// Strictly type the API response to remove all 'any' related ESLint errors
 interface ApiResponse {
   data: {
     data: AuditLog[];
@@ -38,8 +47,9 @@ export default function AdminAuditLogsPage() {
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   const [page, setPage] = useState(1);
+  const [retryCount, setRetryCount] = useState(0);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
   const fetchLogsData = useCallback(async (pageNum: number) => {
@@ -49,14 +59,10 @@ export default function AdminAuditLogsPage() {
 
   useEffect(() => {
     let isMounted = true;
-    
-    // Notice: We removed the synchronous setIsLoading(true) from here.
 
     const loadLogs = async () => {
-      // If we are changing pages (and it's not the initial load), 
-      // we can set loading state right as the async operation begins.
-      setIsLoading(true); 
-      
+      setIsLoading(true);
+
       try {
         const data = await fetchLogsData(page);
         if (isMounted) {
@@ -84,92 +90,89 @@ export default function AdminAuditLogsPage() {
     return () => {
       isMounted = false;
     };
-  }, [page, fetchLogsData]);
+  }, [page, retryCount, fetchLogsData]);
 
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat("en-US", {
+  const formatDate = (dateString: string) =>
+    new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
     }).format(new Date(dateString));
-  };
 
-  const formatTargetType = (type: string) => {
-    return type.split('\\').pop() || type;
-  };
+  const formatTargetType = (type: string) => type.split("\\").pop() || type;
 
   return (
-    <div className="space-y-6">
-      
-      {/* Back Navigation */}
-      <div className="mb-2">
-        <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-xs font-bold text-[#8995a3] hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to Command Center
-        </Link>
-      </div>
-
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">System Audit Logs</h1>
-          <p className="text-sm text-[#8995a3] mt-1">Immutable security ledger of all administrative actions.</p>
-        </div>
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-[#e8edf2] backdrop-blur-md">
-          <Shield className="h-4 w-4 text-purple-400" />
-          <span className="font-medium">{meta?.total || 0} Security Events</span>
-        </div>
-      </header>
+    <div className="space-y-6 pb-10">
+      <PageHeader
+        eyebrow="System"
+        title="System audit logs"
+        description="Immutable security ledger of all administrative actions."
+        action={
+          <span className="inline-flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2 text-[12px] font-medium text-[#52525B] shadow-sm">
+            <Shield size={14} className="text-[#71717A]" aria-hidden="true" />
+            {meta?.total || 0} security events
+          </span>
+        }
+      />
 
       {isLoading && !logs.length ? (
-        <div className="flex h-64 items-center justify-center"><Spinner /></div>
+        <div className="flex h-64 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white">
+          <Spinner />
+        </div>
       ) : error ? (
-        <ErrorMessage message={error} retry={() => setPage(1)} />
+        <ErrorMessage
+          message={error}
+          retry={() => {
+            setPage(1);
+            setRetryCount((c) => c + 1);
+          }}
+        />
       ) : (
-        <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col relative">
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-white/[0.01] border-b border-white/5">
+        <div className={TABLE_SHELL}>
+          <div className="overflow-x-auto">
+            <table className={TABLE}>
+              <thead className={THEAD}>
                 <tr>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Timestamp</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Action</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Target</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3]">Admin ID & IP</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#8995a3] text-right">Payload</th>
+                  <th className={TH}>Timestamp</th>
+                  <th className={TH}>Action</th>
+                  <th className={TH}>Target</th>
+                  <th className={TH}>Admin ID & IP</th>
+                  <th className={`${TH} text-right`}>Payload</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-mono text-xs">
+              <tbody className={`${TBODY} font-mono`}>
                 {logs.map((log) => (
-                  <tr key={log.id} className="transition-colors hover:bg-white/[0.04]">
-                    <td className="px-6 py-4 text-[#8995a3]">
-                      {formatDate(log.created_at)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center rounded bg-purple-500/10 px-2 py-1 font-bold text-purple-400 border border-purple-500/20">
+                  <tr key={log.id} className={TR}>
+                    <td className={`${TD} text-[12px] text-[#71717A]`}>{formatDate(log.created_at)}</td>
+                    <td className={TD}>
+                      <span className="inline-flex items-center rounded-[6px] border border-[#DDD6FE] bg-[#F5F3FF] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#6D28D9]">
                         {log.action}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-white">{formatTargetType(log.target_type)}</p>
-                      <p className="text-[#68747e] mt-0.5">{log.target_id.substring(0, 8)}...</p>
+                    <td className={TD}>
+                      <p className="text-[12px] font-semibold text-[#09090B]">{formatTargetType(log.target_type)}</p>
+                      <p className="mt-0.5 text-[11px] text-[#A1A1AA]">{log.target_id.substring(0, 8)}…</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-[#e8edf2]">{log.admin_id.substring(0, 8)}...</p>
-                      <p className="text-[#68747e] mt-0.5">{log.ip_address}</p>
+                    <td className={TD}>
+                      <p className="text-[12px] text-[#52525B]">{log.admin_id.substring(0, 8)}…</p>
+                      <p className="mt-0.5 text-[11px] text-[#A1A1AA]">{log.ip_address}</p>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
+                    <td className={`${TD} text-right`}>
+                      <button
+                        type="button"
                         onClick={() => setSelectedLog(log)}
-                        className="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 font-bold text-white hover:bg-white/10 transition-colors cursor-pointer"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[7px] border border-[#E5E7EB] bg-white px-3 font-sans text-[11px] font-semibold text-[#09090B] shadow-sm transition-colors hover:bg-[#F1F1EE]"
                       >
-                        <Eye className="h-3.5 w-3.5" /> Inspect
+                        <Eye size={13} aria-hidden="true" /> Inspect
                       </button>
                     </td>
                   </tr>
                 ))}
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-[#68747e] font-sans text-sm">
+                    <td colSpan={5} className="px-5 py-14 text-center font-sans text-[13px] text-[#71717A]">
                       No administrative actions logged yet.
                     </td>
                   </tr>
@@ -177,61 +180,52 @@ export default function AdminAuditLogsPage() {
               </tbody>
             </table>
           </div>
-          
-          {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-white/5 px-6 py-4 bg-white/[0.01]">
-              <p className="text-xs font-medium text-[#8995a3]">Page <span className="text-white font-bold">{meta.current_page}</span> of {meta.last_page}</p>
-              <div className="flex items-center gap-2">
-                <button disabled={meta.current_page === 1} onClick={() => setPage(p => p - 1)} className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 disabled:opacity-50 cursor-pointer">
-                  <ChevronLeft className="h-3.5 w-3.5" /> Prev
-                </button>
-                <button disabled={meta.current_page === meta.last_page} onClick={() => setPage(p => p + 1)} className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 disabled:opacity-50 cursor-pointer">
-                  Next <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
+
+          <Pagination meta={meta} onPage={setPage} />
         </div>
       )}
 
-      {/* Raw Payload Inspection Modal */}
+      {/* Raw payload inspection modal */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0a0f16] p-6 shadow-2xl relative flex flex-col max-h-[85vh]">
-            
-            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4 shrink-0">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8995a3] flex items-center gap-1 mb-1">
-                  <Terminal className="h-3 w-3" /> Audit Record Payload
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#09090B]/40 p-4 backdrop-blur-[2px]">
+          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_24px_60px_-12px_rgba(9,9,11,0.3)]">
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#E5E7EB] bg-[#F8F8F6] px-5 py-4">
+              <div className="min-w-0">
+                <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#71717A]">
+                  <Terminal size={12} aria-hidden="true" /> Audit record payload
                 </p>
-                <h2 className="text-lg font-bold text-white break-all">{selectedLog.id}</h2>
+                <h2 className="truncate font-mono text-[13px] font-semibold text-[#09090B]">{selectedLog.id}</h2>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => setSelectedLog(null)}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 text-[#8995a3] hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                aria-label="Close"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-[#71717A] transition-colors hover:bg-[#ECECE9] hover:text-[#09090B]"
               >
-                <X className="h-4 w-4" />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto bg-[#05080c] rounded-xl border border-white/10 p-4 shadow-inner">
-              <pre className="text-xs font-mono text-[#35d5a4] leading-relaxed break-all whitespace-pre-wrap">
-                {JSON.stringify(selectedLog.changes || {}, null, 2)}
-              </pre>
+            <div className="flex-1 overflow-auto p-5">
+              <div className="custom-scrollbar overflow-auto rounded-[10px] border border-[#27272A] bg-[#0B0B0E] p-4 shadow-inner">
+                <pre className="break-all whitespace-pre-wrap font-mono text-[12px] leading-relaxed text-[#E4E4E7]">
+                  {JSON.stringify(selectedLog.changes || {}, null, 2)}
+                </pre>
+              </div>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-white/5 shrink-0">
-              <button 
+            <div className="shrink-0 border-t border-[#E5E7EB] px-5 py-4">
+              <button
+                type="button"
                 onClick={() => setSelectedLog(null)}
-                className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/10"
+                className="inline-flex h-10 w-full items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[12px] font-semibold text-[#09090B] shadow-sm transition-colors hover:bg-[#F1F1EE]"
               >
-                Close Trace
+                Close trace
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

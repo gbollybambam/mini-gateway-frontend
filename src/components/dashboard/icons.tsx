@@ -5,7 +5,7 @@ import {
   Landmark, Settings, LogOut, Menu, X, Eye, EyeOff, CheckCircle2, XCircle,
   // Added the missing icons for your dashboard overview:
   Banknote, CircleAlert, CircleCheck, Clock3, CreditCard, LoaderCircle, TriangleAlert
-} from "lucide-react";
+} from "@/components/icons";
 
 export {
   KeyRound, Plus, RefreshCw, Trash2, Copy, Save, Activity,

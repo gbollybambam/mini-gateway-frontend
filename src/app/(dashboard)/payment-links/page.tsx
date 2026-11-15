@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
-import { Plus, Link as LinkIcon, Copy, Check, ExternalLink, Power, PowerOff, ChevronDown, ChevronUp, Clock, UserCheck, Activity } from "lucide-react";
+import { Plus, Link as LinkIcon, Copy, Check, ExternalLink, Power, PowerOff, ChevronDown, Search } from "@/components/icons";
 import { useToast } from "@/components/dashboard/ui";
+import { AnimatedNumber } from "@/components/dashboard/motion";
 
 interface PaymentLink {
   id: string;
@@ -18,23 +19,77 @@ interface PaymentLink {
   created_at: string;
   customer_information?: { email: string } | null;
   expiry?: string | null;
-  payment?: { customer_email: string; amount: number; created_at: string } | null; 
+  payment?: { customer_email: string; amount: number; created_at: string } | null;
 }
+
+const TABS = [
+  { label: "All", value: "" },
+  { label: "Active", value: "ACTIVE" },
+  { label: "Completed", value: "COMPLETED" },
+  { label: "Expired", value: "EXPIRED" },
+  { label: "Deactivated", value: "DEACTIVATED" },
+];
+
+const STATUS_STYLES: Record<string, { cls: string; dot: string }> = {
+  ACTIVE: { cls: "bg-[#ECFDF5] border-[#BBF7D0] text-[#059669]", dot: "bg-[#10B981]" },
+  COMPLETED: { cls: "bg-[#EFF6FF] border-[#BFDBFE] text-[#2563EB]", dot: "bg-[#3B82F6]" },
+  EXPIRED: { cls: "bg-[#FFFBEB] border-[#FDE68A] text-[#B45309]", dot: "bg-[#F59E0B]" },
+  DEACTIVATED: { cls: "bg-[var(--pm-band)] border-[#E4E4E7] text-[#52525B]", dot: "bg-[#A1A1AA]" },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const s = STATUS_STYLES[status.toUpperCase()] ?? STATUS_STYLES.DEACTIVATED;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12px] font-medium capitalize ${s.cls}`}>
+      <span className={`size-1.5 rounded-full ${s.dot}`} />
+      {status.toLowerCase()}
+    </span>
+  );
+}
+
+const formatAmount = (amount: number, currency: string) =>
+  new Intl.NumberFormat("en-NG", { style: "currency", currency: currency || "NGN" }).format(amount || 0);
+
+const formatCount = (value: number) => new Intl.NumberFormat("en-NG").format(Math.round(value));
+
+const formatDate = (v: string | null | undefined) =>
+  v ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(v)) : "—";
 
 function LinksSkeleton() {
   return (
-    <div className="animate-pulse flex flex-col mt-4">
+    <div className="flex flex-col">
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between py-6 px-4 sm:px-8 border-b border-white/5">
+        <div key={i} className="flex items-center justify-between border-b border-[var(--pm-line)] px-7 py-5">
           <div className="space-y-2">
-            <div className="h-4 w-32 sm:w-40 bg-white/10 rounded-full"></div>
-            <div className="h-3 w-20 sm:w-24 bg-white/5 rounded-full"></div>
+            <div className="pm-skeleton h-4 w-40 rounded-full" />
+            <div className="pm-skeleton h-3 w-24 rounded-full" />
           </div>
-          <div className="h-4 w-24 bg-white/10 rounded-full hidden sm:block"></div>
-          <div className="h-6 w-20 bg-white/5 rounded-full hidden md:block"></div>
-          <div className="h-8 w-8 bg-white/5 rounded-full"></div>
+          <div className="pm-skeleton hidden h-4 w-24 rounded-full sm:block" />
+          <div className="pm-skeleton hidden h-6 w-20 rounded-full md:block" />
+          <div className="pm-skeleton h-6 w-12 rounded-[6px]" />
         </div>
       ))}
+    </div>
+  );
+}
+
+function StatCard({ label, value, hint }: { label: string; value: number; hint: string }) {
+  return (
+    <div className="rounded-[12px] border border-[var(--pm-line)] bg-white p-5 transition-all hover:border-[#D4D4D8] hover:shadow-[0_8px_24px_-12px_rgba(9,9,11,0.12)]">
+      <p className="text-[13px] font-medium text-[#71717A]">{label}</p>
+      <p className="mt-1.5 text-[26px] font-bold leading-none tracking-[-0.02em] tabular-nums">
+        <AnimatedNumber value={value} format={formatCount} />
+      </p>
+      <p className="mt-3 text-[12px] text-[#A1A1AA]">{hint}</p>
+    </div>
+  );
+}
+
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-2.5 text-[13px]">
+      <span className="shrink-0 text-[#71717A]">{label}</span>
+      <span className="break-all text-right font-medium text-[#09090B]">{children}</span>
     </div>
   );
 }
@@ -45,264 +100,306 @@ export default function PaymentLinksPage() {
   const [error, setError] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  
+  const [tab, setTab] = useState("");
+  const [query, setQuery] = useState("");
+  const isPollingRef = useRef(false);
+
   const toast = useToast();
 
-  const fetchLinks = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-
+  const fetchLinks = useCallback(async (silent = false) => {
     try {
       const response = await api.get<{ data: PaymentLink[] }>("/payment-links");
       setLinks(response.data.data);
-      setError("");
+      if (!silent) setError("");
     } catch (err) {
-      setError(isAxiosError(err) ? err.response?.data?.message || "Failed to load" : "Error loading links");
+      if (!silent) setError(isAxiosError(err) ? err.response?.data?.message || "Failed to load" : "Error loading links");
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, []);
 
-  // 1. Initial Load
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void fetchLinks(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
+    const t = window.setTimeout(() => { void fetchLinks(false); }, 0);
+    return () => window.clearTimeout(t);
   }, [fetchLinks]);
 
-  // 2. THE MAGIC: Silent Background Polling
-  const isPollingRef = React.useRef(false);
-  
-  useEffect(() => {
-    // Only poll if there is at least one active link that could theoretically be paid
-    if (!links.some((link) => link.status.toUpperCase() === "ACTIVE")) return;
+  const hasActive = useMemo(() => links.some((l) => l.status.toUpperCase() === "ACTIVE"), [links]);
 
-    const interval = window.setInterval(() => {
+  useEffect(() => {
+    if (!hasActive) return;
+    const id = window.setInterval(() => {
       if (isPollingRef.current) return;
       isPollingRef.current = true;
-      
-      api.get<{ data: PaymentLink[] }>("/payment-links")
-        .then(response => {
-          setLinks(response.data.data);
-        })
-        .catch(() => {
-          // Silent fail for polling
-        })
-        .finally(() => {
-          isPollingRef.current = false;
-        });
+      fetchLinks(true).finally(() => { isPollingRef.current = false; });
     }, 5000);
+    return () => window.clearInterval(id);
+  }, [hasActive, fetchLinks]);
 
-    return () => window.clearInterval(interval);
-  }, [links]);
-
-  const handleCopy = (e: React.MouseEvent, id: string, url: string) => {
+  const handleCopy = async (e: React.MouseEvent, id: string, url: string) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(url);
-    setCopiedId(id);
-    toast.success("Checkout link copied to clipboard!");
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      toast.success("Checkout link copied to clipboard!");
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      toast.error("Couldn't copy. Please copy the link manually.");
+    }
   };
 
   const toggleStatus = async (e: React.MouseEvent, id: string, currentStatus: string) => {
     e.stopPropagation();
-    const newStatus = currentStatus === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE';
+    const newStatus = currentStatus === "ACTIVE" ? "DEACTIVATED" : "ACTIVE";
     try {
       await api.patch(`/payment-links/${id}`, { status: newStatus });
-      setLinks(links.map(l => l.id === id ? { ...l, status: newStatus } : l));
+      setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, status: newStatus } : l)));
       toast.success(`Link has been successfully ${newStatus.toLowerCase()}.`);
     } catch (err) {
       toast.error(isAxiosError(err) ? err.response?.data?.message || "Status update failed" : "System Error");
     }
   };
 
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
-  };
+  const counts = useMemo(() => {
+    const c = { total: links.length, ACTIVE: 0, COMPLETED: 0, other: 0 };
+    links.forEach((l) => {
+      const s = l.status.toUpperCase();
+      if (s === "ACTIVE") c.ACTIVE++;
+      else if (s === "COMPLETED") c.COMPLETED++;
+      else c.other++;
+    });
+    return c;
+  }, [links]);
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return "N/A";
-    return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(dateString));
-  };
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return links.filter((l) => {
+      if (tab && l.status.toUpperCase() !== tab) return false;
+      if (!q) return true;
+      return l.description?.toLowerCase().includes(q) || l.reference?.toLowerCase().includes(q);
+    });
+  }, [links, tab, query]);
 
   return (
-    <div className="space-y-6 relative">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl p-4 sm:p-6 shadow-xl">
+    <div className="space-y-6 bg-white pb-10 font-sans text-[#09090B]">
+      {/* Header */}
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-sm">Payment Links</h1>
-          <p className="text-xs sm:text-sm text-[#8995a3] mt-1">Generate reusable checkout pages to collect payments globally.</p>
+          <h1 className="text-[28px] font-bold tracking-[-0.025em]">Payment Links</h1>
+          <p className="mt-1 text-[13px] text-[#71717A]">Generate reusable checkout pages to collect payments.</p>
         </div>
-        <Link 
-          href="/payment-links/create" 
-          className="flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#2f9d78] to-[#1a6b50] px-6 py-3 text-sm font-bold text-white transition-all hover:shadow-[0_0_20px_rgba(47,157,120,0.4)] hover:brightness-110 border border-white/10"
+        <Link
+          href="/payment-links/create"
+          className="inline-flex w-fit items-center justify-center gap-2 rounded-[8px] bg-gradient-to-b from-[#27272A] to-[#09090B] px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm ring-1 ring-black/10 transition-all hover:brightness-125"
         >
           <Plus className="h-4 w-4" /> Create Link
         </Link>
+      </header>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Total Links" value={counts.total} hint="All links created" />
+        <StatCard label="Active" value={counts.ACTIVE} hint="Ready to accept payment" />
+        <StatCard label="Completed" value={counts.COMPLETED} hint="Successfully paid" />
+        <StatCard label="Inactive" value={counts.other} hint="Expired or deactivated" />
       </div>
 
-      {error ? (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center text-sm font-medium text-red-500">
-          {error}
+      {/* Filters */}
+      <section className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
+        <div className="inline-flex w-fit max-w-full items-center gap-0.5 overflow-x-auto rounded-[10px] border border-[var(--pm-line)] bg-[var(--pm-band)] p-0.5" role="tablist" aria-label="Filter by status">
+          {TABS.map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.value}
+              onClick={() => { setTab(t.value); setExpandedId(null); }}
+              className={`whitespace-nowrap rounded-[8px] px-3.5 py-1.5 text-[13px] font-medium transition-all ${
+                tab === t.value ? "border border-[var(--pm-line)] bg-[var(--pm-raised)] text-[var(--pm-ink)] shadow-sm" : "border border-transparent text-[#71717A] hover:text-[var(--pm-ink)]"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
+
+        <label className="flex h-10 w-full items-center gap-2.5 rounded-[10px] border border-[var(--pm-line)] bg-white px-3.5 shadow-[0_1px_2px_rgba(9,9,11,0.04)] transition-all focus-within:border-[#D4D4D8] focus-within:shadow-[0_0_0_3px_rgba(9,9,11,0.06)] hover:border-[#D4D4D8] lg:max-w-sm">
+          <Search className="h-4 w-4 shrink-0 text-[#71717A]" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by description or reference..."
+            className="h-full w-full bg-transparent text-[13px] outline-none placeholder:text-[#A1A1AA]"
+          />
+        </label>
+      </section>
+
+      {error ? (
+        <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] p-6 text-center text-[13px] font-medium text-[#DC2626]">{error}</div>
       ) : (
-        <div className="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl shadow-2xl overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left text-sm text-[#e8edf2] whitespace-nowrap">
-              <thead className="border-b border-white/5 bg-white/1 text-[10px] font-bold uppercase tracking-widest text-[#68747e]">
+        <section className="overflow-hidden rounded-[12px] border border-[var(--pm-line)] bg-white shadow-sm">
+          <div className="custom-scrollbar overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead className="border-b border-[var(--pm-line)] bg-[var(--pm-band)]">
                 <tr>
-                  <th className="px-4 sm:px-8 py-5">Details</th>
-                  <th className="hidden sm:table-cell px-8 py-5">Amount</th>
-                  <th className="hidden md:table-cell px-8 py-5">Status</th>
-                  <th className="hidden lg:table-cell px-8 py-5">Created</th>
-                  <th className="px-4 sm:px-8 py-5 text-right">Actions</th>
+                  {[
+                    { h: "Details", c: "" },
+                    { h: "Amount", c: "hidden sm:table-cell" },
+                    { h: "Status", c: "hidden md:table-cell" },
+                    { h: "Created", c: "hidden lg:table-cell" },
+                    { h: "", c: "text-right" },
+                  ].map((col, i) => (
+                    <th key={i} className={`px-4 py-3.5 text-[12px] font-medium uppercase tracking-wide text-[#71717A] sm:px-7 ${col.c}`}>
+                      {col.h || <span className="sr-only">Actions</span>}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="bg-white">
                 {isLoading ? (
                   <tr><td colSpan={5}><LinksSkeleton /></td></tr>
-                ) : links.length === 0 ? (
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={5}>
-                      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <LinkIcon className="h-8 w-8 text-[#68747e]" />
+                      <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+                        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[12px] border border-[var(--pm-line)] bg-[var(--pm-band)]">
+                          <LinkIcon className="h-6 w-6 text-[#A1A1AA]" />
                         </div>
-                        <h3 className="text-lg font-bold text-white drop-shadow-sm">No Payment Links Active</h3>
-                        <p className="mt-2 text-sm text-[#8995a3] max-w-sm leading-relaxed whitespace-normal">
-                          Create your first hosted checkout link to start accepting payments securely without writing any code.
+                        <h3 className="text-[15px] font-bold">{links.length ? "No links match your filters" : "No payment links yet"}</h3>
+                        <p className="mt-2 max-w-sm text-[13px] leading-[1.6] text-[#71717A]">
+                          {links.length
+                            ? "Try a different status or search term."
+                            : "Create your first hosted checkout link to start accepting payments without writing any code."}
                         </p>
+                        {!links.length && (
+                          <Link href="/payment-links/create" className="mt-5 inline-flex items-center gap-2 rounded-[8px] border border-[var(--pm-line)] bg-white px-4 py-2 text-[13px] font-medium shadow-sm transition-colors hover:bg-[var(--pm-band-hover)]">
+                            <Plus className="h-4 w-4" /> Create your first link
+                          </Link>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  links.map((link) => {
-                    const isActive = link.status === 'ACTIVE';
-                    const isCompleted = link.status === 'COMPLETED';
-                    const isDeactivated = link.status === 'DEACTIVATED';
-                    const isExpired = link.status === 'EXPIRED';
+                  filtered.map((link) => {
+                    const status = link.status.toUpperCase();
+                    const isActive = status === "ACTIVE";
+                    const isCompleted = status === "COMPLETED";
+                    const isExpired = status === "EXPIRED";
+                    const dim = status === "DEACTIVATED" || isExpired;
                     const isExpanded = expandedId === link.id;
-                    
+                    const payer = link.payment?.customer_email || link.customer_information?.email;
+
                     return (
                       <React.Fragment key={link.id}>
-                        {/* MAIN ROW (RESPONSIVE) */}
-                        <tr 
+                        <tr
                           onClick={() => setExpandedId(isExpanded ? null : link.id)}
-                          className={`transition-colors cursor-pointer group ${isDeactivated || isExpired ? 'opacity-60' : ''} ${isExpanded ? 'bg-white/4' : 'hover:bg-white/2'}`}
+                          aria-expanded={isExpanded}
+                          className={`group cursor-pointer border-b border-[var(--pm-line)] transition-colors hover:bg-[var(--pm-band-hover)] ${isExpanded ? "bg-[var(--pm-band)]" : ""}`}
                         >
-                          <td className="px-4 sm:px-8 py-5">
-                            <p className={`font-bold transition-colors truncate max-w-37.5 sm:max-w-62.5 ${isActive || isCompleted ? 'text-white group-hover:text-[#35d5a4]' : 'text-[#8995a3]'}`}>
-                              {link.description}
-                            </p>
-                            <p className="text-xs text-[#8995a3] mt-0.5">{link.reference}</p>
-                            {/* Show Amount & Status on mobile only */}
-                            <div className="sm:hidden flex items-center gap-2 mt-2">
-                              <span className="font-bold text-[#e8edf2] text-xs">{formatAmount(link.amount, link.currency)}</span>
-                              <span className="text-[10px] uppercase text-[#68747e]">• {link.status}</span>
+                          <td className={`px-4 py-4 sm:px-7 sm:py-5 ${isExpanded ? "shadow-[inset_3px_0_0_#09090B]" : ""}`}>
+                            <p className={`max-w-[220px] truncate text-[14px] font-semibold sm:max-w-[320px] ${dim ? "text-[#71717A]" : ""}`}>{link.description}</p>
+                            <p className="mt-0.5 font-mono text-[12px] text-[#A1A1AA]">{link.reference}</p>
+                            <div className="mt-2 flex items-center gap-2 sm:hidden">
+                              <span className="text-[12px] font-semibold tabular-nums">{formatAmount(link.amount, link.currency)}</span>
+                              <StatusBadge status={link.status} />
                             </div>
                           </td>
-                          <td className={`hidden sm:table-cell px-8 py-5 font-bold ${isActive || isCompleted ? 'text-[#e8edf2]' : 'text-[#8995a3]'}`}>
+                          <td className={`hidden whitespace-nowrap px-4 py-4 text-[14px] font-semibold tabular-nums sm:table-cell sm:px-7 sm:py-5 ${dim ? "text-[#71717A]" : ""}`}>
                             {formatAmount(link.amount, link.currency)}
                           </td>
-                          <td className="hidden md:table-cell px-8 py-5">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                              isCompleted ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                              isActive ? 'bg-[#2f9d78]/10 text-[#35d5a4] border border-[#2f9d78]/20' : 
-                              isExpired ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                              'bg-red-500/10 text-red-400 border border-red-500/20'
+                          <td className="hidden whitespace-nowrap px-4 py-4 sm:px-7 sm:py-5 md:table-cell"><StatusBadge status={link.status} /></td>
+                          <td className="hidden whitespace-nowrap px-4 py-4 text-[14px] text-[#52525B] sm:px-7 sm:py-5 lg:table-cell">{formatDate(link.created_at)}</td>
+                          <td className="whitespace-nowrap px-4 py-4 text-right sm:px-7 sm:py-5">
+                            <span className={`inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1.5 text-[13px] font-medium transition-colors ${
+                              isExpanded ? "bg-[#09090B] text-white" : "text-[#52525B] group-hover:bg-[var(--pm-band-hover)] group-hover:text-[#09090B]"
                             }`}>
-                              {link.status}
+                              {isExpanded ? "Close" : "View"}
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
                             </span>
-                          </td>
-                          <td className="hidden lg:table-cell px-8 py-5 text-[#8995a3] font-medium">
-                            {formatDate(link.created_at)}
-                          </td>
-                          <td className="px-4 sm:px-8 py-5 text-right">
-                             <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-[#8995a3] group-hover:text-white">
-                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                             </button>
                           </td>
                         </tr>
 
-                        {/* EXPANDED DROPDOWN (RESPONSIVE) */}
                         {isExpanded && (
-                          <tr className="bg-[#05080c]/40 shadow-inner border-b-2 border-[#2f9d78]/20">
+                          <tr className="border-b border-[var(--pm-line)] bg-[var(--pm-band)]">
                             <td colSpan={5} className="p-0">
-                               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-8 animate-in slide-in-from-top-2 fade-in duration-200 whitespace-normal">
-                                  
-                                  {/* Left Col: Metadata & Usage Details */}
-                                  <div className="space-y-5">
-                                     <div>
-                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><LinkIcon className="h-3 w-3"/> Hosted URL</h4>
-                                        <a href={link.checkout_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-[#35d5a4] hover:underline break-all">
-                                          {link.checkout_url}
-                                        </a>
-                                     </div>
-                                     
-                                     {isCompleted ? (
-                                       <div className="rounded-xl border border-[#3f82b2]/20 bg-[#3f82b2]/10 p-4">
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#79b8e8] mb-1 flex items-center gap-2">
-                                            <UserCheck className="h-3 w-3"/> Payer Details
-                                          </h4>
-                                          <p className="text-sm font-medium text-white break-all">
-                                            {link.payment?.customer_email || link.customer_information?.email || "Anonymous Payer"}
-                                          </p>
-                                          <p className="text-xs text-[#79b8e8] mt-1 font-bold">Successfully Collected</p>
-                                       </div>
-                                     ) : (
-                                       <div>
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><UserCheck className="h-3 w-3"/> Designated Customer</h4>
-                                          <p className="text-sm font-medium text-white break-all">{link.customer_information?.email || "General (Open to anyone)"}</p>
-                                       </div>
-                                     )}
-
-                                     <div className="grid grid-cols-2 gap-4">
-                                       <div className="md:hidden">
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><Activity className="h-3 w-3"/> Status</h4>
-                                          <p className="text-sm font-medium text-white">{link.status}</p>
-                                       </div>
-                                       <div>
-                                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#68747e] mb-1 flex items-center gap-2"><Clock className="h-3 w-3"/> Expiry Date</h4>
-                                          <p className="text-sm font-medium text-white">{formatDate(link.expiry)}</p>
-                                       </div>
-                                     </div>
+                              <div className="animate-in fade-in slide-in-from-top-1 px-4 py-5 duration-200 sm:px-7 sm:py-6" onClick={(e) => e.stopPropagation()}>
+                                {/* Summary strip */}
+                                <div className="mb-5 flex flex-col gap-4 rounded-[12px] border border-[var(--pm-line)] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                                  <div>
+                                    <p className="text-[24px] font-bold leading-none tracking-[-0.02em] tabular-nums">{formatAmount(link.amount, link.currency)}</p>
+                                    <p className="mt-1.5 text-[12px] text-[#71717A]">{link.description}</p>
                                   </div>
+                                  <StatusBadge status={link.status} />
+                                </div>
 
-                                  {/* Right Col: Actions */}
-                                  <div className="flex flex-col gap-3 justify-center md:border-l border-white/5 md:pl-8">
-                                     <button 
-                                      onClick={(e) => handleCopy(e, link.id, link.checkout_url)}
-                                      disabled={!isActive}
-                                      className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-bold text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                     >
-                                      {copiedId === link.id ? <Check className="h-4 w-4 text-[#35d5a4]" /> : <Copy className="h-4 w-4" />}
-                                      {copiedId === link.id ? "Copied" : "Copy Checkout Link"}
-                                     </button>
-
-                                     <a 
+                                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                                  {/* Link */}
+                                  <div className="rounded-[12px] border border-[var(--pm-line)] bg-white p-5">
+                                    <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#A1A1AA]">Hosted URL</h4>
+                                    <a
                                       href={link.checkout_url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#3f82b2]/20 bg-[#3f82b2]/10 px-4 text-sm font-bold text-[#79b8e8] hover:bg-[#3f82b2]/20 transition-all ${!isActive && 'opacity-50 pointer-events-none'}`}
-                                     >
-                                      <ExternalLink className="h-4 w-4" /> Open Payment Page
-                                     </a>
+                                      className="block break-all rounded-[8px] border border-[var(--pm-line)] bg-[var(--pm-band)] px-3 py-2.5 font-mono text-[12px] text-[#09090B] transition-colors hover:border-[#D4D4D8]"
+                                    >
+                                      {link.checkout_url}
+                                    </a>
+                                    <div className="mt-3 divide-y divide-[var(--pm-line)]">
+                                      <DetailRow label="Reference"><span className="font-mono text-[12px]">{link.reference}</span></DetailRow>
+                                      <DetailRow label="Currency">{link.currency}</DetailRow>
+                                    </div>
+                                  </div>
 
-                                     {!isCompleted && !isExpired && (
-                                      <button 
+                                  {/* Customer & timeline */}
+                                  <div className="rounded-[12px] border border-[var(--pm-line)] bg-white p-5">
+                                    <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#A1A1AA]">{isCompleted ? "Payer & Timeline" : "Customer & Timeline"}</h4>
+                                    <div className="divide-y divide-[var(--pm-line)]">
+                                      <DetailRow label={isCompleted ? "Paid by" : "Designated"}>
+                                        {isCompleted ? payer || "Anonymous payer" : link.customer_information?.email || "Open to anyone"}
+                                      </DetailRow>
+                                      <DetailRow label="Created">{formatDate(link.created_at)}</DetailRow>
+                                      <DetailRow label="Expires">{formatDate(link.expiry)}</DetailRow>
+                                      {isCompleted && <DetailRow label="Paid on">{formatDate(link.payment?.created_at)}</DetailRow>}
+                                    </div>
+                                  </div>
+
+                                  {/* Actions */}
+                                  <div className="flex flex-col gap-2.5 rounded-[12px] border border-[var(--pm-line)] bg-white p-5">
+                                    <h4 className="mb-0.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#A1A1AA]">Actions</h4>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => handleCopy(e, link.id, link.checkout_url)}
+                                      disabled={!isActive}
+                                      className="flex h-10 w-full items-center justify-center gap-2 rounded-[8px] border border-[var(--pm-line)] bg-white px-4 text-[13px] font-medium shadow-sm transition-colors hover:bg-[var(--pm-band-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      {copiedId === link.id ? <Check className="h-4 w-4 text-[#059669]" /> : <Copy className="h-4 w-4" />}
+                                      {copiedId === link.id ? "Copied" : "Copy checkout link"}
+                                    </button>
+                                    <a
+                                      href={link.checkout_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-disabled={!isActive}
+                                      className={`flex h-10 w-full items-center justify-center gap-2 rounded-[8px] border border-[var(--pm-line)] bg-white px-4 text-[13px] font-medium shadow-sm transition-colors hover:bg-[var(--pm-band-hover)] ${!isActive ? "pointer-events-none opacity-50" : ""}`}
+                                    >
+                                      <ExternalLink className="h-4 w-4" /> Open payment page
+                                    </a>
+                                    {!isCompleted && !isExpired && (
+                                      <button
+                                        type="button"
                                         onClick={(e) => toggleStatus(e, link.id, link.status)}
-                                        className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold transition-all ${
-                                          isActive 
-                                            ? 'border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20' 
-                                            : 'border-amber-500/20 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                                        className={`flex h-10 w-full items-center justify-center gap-2 rounded-[8px] border px-4 text-[13px] font-medium transition-colors ${
+                                          isActive
+                                            ? "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEE2E2]"
+                                            : "border-[#BBF7D0] bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5]"
                                         }`}
                                       >
                                         {isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
-                                        {isActive ? "Deactivate Link" : "Reactivate Link"}
+                                        {isActive ? "Deactivate link" : "Reactivate link"}
                                       </button>
-                                     )}
+                                    )}
                                   </div>
-
-                               </div>
+                                </div>
+                              </div>
                             </td>
                           </tr>
                         )}
@@ -313,7 +410,7 @@ export default function PaymentLinksPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
