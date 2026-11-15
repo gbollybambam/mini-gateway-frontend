@@ -4,387 +4,302 @@ import { useState, useEffect } from "react";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
 import { Spinner, useToast } from "@/components/dashboard/ui";
-import { User, Shield, Webhook, Copy, Check, Save, RefreshCw, AlertTriangle, ShieldCheck, X, CheckCircle2, XCircle } from "@/components/icons";
+import { User, Shield, Webhook, Save, RefreshCw, AlertTriangle, CheckCircle2, XCircle } from "@/components/icons";
+import {
+  Banner, Field, Modal, PageHeader, SecretModal,
+  btnDanger, btnDangerSoft, btnPrimary, btnSecondary, cardCls, inputCls,
+} from "@/components/dashboard/kit";
+
+type Tab = "general" | "security" | "webhooks";
+
+const TABS: { id: Tab; label: string; hint: string; icon: React.ReactNode }[] = [
+  { id: "general", label: "General profile", hint: "Brand & URLs", icon: <User className="h-4 w-4" /> },
+  { id: "security", label: "Security", hint: "Password", icon: <Shield className="h-4 w-4" /> },
+  { id: "webhooks", label: "Webhooks", hint: "HMAC secret", icon: <Webhook className="h-4 w-4" /> },
+];
 
 function SettingsSkeleton() {
   return (
-    <div className="animate-pulse p-6 md:p-8 space-y-6">
-      <div className="h-6 w-48 bg-surface-muted rounded-full mb-2" />
-      <div className="h-4 w-72 bg-surface-muted rounded-full mb-8" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="h-12 bg-surface-muted rounded-input" />
-        <div className="h-12 bg-surface-muted rounded-input" />
-        <div className="md:col-span-2 h-12 bg-surface-muted rounded-input" />
+    <div className="space-y-6 p-6 md:p-8">
+      <div className="pm-skeleton h-5 w-48 rounded-full" />
+      <div className="pm-skeleton mb-8 h-4 w-72 rounded-full" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="pm-skeleton h-10 rounded-[10px]" />
+        <div className="pm-skeleton h-10 rounded-[10px]" />
+        <div className="pm-skeleton h-10 rounded-[10px] md:col-span-2" />
       </div>
     </div>
   );
 }
 
+function PanelHead({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="border-b border-[var(--pm-line)] bg-[var(--pm-band)] px-6 py-5 md:px-8">
+      <h2 className="text-[16px] font-semibold tracking-tight">{title}</h2>
+      <p className="mt-1 text-[13px] text-[#71717A]">{description}</p>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'general' | 'security' | 'webhooks'>('general');
+  const [activeTab, setActiveTab] = useState<Tab>("general");
   const [isLoading, setIsLoading] = useState(true);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const [passwordErrors, setPasswordErrors] = useState<{ [key: string]: string[] }>({});
-  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('');
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
 
   const toast = useToast();
 
-  const [generalForm, setGeneralForm] = useState({
-    brand_name: '',
-    website_url: '',
-    logo_url: '',
-    success_url: '',
-    cancel_url: '',
-  });
+  const [generalForm, setGeneralForm] = useState({ brand_name: "", website_url: "", logo_url: "", success_url: "", cancel_url: "" });
+  const [passwordForm, setPasswordForm] = useState({ current_password: "", password: "", password_confirmation: "" });
 
-  const [passwordForm, setPasswordForm] = useState({
-    current_password: '',
-    password: '', 
-    password_confirmation: '', 
-  });
-
-  const [webhookSecretMasked, setWebhookSecretMasked] = useState('');
+  const [webhookSecretMasked, setWebhookSecretMasked] = useState("");
   const [revealedSecret, setRevealedSecret] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [confirmRotate, setConfirmRotate] = useState(false);
 
-  const passwordsMatch = passwordForm.password && passwordForm.password_confirmation && passwordForm.password === passwordForm.password_confirmation;
+  const passwordsMatch = !!passwordForm.password && !!passwordForm.password_confirmation && passwordForm.password === passwordForm.password_confirmation;
   const passwordsMismatch = passwordForm.password_confirmation.length > 0 && passwordForm.password !== passwordForm.password_confirmation;
 
   useEffect(() => {
     let isMounted = true;
-
     async function fetchSettings() {
       try {
-        const res = await api.get('/settings');
-        if (isMounted) {
-          const { business, checkout, developer } = res.data.data;
-
-          setGeneralForm({
-            brand_name: checkout?.brand_name || business?.business_name || '',
-            website_url: business?.website_url || '',
-            logo_url: business?.logo_url || '',
-            success_url: checkout?.success_url || '',
-            cancel_url: checkout?.cancel_url || '',
-          });
-
-          const secret = developer?.webhook_secret || '';
-          setWebhookSecretMasked(secret ? `${secret.substring(0, 10)}**********************` : '');
-        }
+        const res = await api.get("/settings");
+        if (!isMounted) return;
+        const { business, checkout, developer } = res.data.data;
+        setGeneralForm({
+          brand_name: checkout?.brand_name || business?.business_name || "",
+          website_url: business?.website_url || "",
+          logo_url: business?.logo_url || "",
+          success_url: checkout?.success_url || "",
+          cancel_url: checkout?.cancel_url || "",
+        });
+        const secret = developer?.webhook_secret || "";
+        setWebhookSecretMasked(secret ? `${secret.substring(0, 10)}**********************` : "");
       } catch {
         toast.error("Failed to load settings from server.");
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
-    
     void fetchSettings();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [toast]);
 
-  const handleTabChange = (tab: 'general' | 'security' | 'webhooks') => {
+  const handleTabChange = (tab: Tab) => {
     if (tab === activeTab) return;
     setIsTabLoading(true);
     setActiveTab(tab);
-    setPasswordSuccessMessage('');
-    setTimeout(() => setIsTabLoading(false), 250); 
+    setPasswordSuccessMessage("");
+    setTimeout(() => setIsTabLoading(false), 250);
   };
 
   const handleGeneralSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await api.put('/settings', {
-        ...generalForm,
-        business_name: generalForm.brand_name
-      });
-      toast.success('General settings updated successfully.');
+      await api.put("/settings", { ...generalForm, business_name: generalForm.brand_name });
+      toast.success("General settings updated successfully.");
     } catch (err: unknown) {
-      toast.error(isAxiosError(err) ? err.response?.data?.message || 'Failed to update settings.' : 'System Error');
-    } finally {
-      setIsSaving(false);
-    }
+      toast.error(isAxiosError(err) ? err.response?.data?.message || "Failed to update settings." : "System Error");
+    } finally { setIsSaving(false); }
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (passwordsMismatch) return;
     setIsSaving(true);
-    setPasswordErrors({}); 
-    setPasswordSuccessMessage('');
-
-    if (passwordsMismatch) {
-      setIsSaving(false);
-      return; 
-    }
-
+    setPasswordErrors({});
+    setPasswordSuccessMessage("");
     try {
-      await api.request({
-        method: 'PUT',
-        url: '/user/password',
-        data: {
-          current_password: passwordForm.current_password,
-          password: passwordForm.password,
-          password_confirmation: passwordForm.password_confirmation
-        }
-      });
-      
-      // Explicit success feedback state + Toast
-      setPasswordSuccessMessage('Password updated successfully! Your new credentials are now active.');
-      toast.success('Password updated successfully!');
-      setPasswordForm({ current_password: '', password: '', password_confirmation: '' });
-      setPasswordErrors({});
+      await api.request({ method: "PUT", url: "/user/password", data: { ...passwordForm } });
+      setPasswordSuccessMessage("Password updated successfully! Your new credentials are now active.");
+      toast.success("Password updated successfully!");
+      setPasswordForm({ current_password: "", password: "", password_confirmation: "" });
     } catch (err: unknown) {
       if (isAxiosError(err) && err.response?.status === 422) {
-        const responseData = err.response.data;
-        if (responseData && responseData.errors) {
-          setPasswordErrors(responseData.errors);
-          toast.error("Validation failed. Check the errors in red below.");
-        } else {
-          toast.error(responseData?.message || "Invalid password data.");
-        }
+        const data = err.response.data;
+        if (data?.errors) { setPasswordErrors(data.errors); toast.error("Validation failed. Check the errors below."); }
+        else toast.error(data?.message || "Invalid password data.");
       } else {
-        toast.error(isAxiosError(err) ? err.response?.data?.message || 'Failed to update password.' : 'System Error');
+        toast.error(isAxiosError(err) ? err.response?.data?.message || "Failed to update password." : "System Error");
       }
-    } finally {
-      setIsSaving(false);
-    }
+    } finally { setIsSaving(false); }
   };
 
-  const handleRotateWebhookSecret = async () => {
-    if (webhookSecretMasked && !window.confirm('Are you sure you want to rotate your webhook secret? Existing integrations will fail until updated.')) return;
-    
+  const doRotate = async () => {
+    setConfirmRotate(false);
     try {
       setIsSaving(true);
-      const res = await api.post('/settings/webhook-secret/rotate');
-      const newSecret = res.data.data?.webhook_secret || '';
-      
+      const res = await api.post("/settings/webhook-secret/rotate");
+      const newSecret = res.data.data?.webhook_secret || "";
       setWebhookSecretMasked(`${newSecret.substring(0, 10)}**********************`);
       setRevealedSecret(newSecret);
-      toast.success('Webhook secret rotated successfully.');
+      toast.success("Webhook secret rotated successfully.");
     } catch (err) {
-      toast.error(isAxiosError(err) ? err.response?.data?.message || 'Failed to rotate webhook secret.' : 'System Error');
-    } finally {
-      setIsSaving(false);
-    }
+      toast.error(isAxiosError(err) ? err.response?.data?.message || "Failed to rotate webhook secret." : "System Error");
+    } finally { setIsSaving(false); }
   };
 
-  const handleCopy = async (textToCopy: string) => {
-    await navigator.clipboard.writeText(textToCopy);
-    setCopied(true);
-    toast.success("Copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
+  const handleRotateWebhookSecret = () => {
+    if (webhookSecretMasked) setConfirmRotate(true);
+    else void doRotate();
   };
+
+  const setGeneral = (key: keyof typeof generalForm) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setGeneralForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const pwdInput = (hasError: boolean) =>
+    `${inputCls} ${hasError ? "!border-[#FCA5A5] focus:!shadow-[0_0_0_3px_rgba(239,68,68,0.12)]" : ""}`;
+
+  const FieldError = ({ msg }: { msg?: string }) =>
+    msg ? <p className="flex items-center gap-1 text-[12px] text-[#DC2626]"><XCircle className="h-3 w-3" /> {msg}</p> : null;
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="flex items-center gap-3 text-brand-500 bg-success-tint px-6 py-3 rounded-pill border border-line font-medium text-sm shadow-card">
-          <Spinner /> Synchronizing profile...
+      <div className="space-y-6 bg-white pb-10">
+        <div className="pm-skeleton h-9 w-56 rounded" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+          <div className="space-y-2">{[1, 2, 3].map((i) => <div key={i} className="pm-skeleton h-16 rounded-[12px] border border-[var(--pm-line)]" />)}</div>
+          <div className={`${cardCls} lg:col-span-3`}><SettingsSkeleton /></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Configuration</p>
-          <h1 className="text-2xl font-bold text-ink drop-shadow-sm mt-1">Merchant Settings</h1>
-        </div>
-      </header>
+    <div className="space-y-6 bg-white pb-10 font-sans text-[#09090B]">
+      <PageHeader eyebrow="Configuration" title="Merchant Settings" description="Manage your brand, security and developer credentials." />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1 space-y-2">
-          <button onClick={() => handleTabChange('general')} className={`w-full flex items-center gap-3 p-4 rounded-card border transition-all text-left ${activeTab === 'general' ? 'bg-surface-muted border-line text-ink shadow-lg' : 'bg-surface/[0.02] border-line text-ink-muted hover:bg-surface-muted hover:text-ink'}`}>
-            <div className={`p-2 rounded-input ${activeTab === 'general' ? 'bg-success-tint text-brand-500' : 'bg-surface-muted text-ink-muted'}`}><User className="h-4 w-4" /></div>
-            <div><p className="font-bold text-sm">General Profile</p><p className="text-[10px] uppercase tracking-wider text-ink-muted mt-0.5">Brand & URLs</p></div>
-          </button>
-          <button onClick={() => handleTabChange('security')} className={`w-full flex items-center gap-3 p-4 rounded-card border transition-all text-left ${activeTab === 'security' ? 'bg-surface-muted border-line text-ink shadow-lg' : 'bg-surface/[0.02] border-line text-ink-muted hover:bg-surface-muted hover:text-ink'}`}>
-            <div className={`p-2 rounded-input ${activeTab === 'security' ? 'bg-amber-500/20 text-pending' : 'bg-surface-muted text-ink-muted'}`}><Shield className="h-4 w-4" /></div>
-            <div><p className="font-bold text-sm">Security</p><p className="text-[10px] uppercase tracking-wider text-ink-muted mt-0.5">Passwords</p></div>
-          </button>
-          <button onClick={() => handleTabChange('webhooks')} className={`w-full flex items-center gap-3 p-4 rounded-card border transition-all text-left ${activeTab === 'webhooks' ? 'bg-surface-muted border-line text-ink shadow-lg' : 'bg-surface/[0.02] border-line text-ink-muted hover:bg-surface-muted hover:text-ink'}`}>
-            <div className={`p-2 rounded-input ${activeTab === 'webhooks' ? 'bg-blue-500/20 text-blue-400' : 'bg-surface-muted text-ink-muted'}`}><Webhook className="h-4 w-4" /></div>
-            <div><p className="font-bold text-sm">Webhooks</p><p className="text-[10px] uppercase tracking-wider text-ink-muted mt-0.5">HMAC Secrets</p></div>
-          </button>
-        </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Tab nav */}
+        <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible" aria-label="Settings sections">
+          {TABS.map((t) => {
+            const active = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => handleTabChange(t.id)}
+                aria-current={active ? "page" : undefined}
+                className={`flex min-w-[170px] items-center gap-3 rounded-[12px] border p-3.5 text-left transition-all lg:min-w-0 ${
+                  active ? "border-[#D4D4D8] bg-[var(--pm-band)] shadow-sm" : "border-[var(--pm-line)] bg-white hover:border-[#D4D4D8] hover:bg-[var(--pm-band)]"
+                }`}
+              >
+                <span className={`grid size-9 shrink-0 place-items-center rounded-[8px] transition-colors ${active ? "bg-[#09090B] text-white" : "bg-[var(--pm-band-hover)] text-[#52525B]"}`}>{t.icon}</span>
+                <span>
+                  <span className="block text-[13px] font-semibold">{t.label}</span>
+                  <span className="mt-0.5 block text-[12px] text-[#71717A]">{t.hint}</span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
 
-        <section className="lg:col-span-3 rounded-card border border-line bg-surface/[0.02] backdrop-blur-xl shadow-card overflow-hidden flex flex-col relative min-h-[500px]">
+        {/* Panel */}
+        <section className={`${cardCls} relative flex min-h-[500px] flex-col overflow-hidden lg:col-span-3`}>
           {isTabLoading ? <SettingsSkeleton /> : (
             <>
-              {activeTab === 'general' && (
+              {activeTab === "general" && (
                 <>
-                  <div className="border-b border-line bg-surface/[0.01] p-6 md:px-8">
-                    <h2 className="text-lg font-bold text-ink">Business Profile</h2>
-                    <p className="text-xs text-ink-muted mt-1">Configure your brand identity and customer redirect flows.</p>
-                  </div>
-                  <form onSubmit={handleGeneralSubmit} className="flex-1 flex flex-col">
-                    <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Brand Name</label>
-                        <input type="text" value={generalForm.brand_name} onChange={(e) => setGeneralForm({ ...generalForm, brand_name: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Website URL</label>
-                        <input type="url" value={generalForm.website_url} onChange={(e) => setGeneralForm({ ...generalForm, website_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="https://yourwebsite.com" />
-                      </div>
+                  <PanelHead title="Business profile" description="Configure your brand identity and customer redirect flows." />
+                  <form onSubmit={handleGeneralSubmit} className="flex flex-1 flex-col">
+                    <div className="grid flex-1 grid-cols-1 gap-6 p-6 md:grid-cols-2 md:p-8">
+                      <Field label="Brand name"><input type="text" value={generalForm.brand_name} onChange={setGeneral("brand_name")} className={inputCls} placeholder="e.g. Acme Corp" /></Field>
+                      <Field label="Website URL"><input type="url" value={generalForm.website_url} onChange={setGeneral("website_url")} className={inputCls} placeholder="https://yourwebsite.com" /></Field>
                       <div className="md:col-span-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Logo URL</label>
-                        <input type="url" value={generalForm.logo_url} onChange={(e) => setGeneralForm({ ...generalForm, logo_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="https://yourwebsite.com/logo.png" />
+                        <Field label="Logo URL"><input type="url" value={generalForm.logo_url} onChange={setGeneral("logo_url")} className={inputCls} placeholder="https://yourwebsite.com/logo.png" /></Field>
                       </div>
-                      <div className="md:col-span-2 pt-6 border-t border-line mt-2"><h4 className="text-sm font-bold text-ink mb-6">Checkout Redirection</h4></div>
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Default Success URL</label>
-                        <input type="url" value={generalForm.success_url} onChange={(e) => setGeneralForm({ ...generalForm, success_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="Redirect after successful payment" />
+                      <div className="border-t border-[var(--pm-line)] pt-6 md:col-span-2">
+                        <h3 className="text-[14px] font-semibold">Checkout redirection</h3>
+                        <p className="mt-1 text-[12px] text-[#71717A]">Where customers land after completing or cancelling a payment.</p>
                       </div>
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Default Cancel URL</label>
-                        <input type="url" value={generalForm.cancel_url} onChange={(e) => setGeneralForm({ ...generalForm, cancel_url: e.target.value })} className="h-11 w-full rounded-input border border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-ink-muted outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all shadow-inner" placeholder="Redirect if customer cancels" />
-                      </div>
+                      <Field label="Default success URL"><input type="url" value={generalForm.success_url} onChange={setGeneral("success_url")} className={inputCls} placeholder="Redirect after successful payment" /></Field>
+                      <Field label="Default cancel URL"><input type="url" value={generalForm.cancel_url} onChange={setGeneral("cancel_url")} className={inputCls} placeholder="Redirect if customer cancels" /></Field>
                     </div>
-                    <div className="border-t border-line bg-surface/[0.01] p-6 flex justify-end">
-                      <button type="submit" disabled={isSaving} className="flex items-center gap-2 rounded-input bg-brand-500 px-6 py-2.5 text-sm font-bold text-ink transition-all hover:shadow-card border border-line disabled:opacity-50">
-                        {isSaving ? <Spinner /> : <Save className="h-4 w-4" />} {isSaving ? 'Saving...' : 'Save Profile'}
+                    <div className="flex justify-end border-t border-[var(--pm-line)] bg-[var(--pm-band)] px-6 py-4 md:px-8">
+                      <button type="submit" disabled={isSaving} className={btnPrimary}>
+                        {isSaving ? <Spinner /> : <Save className="h-4 w-4" />} {isSaving ? "Saving..." : "Save profile"}
                       </button>
                     </div>
                   </form>
                 </>
               )}
 
-              {activeTab === 'security' && (
+              {activeTab === "security" && (
                 <>
-                  <div className="border-b border-line bg-surface/[0.01] p-6 md:px-8">
-                    <h2 className="text-lg font-bold text-ink">Change Password</h2>
-                    <p className="text-xs text-ink-muted mt-1">Ensure your account is using a long, random password to stay secure.</p>
-                  </div>
-                  <form onSubmit={handlePasswordSubmit} className="flex-1 flex flex-col">
-                    <div className="p-6 md:p-8 space-y-6 max-w-lg flex-1">
-                      
-                      {/* SUCCESS BANNER */}
-                      {passwordSuccessMessage && (
-                        <div className="rounded-input border border-line bg-success-tint p-4 text-xs font-semibold text-brand-500 flex items-center gap-2 animate-in fade-in duration-200">
-                          <CheckCircle2 className="h-4 w-4 shrink-0" />
-                          <span>{passwordSuccessMessage}</span>
-                        </div>
-                      )}
+                  <PanelHead title="Change password" description="Use a long, random password to keep your account secure." />
+                  <form onSubmit={handlePasswordSubmit} className="flex flex-1 flex-col">
+                    <div className="max-w-lg flex-1 space-y-6 p-6 md:p-8">
+                      {passwordSuccessMessage && <Banner tone="success">{passwordSuccessMessage}</Banner>}
 
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Current Password</label>
+                      <Field label="Current password">
                         <input
-                          type="password"
-                          value={passwordForm.current_password}
-                          onChange={(e) => {
-                            setPasswordForm({ ...passwordForm, current_password: e.target.value });
-                            setPasswordErrors(prev => ({ ...prev, current_password: [] }));
-                            setPasswordSuccessMessage('');
-                          }}
-                          className={`h-11 w-full rounded-input border bg-surface px-4 text-sm font-medium text-ink outline-none focus:ring-1 transition-all shadow-inner ${
-                            passwordErrors.current_password?.length 
-                              ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/50' 
-                              : 'border-line focus:border-amber-500/50 focus:ring-amber-500/50'
-                          }`}
-                          required
+                          type="password" required value={passwordForm.current_password}
+                          onChange={(e) => { setPasswordForm({ ...passwordForm, current_password: e.target.value }); setPasswordErrors((p) => ({ ...p, current_password: [] })); setPasswordSuccessMessage(""); }}
+                          className={pwdInput(!!passwordErrors.current_password?.length)}
                         />
-                        {passwordErrors.current_password?.length > 0 && (
-                          <p className="text-danger text-xs mt-1.5 flex items-center gap-1">
-                            <XCircle className="h-3 w-3" /> {passwordErrors.current_password[0]}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">New Password</label>
+                        <FieldError msg={passwordErrors.current_password?.[0]} />
+                      </Field>
+
+                      <Field label="New password" hint="At least 8 characters, with upper & lower case letters, numbers and symbols.">
                         <input
-                          type="password"
-                          value={passwordForm.password}
-                          onChange={(e) => {
-                            setPasswordForm({ ...passwordForm, password: e.target.value });
-                            setPasswordErrors(prev => ({ ...prev, password: [] }));
-                            setPasswordSuccessMessage('');
-                          }}
-                          className={`h-11 w-full rounded-input border bg-surface px-4 text-sm font-medium text-ink outline-none focus:ring-1 transition-all shadow-inner ${
-                            passwordErrors.password?.length 
-                              ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/50' 
-                              : 'border-line focus:border-amber-500/50 focus:ring-amber-500/50'
-                          }`}
-                          required
+                          type="password" required value={passwordForm.password}
+                          onChange={(e) => { setPasswordForm({ ...passwordForm, password: e.target.value }); setPasswordErrors((p) => ({ ...p, password: [] })); setPasswordSuccessMessage(""); }}
+                          className={pwdInput(!!passwordErrors.password?.length)}
                         />
-                        <p className="text-ink-muted text-[10px] mt-1.5 uppercase tracking-wide">Must be at least 8 characters with upper, lower, numbers & symbols</p>
-                        {passwordErrors.password?.length > 0 && (
-                          <p className="text-danger text-xs mt-1.5 flex items-center gap-1">
-                            <XCircle className="h-3 w-3" /> {passwordErrors.password[0]}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 flex justify-between">
-                          <span>Confirm New Password</span>
-                          {passwordsMatch && <span className="text-brand-500 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/> Matches</span>}
-                          {passwordsMismatch && <span className="text-danger flex items-center gap-1"><XCircle className="h-3 w-3"/> Mismatch</span>}
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.password_confirmation}
-                          onChange={(e) => {
-                            setPasswordForm({ ...passwordForm, password_confirmation: e.target.value });
-                            setPasswordSuccessMessage('');
-                          }}
-                          className={`h-11 w-full rounded-input border bg-surface px-4 text-sm font-medium text-ink outline-none focus:ring-1 transition-all shadow-inner ${
-                            passwordsMismatch 
-                              ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/50'
-                              : passwordsMatch 
-                                ? 'border-line focus:border-brand-500/50 focus:ring-brand-500/50'
-                                : 'border-line focus:border-amber-500/50 focus:ring-amber-500/50'
-                          }`}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="border-t border-line bg-surface/[0.01] p-6 flex justify-start md:px-8">
-                      <button
-                        type="submit"
-                        disabled={isSaving || passwordsMismatch}
-                        className="flex items-center gap-2 rounded-input bg-linear-to-r from-pending to-pending px-6 py-2.5 text-sm font-bold text-ink transition-all hover:shadow-card hover:brightness-110 border border-line disabled:opacity-50 disabled:cursor-not-allowed"
+                        <FieldError msg={passwordErrors.password?.[0]} />
+                      </Field>
+
+                      <Field
+                        label="Confirm new password"
+                        right={
+                          passwordsMatch ? <span className="flex items-center gap-1 text-[12px] font-normal text-[#059669]"><CheckCircle2 className="h-3 w-3" /> Matches</span>
+                          : passwordsMismatch ? <span className="flex items-center gap-1 text-[12px] font-normal text-[#DC2626]"><XCircle className="h-3 w-3" /> Doesn&apos;t match</span>
+                          : undefined
+                        }
                       >
-                        {isSaving ? <Spinner /> : <Shield className="h-4 w-4" />} 
-                        {isSaving ? 'Updating...' : 'Update Password'}
+                        <input
+                          type="password" required value={passwordForm.password_confirmation}
+                          onChange={(e) => { setPasswordForm({ ...passwordForm, password_confirmation: e.target.value }); setPasswordSuccessMessage(""); }}
+                          className={pwdInput(passwordsMismatch)}
+                        />
+                      </Field>
+                    </div>
+                    <div className="flex justify-start border-t border-[var(--pm-line)] bg-[var(--pm-band)] px-6 py-4 md:px-8">
+                      <button type="submit" disabled={isSaving || passwordsMismatch} className={btnPrimary}>
+                        {isSaving ? <Spinner /> : <Shield className="h-4 w-4" />} {isSaving ? "Updating..." : "Update password"}
                       </button>
                     </div>
                   </form>
                 </>
               )}
 
-              {activeTab === 'webhooks' && (
+              {activeTab === "webhooks" && (
                 <>
-                  <div className="border-b border-line bg-surface/[0.01] p-6 md:px-8">
-                    <h2 className="text-lg font-bold text-ink">HMAC Webhook Signing Secret</h2>
-                    <p className="text-xs text-ink-muted mt-1">Used to sign incoming webhook events via the <code className="bg-surface border border-line px-1.5 py-0.5 rounded text-[10px] font-mono text-ink ml-1">x-gateway-signature</code> header.</p>
-                  </div>
-                  <div className="p-6 md:p-8 flex-1">
-                    <div className="max-w-xl">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-2 block">Current Webhook Secret</label>
-                      <div className="flex items-center mb-8 h-12 rounded-input border border-line bg-surface shadow-inner overflow-hidden">
-                        <input type="text" readOnly value={webhookSecretMasked || 'No secret generated yet'} className="h-full w-full bg-transparent px-4 text-sm font-mono text-ink-muted outline-none cursor-not-allowed" />
-                      </div>
-                      
-                      <div className="rounded-card border border-line bg-danger-tint p-6">
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertTriangle className="h-5 w-5 text-danger" />
-                          <strong className="text-sm font-bold text-danger">Danger Zone</strong>
+                  <PanelHead title="HMAC webhook signing secret" description="Used to sign webhook events sent to your endpoint." />
+                  <div className="flex-1 p-6 md:p-8">
+                    <div className="max-w-xl space-y-8">
+                      <Field
+                        label="Current webhook secret"
+                        hint={<>Events are signed using the <code className="rounded-[4px] border border-[var(--pm-line)] bg-[var(--pm-band-hover)] px-1.5 py-0.5 font-mono text-[11px] text-[#09090B]">x-gateway-signature</code> header.</>}
+                      >
+                        <input type="text" disabled readOnly value={webhookSecretMasked || "No secret generated yet"} className={`${inputCls} font-mono text-[12px]`} />
+                      </Field>
+
+                      <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] p-5">
+                        <div className="mb-2 flex items-center gap-2 text-[#B91C1C]">
+                          <AlertTriangle className="h-4 w-4" />
+                          <strong className="text-[13px] font-semibold">Danger zone</strong>
                         </div>
-                        <p className="text-xs text-red-300/80 mb-6 leading-relaxed">
-                          Rotating your secret will immediately invalidate signatures generated with the old secret. For security reasons, the full secret is only displayed once upon rotation.
+                        <p className="mb-4 text-[13px] leading-[1.6] text-[#B91C1C]/90">
+                          Rotating your secret immediately invalidates signatures generated with the old one. The full secret is displayed only once after rotation.
                         </p>
-                        <button type="button" disabled={isSaving} onClick={handleRotateWebhookSecret} className="flex items-center justify-center gap-2 rounded-input bg-danger-tint px-6 py-2.5 text-sm font-bold text-danger transition-all hover:bg-red-500/30 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
+                        <button type="button" disabled={isSaving} onClick={handleRotateWebhookSecret} className={`${btnDangerSoft} w-full bg-white sm:w-auto`}>
                           {isSaving ? <Spinner /> : <RefreshCw className="h-4 w-4" />}
-                          {isSaving ? 'Processing...' : webhookSecretMasked ? 'Rotate Webhook Secret' : 'Generate Webhook Secret'}
+                          {isSaving ? "Processing..." : webhookSecretMasked ? "Rotate webhook secret" : "Generate webhook secret"}
                         </button>
                       </div>
                     </div>
@@ -396,37 +311,32 @@ export default function SettingsPage() {
         </section>
       </div>
 
-      {revealedSecret && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-card border border-amber-500/30 bg-surface shadow-card overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between border-b border-line bg-amber-500/5 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-input bg-surface-muted border border-line text-pending"><ShieldCheck className="h-5 w-5" /></div>
-                <div><h3 className="text-lg font-bold text-ink">Save Your Webhook Secret</h3><p className="text-xs text-pending/80">HMAC Signature Verification</p></div>
-              </div>
-              <button onClick={() => setRevealedSecret(null)} className="rounded-full p-2 text-ink-muted hover:text-ink transition-colors"><X className="h-5 w-5" /></button>
-            </div>
-            <div className="p-6 space-y-5">
-              <div className="rounded-input border border-line bg-danger-tint p-4 text-xs text-red-200/90 leading-relaxed shadow-inner">
-                <strong className="text-danger block mb-1 text-sm">Please copy your secret key now.</strong>
-                For your security, you will not be able to view this secret again once this dialog is closed. If you lose it, you will need to rotate the secret again.
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">New Webhook Secret</label>
-                <div className="flex items-center gap-2">
-                  <input readOnly value={revealedSecret} className="w-full h-12 rounded-input border border-line bg-bg px-4 font-mono text-xs sm:text-sm text-ink selection:bg-pending outline-none shadow-inner" />
-                  <button onClick={() => handleCopy(revealedSecret)} className="h-12 px-4 rounded-input bg-pending hover:bg-pending text-ink font-bold text-xs flex items-center gap-2 shrink-0 transition-all shadow-card">
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "Copied" : "Copy"}
-                  </button>
-                </div>
-              </div>
-              <div className="pt-3 border-t border-line">
-                <button onClick={() => setRevealedSecret(null)} className="w-full h-11 rounded-input bg-surface-muted hover:bg-surface-muted text-xs font-bold text-ink transition-colors">I have securely saved my secret</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SecretModal
+        open={!!revealedSecret}
+        onClose={() => setRevealedSecret(null)}
+        title="Save your webhook secret"
+        subtitle="HMAC signature verification"
+        label="New webhook secret"
+        value={revealedSecret ?? ""}
+        warning="You won't be able to view this secret again after closing this dialog. If you lose it, you'll need to rotate it again."
+        confirmLabel="I have securely saved my secret"
+      />
+
+      <Modal
+        open={confirmRotate}
+        onClose={() => setConfirmRotate(false)}
+        title="Rotate webhook secret?"
+        icon={<AlertTriangle className="h-5 w-5" />}
+        tone="danger"
+        footer={
+          <>
+            <button type="button" onClick={() => setConfirmRotate(false)} className={btnSecondary}>Cancel</button>
+            <button type="button" onClick={doRotate} className={btnDanger}>Rotate secret</button>
+          </>
+        }
+      >
+        <p className="text-[13px] leading-[1.6] text-[#52525B]">Existing integrations will fail to verify events until they&apos;re updated with the new secret.</p>
+      </Modal>
     </div>
   );
 }

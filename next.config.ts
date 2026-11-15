@@ -29,6 +29,14 @@ const cspHeader = `
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  async rewrites() {
+    return [
+      {
+        source: "/",
+        destination: "/landing/index.html",
+      },
+    ];
+  },
   async headers() {
     return [
       {

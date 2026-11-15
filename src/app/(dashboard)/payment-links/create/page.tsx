@@ -4,9 +4,46 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
-import { ArrowLeft, Link as LinkIcon, Plus, Eye, ShieldCheck, CreditCard } from "@/components/icons";
+import { ArrowLeft, Plus, Eye, ShieldCheck, CreditCard } from "@/components/icons";
 import Link from "next/link";
 import { Spinner, useToast } from "@/components/dashboard/ui";
+
+const CURRENCY_SYMBOLS: Record<string, string> = { NGN: "₦", USD: "$", GBP: "£" };
+
+const fieldCls =
+  "h-11 w-full rounded-[10px] border border-[var(--pm-line)] bg-white px-3.5 text-[14px] text-[#09090B] shadow-[0_1px_2px_rgba(9,9,11,0.04)] outline-none transition-all placeholder:text-[#A1A1AA] hover:border-[#D4D4D8] focus:border-[#D4D4D8] focus:shadow-[0_0_0_3px_rgba(9,9,11,0.06)]";
+
+const selectChevron = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717A'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+  backgroundPosition: "right 12px center",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "16px",
+} as const;
+
+function Field({ label, optional, hint, children }: { label: string; optional?: boolean; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center justify-between text-[13px] font-medium text-[#09090B]">
+        <span>{label}</span>
+        {optional && <span className="text-[12px] font-normal text-[#A1A1AA]">Optional</span>}
+      </label>
+      {children}
+      {hint && <p className="text-[12px] text-[#71717A]">{hint}</p>}
+    </div>
+  );
+}
+
+function SectionTitle({ step, title, subtitle }: { step: number; title: string; subtitle: string }) {
+  return (
+    <div className="flex items-start gap-3 border-b border-[var(--pm-line)] pb-4">
+      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#09090B] text-[12px] font-semibold text-white">{step}</span>
+      <div>
+        <h2 className="text-[15px] font-semibold tracking-tight text-[#09090B]">{title}</h2>
+        <p className="mt-0.5 text-[12px] text-[#71717A]">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function CreatePaymentLinkPage() {
   const router = useRouter();
@@ -19,11 +56,11 @@ export default function CreatePaymentLinkPage() {
 
   const [form, setForm] = useState({
     reference: "",
-    amount: "", 
+    amount: "",
     currency: "NGN",
     description: "",
     customer_email: "",
-    expiry: "", 
+    expiry: "",
   });
 
   useEffect(() => {
@@ -32,28 +69,26 @@ export default function CreatePaymentLinkPage() {
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       setMinDateTime(now.toISOString().slice(0, 16));
-      setForm(prev => ({ ...prev, reference: generateRef }));
+      setForm((prev) => ({ ...prev, reference: generateRef }));
     }, 0);
     return () => clearTimeout(timer);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/[^\d.]/g, '');
-    const parts = val.split('.');
-    if (parts.length > 2) {
-      val = parts[0] + '.' + parts.slice(1).join('');
-    }
+    let val = e.target.value.replace(/[^\d.]/g, "");
+    const parts = val.split(".");
+    if (parts.length > 2) val = parts[0] + "." + parts.slice(1).join("");
     const intPart = parts[0];
     if (intPart) {
-      const formattedInt = new Intl.NumberFormat('en-US').format(parseInt(intPart, 10));
-      val = parts.length > 1 ? `${formattedInt}.${parts[1]}` : formattedInt;
+      const formattedInt = new Intl.NumberFormat("en-US").format(parseInt(intPart, 10));
+      val = parts.length > 1 ? `${formattedInt}.${parts[1].slice(0, 2)}` : formattedInt;
     }
     setDisplayAmount(val);
-    setForm(prev => ({ ...prev, amount: val.replace(/,/g, '') }));
+    setForm((prev) => ({ ...prev, amount: val.replace(/,/g, "") }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +111,6 @@ export default function CreatePaymentLinkPage() {
         customer_email: form.customer_email || undefined,
         expiry: form.expiry ? new Date(form.expiry).toISOString() : undefined,
       });
-
       toast.success("Secure payment link initialized successfully.");
       router.push("/payment-links");
     } catch (err) {
@@ -87,191 +121,144 @@ export default function CreatePaymentLinkPage() {
   };
 
   const previewAmount = form.amount ? parseFloat(form.amount) : 0;
-  const formattedPreview = new Intl.NumberFormat("en-US", { style: "currency", currency: form.currency }).format(previewAmount);
+  const formattedPreview = new Intl.NumberFormat("en-NG", { style: "currency", currency: form.currency }).format(previewAmount || 0);
 
   return (
-    <div className="w-full space-y-8">
-      <Link href="/payment-links" className="inline-flex items-center gap-2 text-sm font-bold text-ink-muted hover:text-ink transition-colors">
-        <ArrowLeft className="h-5 w-5" /> Back to Ledger
-      </Link>
+    <div className="w-full space-y-6 bg-white pb-10 font-sans text-[#09090B]">
+      <div>
+        <Link href="/payment-links" className="inline-flex items-center gap-2 text-[13px] font-medium text-[#71717A] transition-colors hover:text-[#09090B]">
+          <ArrowLeft className="h-4 w-4" /> Back to Payment Links
+        </Link>
+        <h1 className="mt-4 text-[28px] font-bold tracking-[-0.025em]">Create Payment Link</h1>
+        <p className="mt-1 text-[13px] text-[#71717A]">Configure the details for your hosted checkout page.</p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-16">
-        
-        <div className="lg:col-span-7 xl:col-span-8 rounded-card border border-line bg-surface backdrop-blur-xl p-6 sm:p-8 md:p-12 shadow-card relative overflow-hidden min-h-175">
-          <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-success-tint blur-[100px] pointer-events-none" />
-
-          <div className="flex items-center gap-5 mb-10 sm:mb-12">
-            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-card bg-success-tint text-brand-500 border border-line shadow-inner shrink-0">
-              <LinkIcon className="h-6 w-6 sm:h-8 sm:w-8" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-3xl font-black text-ink tracking-tight drop-shadow-sm">Initialize Link</h1>
-              <p className="text-sm sm:text-base text-ink-muted mt-1">Configure parameters for your hosted checkout.</p>
-            </div>
-          </div>
-
-          {error && (
-            <div className="mb-8 rounded-input border border-line bg-danger-tint p-5 text-sm font-bold text-danger">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
-            <div className="space-y-6 sm:space-y-8">
-              <h2 className="text-sm sm:text-base font-bold text-ink border-b border-line pb-3">1. Payment Details</h2>
-              
-              <div className="space-y-3">
-                <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Payment Description</label>
-                <input 
-                  required
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder="e.g. Software Consultation"
-                  className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
-                />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        {/* FORM */}
+        <div className="lg:col-span-7 xl:col-span-8">
+          <form onSubmit={handleSubmit} className="rounded-[12px] border border-[var(--pm-line)] bg-white shadow-sm">
+            {error && (
+              <div className="mx-6 mt-6 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-[13px] font-medium text-[#DC2626] sm:mx-8" role="alert">
+                {error}
               </div>
+            )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Amount</label>
-                  <input 
-                    required
-                    type="text"
-                    name="amountDisplay"
-                    value={displayAmount}
-                    onChange={handleAmountChange}
-                    placeholder="0.00"
-                    className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
-                  />
+            <div className="space-y-8 p-6 sm:p-8">
+              {/* Section 1 */}
+              <section className="space-y-5">
+                <SectionTitle step={1} title="Payment details" subtitle="What the customer is paying for, and how much." />
+                <Field label="Description">
+                  <input required name="description" value={form.description} onChange={handleChange} placeholder="e.g. Software consultation" className={fieldCls} />
+                </Field>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <Field label="Amount">
+                    <div className="relative">
+                      <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[14px] font-medium text-[#71717A]">
+                        {CURRENCY_SYMBOLS[form.currency] || ""}
+                      </span>
+                      <input
+                        required
+                        inputMode="decimal"
+                        type="text"
+                        name="amountDisplay"
+                        value={displayAmount}
+                        onChange={handleAmountChange}
+                        placeholder="0.00"
+                        className={`${fieldCls} pl-8 tabular-nums`}
+                      />
+                    </div>
+                  </Field>
+                  <Field label="Currency">
+                    <select name="currency" value={form.currency} onChange={handleChange} style={selectChevron} className={`${fieldCls} cursor-pointer appearance-none pr-9`}>
+                      <option value="NGN">NGN (₦)</option>
+                      <option value="USD">USD ($)</option>
+                      <option value="GBP">GBP (£)</option>
+                    </select>
+                  </Field>
                 </div>
+              </section>
 
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Currency</label>
-                  <select 
-                    name="currency"
-                    value={form.currency}
-                    onChange={handleChange}
-                    className="h-14 w-full rounded-input border border-line bg-bg/90 px-5 text-base font-medium text-ink outline-none transition-all focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-inner appearance-none cursor-pointer"
-                  >
-                    <option value="NGN">NGN (₦)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="GBP">GBP (£)</option>
-                  </select>
+              {/* Section 2 */}
+              <section className="space-y-5">
+                <SectionTitle step={2} title="Security & triggers" subtitle="Reference, customer restriction and expiry." />
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <Field label="Transaction reference">
+                    <input required type="text" name="reference" value={form.reference} onChange={handleChange} className={`${fieldCls} font-mono text-[13px]`} />
+                  </Field>
+                  <Field label="Customer email" optional>
+                    <input type="email" name="customer_email" value={form.customer_email} onChange={handleChange} placeholder="client@example.com" className={fieldCls} />
+                  </Field>
                 </div>
-              </div>
+                <Field label="Link expiry" optional hint="If set, the checkout page becomes inaccessible after this time.">
+                  <input type="datetime-local" name="expiry" min={minDateTime} value={form.expiry} onChange={handleChange} className={`${fieldCls} cursor-pointer`} />
+                </Field>
+              </section>
             </div>
 
-            <div className="space-y-6 sm:space-y-8">
-              <h2 className="text-sm sm:text-base font-bold text-ink border-b border-line pb-3">2. Security & Triggers</h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Transaction Reference</label>
-                  <input 
-                    required
-                    type="text"
-                    name="reference"
-                    value={form.reference}
-                    onChange={handleChange}
-                    className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Customer Email (Optional)</label>
-                  <input 
-                    type="email"
-                    name="customer_email"
-                    value={form.customer_email}
-                    onChange={handleChange}
-                    placeholder="client@example.com"
-                    className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-xs font-bold uppercase tracking-widest text-ink-muted">Link Expiry (Optional)</label>
-                <input 
-                  type="datetime-local"
-                  name="expiry"
-                  min={minDateTime}
-                  value={form.expiry}
-                  onChange={handleChange}
-                  className="h-14 w-full rounded-input border border-line bg-bg/50 px-5 text-base font-medium text-ink placeholder:text-ink-muted outline-none transition-all focus:border-brand-500 focus:bg-surface-muted focus:ring-1 focus:ring-brand-500 shadow-inner scheme-dark cursor-pointer"
-                />
-                <p className="text-xs text-ink-muted mt-2">If set, checkout page will become inaccessible after this time.</p>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-line">
-              <button 
-                type="submit" 
+            <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t border-[var(--pm-line)] bg-[var(--pm-band)] px-6 py-4 sm:flex-row sm:items-center sm:px-8">
+              <Link href="/payment-links" className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--pm-line)] bg-white px-4 text-[13px] font-medium text-[#52525B] shadow-sm transition-colors hover:bg-[var(--pm-band-hover)] hover:text-[#09090B]">
+                Cancel
+              </Link>
+              <button
+                type="submit"
                 disabled={isSubmitting}
-                className="flex h-14 sm:h-16 w-full items-center justify-center gap-3 rounded-card bg-brand-500 px-8 text-sm sm:text-base font-bold text-ink transition-all hover:shadow-card hover:brightness-110 disabled:opacity-50 border border-line"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-gradient-to-b from-[#27272A] to-[#09090B] px-5 text-[13px] font-semibold text-white shadow-sm ring-1 ring-black/10 transition-all hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSubmitting ? <Spinner /> : <Plus className="h-5 w-5 sm:h-6 sm:w-6" />}
-                {isSubmitting ? "Generating Link..." : "Deploy Payment Link"}
+                {isSubmitting ? <Spinner /> : <Plus className="h-4 w-4" />}
+                {isSubmitting ? "Generating link..." : "Create payment link"}
               </button>
             </div>
           </form>
         </div>
 
-        {/* RIGHT COLUMN: PREVIEW */}
-        <div className="lg:col-span-5 xl:col-span-4 hidden lg:block">
-          <div className="sticky top-32 space-y-6">
-            <div className="flex items-center gap-3 text-ink-muted mb-6">
-              <Eye className="h-5 w-5" />
-              <span className="text-sm font-bold uppercase tracking-widest">Customer Preview</span>
+        {/* PREVIEW */}
+        <aside className="hidden lg:col-span-5 lg:block xl:col-span-4">
+          <div className="sticky top-24">
+            <div className="mb-3 flex items-center gap-2 text-[#71717A]">
+              <Eye className="h-4 w-4" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.1em]">Customer preview</span>
             </div>
 
-            <div className="rounded-card bg-surface p-10 shadow-card transition-all duration-300 border border-line relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-brand-500" />
-              
-              <div className="flex justify-center mb-10">
-                <div className="flex h-16 w-16 items-center justify-center rounded-card bg-bg text-ink font-black text-2xl shadow-xl">
-                  P
+            <div className="overflow-hidden rounded-[16px] border border-[var(--pm-line)] bg-white shadow-[0_16px_40px_-16px_rgba(9,9,11,0.18)]">
+              <div className="h-1.5 w-full bg-gradient-to-r from-[#09090B] via-[#3F3F46] to-[#09090B]" />
+              <div className="p-7">
+                <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="grid size-8 place-items-center rounded-[8px] bg-gradient-to-b from-[#27272A] to-[#09090B] text-[13px] font-bold text-white">P</div>
+                    <span className="text-[14px] font-semibold tracking-tight">PayMesh</span>
+                  </div>
+                  <span className="rounded-full border border-[var(--pm-line)] bg-[var(--pm-band)] px-2.5 py-0.5 text-[11px] font-medium text-[#71717A]">{form.currency}</span>
                 </div>
-              </div>
-              
-              <div className="text-center space-y-3 mb-10">
-                <p className="text-base font-semibold text-gray-500 wrap-break-word">
-                  {form.customer_email || "guest@example.com"}
-                </p>
-                <h3 className="text-2xl font-bold text-gray-900 wrap-break-word leading-tight">
-                  {form.description || "Payment Description"}
-                </h3>
-                <p className="text-4xl xl:text-5xl font-black text-ink tracking-tighter py-6 wrap-break-word">
-                  {formattedPreview}
-                </p>
-                <p className="text-sm font-medium text-gray-400">
-                  Ref: {form.reference.substring(0, 15)}...
-                </p>
-              </div>
 
-              <div className="space-y-4">
-                <div className="h-14 w-full rounded-card bg-gray-50 flex items-center px-5 border border-gray-200">
-                  <CreditCard className="h-6 w-6 text-gray-400 mr-4 shrink-0" />
-                  <div className="h-4 w-full max-w-37.5 bg-gray-200 rounded animate-pulse" />
+                <div className="space-y-1 text-center">
+                  <p className="truncate text-[13px] text-[#71717A]">{form.customer_email || "guest@example.com"}</p>
+                  <h3 className="break-words text-[17px] font-semibold leading-tight">{form.description || "Payment description"}</h3>
+                  <p className="break-words py-5 text-[38px] font-bold leading-none tracking-[-0.03em] tabular-nums">{formattedPreview}</p>
+                  <p className="font-mono text-[11px] text-[#A1A1AA]">Ref: {form.reference ? `${form.reference.substring(0, 15)}…` : "—"}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="h-14 rounded-card bg-gray-50 border border-gray-200" />
-                  <div className="h-14 rounded-card bg-gray-50 border border-gray-200" />
-                </div>
-                <div className="h-16 w-full rounded-card bg-bg flex items-center justify-center mt-8 shadow-lg">
-                  <span className="text-ink font-bold text-sm xl:text-base">Pay {formattedPreview}</span>
-                </div>
-              </div>
 
-              <div className="mt-10 flex items-center justify-center gap-2 text-gray-400">
-                <ShieldCheck className="h-5 w-5 shrink-0" />
-                <span className="text-xs xl:text-sm font-medium">Secured by Payflow Infrastructure</span>
+                <div className="mt-6 space-y-3">
+                  <div className="flex h-11 w-full items-center rounded-[10px] border border-[var(--pm-line)] bg-[var(--pm-band)] px-3.5">
+                    <CreditCard className="mr-3 h-4 w-4 shrink-0 text-[#A1A1AA]" />
+                    <div className="pm-skeleton h-2.5 w-32 rounded" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="h-11 rounded-[10px] border border-[var(--pm-line)] bg-[var(--pm-band)]" />
+                    <div className="h-11 rounded-[10px] border border-[var(--pm-line)] bg-[var(--pm-band)]" />
+                  </div>
+                  <div className="flex h-12 w-full items-center justify-center rounded-[10px] bg-gradient-to-b from-[#27272A] to-[#09090B] shadow-sm">
+                    <span className="truncate px-3 text-[14px] font-semibold text-white">Pay {formattedPreview}</span>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center justify-center gap-1.5 text-[#A1A1AA]">
+                  <ShieldCheck className="h-4 w-4 shrink-0" />
+                  <span className="text-[12px] font-medium">Secured by PayMesh</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
+        </aside>
       </div>
     </div>
   );

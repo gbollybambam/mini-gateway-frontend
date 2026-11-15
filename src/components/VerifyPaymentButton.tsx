@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { RefreshCw } from "@/components/icons";
+import Spinner from "@/components/Spinner";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
 
@@ -39,7 +40,7 @@ export default function VerifyPaymentButton({ transactionId, onVerified }: Props
       title="Manually verify this payment"
       className="group flex h-8 items-center gap-1.5 rounded-lg border border-[#3f82b2]/30 bg-[#3f82b2]/10 px-3 text-[10px] font-bold uppercase tracking-wider text-[#79b8e8] transition-all hover:bg-[#3f82b2]/20 hover:text-[#90c6ec] hover:border-[#3f82b2]/50 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
     >
-      <RefreshCw className={`h-3 w-3 ${isVerifying ? "animate-spin" : ""}`} />
+      {isVerifying ? <Spinner size={12} /> : <RefreshCw className="h-3 w-3" />}
       {isVerifying ? "Verifying..." : "Verify"}
     </button>
   );

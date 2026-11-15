@@ -21,9 +21,11 @@ export function PageHeader({ title, description, action }: { title: string; desc
 
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <TrendingUp size={20} className="text-ink-muted" aria-hidden="true" />
-      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="mb-5 grid size-12 place-items-center rounded-[12px] border border-line bg-surface-muted text-ink-muted">
+        <TrendingUp size={20} aria-hidden="true" />
+      </div>
+      <h3 className="text-base font-semibold text-ink">{title}</h3>
       <p className="mt-2 max-w-sm text-sm leading-6 text-ink-muted">{description}</p>
       {action ? <div className="mt-6">{action}</div> : null}
     </div>
@@ -60,7 +62,7 @@ export function ChartCard({ title = "Payment volume", subtitle = "Recent activit
           </svg>
         ) : (
           <div className="flex h-full items-end gap-2 sm:gap-3" aria-label="Payment volume by month">
-            {points.map((point, index) => <div key={index} className="flex h-full min-w-0 flex-1 items-end"><div className={cn("w-full rounded-t-input", index === points.length - 2 ? "bg-brand-500" : "bg-track")} style={{ height: `${point}%` }} /></div>)}
+            {points.map((point, index) => <div key={index} className="flex h-full min-w-0 flex-1 items-end"><div className={cn("pm-bar-rise w-full rounded-t-input", index === points.length - 2 ? "bg-brand-500" : "bg-track")} style={{ height: `${point}%`, animationDelay: `${index * 30}ms` }} /></div>)}
           </div>
         )}
       </div>
@@ -77,7 +79,7 @@ export function DataTable<T extends { id: string }>({ columns, rows, empty, load
       <table className="min-w-full text-left text-sm">
         <thead className="text-xs font-medium text-ink-muted"><tr>{columns.map((column) => <th key={column.key} scope="col" className="whitespace-nowrap px-4 py-3">{column.sortable ? <button type="button" className="inline-flex items-center gap-1 hover:text-ink" onClick={() => onSort?.(column.key)}>{column.label}<ChevronDown size={14} aria-hidden="true" /></button> : column.label}</th>)}<th className="w-12 px-4 py-3"><span className="sr-only">Actions</span></th></tr></thead>
         <tbody className="divide-y divide-line">
-          {loading ? Array.from({ length: 5 }).map((_, index) => <tr key={index} className="animate-pulse">{columns.map((column) => <td key={column.key} className="px-4 py-5"><div className="h-4 w-24 rounded-input bg-track" /></td>)}<td /></tr>) : rows.length === 0 ? <tr><td colSpan={columns.length + 1}>{empty}</td></tr> : rows.map((row) => <tr key={row.id} className="transition-colors duration-120 hover:bg-surface-muted/60">{columns.map((column) => <td key={column.key} className="max-w-72 px-4 py-4 align-middle">{column.render(row)}</td>)}<td className="px-4 py-4 text-right"><button type="button" aria-label={`Actions for ${row.id}`} className="grid size-8 place-items-center rounded-input text-ink-muted hover:text-ink"><MoreHorizontal size={18} aria-hidden="true" /></button></td></tr>)}
+          {loading ? Array.from({ length: 5 }).map((_, index) => <tr key={index}>{columns.map((column) => <td key={column.key} className="px-4 py-5"><div className="pm-skeleton h-4 w-24 rounded-input" /></td>)}<td /></tr>) : rows.length === 0 ? <tr><td colSpan={columns.length + 1}>{empty}</td></tr> : rows.map((row) => <tr key={row.id} className="transition-colors duration-120 hover:bg-surface-muted/60">{columns.map((column) => <td key={column.key} className="max-w-72 px-4 py-4 align-middle">{column.render(row)}</td>)}<td className="px-4 py-4 text-right"><button type="button" aria-label={`Actions for ${row.id}`} className="grid size-8 place-items-center rounded-input text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"><MoreHorizontal size={18} aria-hidden="true" /></button></td></tr>)}
         </tbody>
       </table>
     </div>
@@ -94,7 +96,7 @@ export function BalanceCard({ amount, accountName = "Your merchant account", acc
     window.setTimeout(() => setCopied(false), 1600)
   }
   return (
-    <div className="balance-card relative overflow-hidden rounded-[16px] bg-brand-900 p-6 text-surface sm:p-8">
+    <div className="balance-card relative overflow-hidden rounded-[16px] bg-brand-900 p-6 text-white sm:p-8">
       <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full opacity-20" viewBox="0 0 800 320" preserveAspectRatio="none"><path d="M-40 250C140 80 260 360 450 140S710 60 840 190" fill="none" stroke="var(--brand-500)" strokeWidth="2" /><path d="M-40 290C140 120 260 400 450 180S710 100 840 230" fill="none" stroke="var(--brand-500)" strokeWidth="1" /></svg>
       <div className="relative">
         <div className="flex items-center justify-between gap-4"><p className="text-sm text-surface/70">Your balance</p><button type="button" aria-label={hidden ? "Show balance" : "Hide balance"} onClick={() => setHidden((value) => !value)} className="grid size-9 place-items-center rounded-input text-surface/80 hover:bg-white/10">{hidden ? <Eye size={20} weight="bold" /> : <EyeOff size={20} weight="bold" />}</button></div>

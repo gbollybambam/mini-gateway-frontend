@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PayMesh
 
-## Getting Started
+PayMesh is a payment gateway frontend — a complete merchant dashboard, admin console, hosted checkout, and public landing page built with Next.js, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+Accept payments with hosted checkout links, track every transaction, manage withdrawals, and withdraw to your bank from one simple platform.
+
+## Features
+
+- **Hosted checkout** — share a payment link or tokenised URL; customers pay on a branded, secure frame.
+- **Merchant dashboard** — overview, transactions, payment links, wallet, withdrawals, team, API keys, webhooks, and settings.
+- **Admin console** — provider management, global ledger, merchant directory, withdrawals, and audit logs.
+- **Public landing** — responsive marketing site with docs and an interactive API reference.
+- **Auth flow** — registration, email OTP verification, password reset, and team invitation acceptance.
+- **Theme support** — light/dark mode persisted via a theme init script.
+- **Design system** — shared motion, skeleton, and surface tokens with reduced-motion support.
+
+## Tech stack
+
+- [Next.js](https://nextjs.org) (App Router)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [React](https://react.dev)
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/
+    (auth)/              # login, register, OTP, password reset, invite
+    (dashboard)/         # merchant dashboard routes
+    (public)/            # docs page
+    admin/               # admin console routes
+    pay/[token]/         # hosted checkout page
+    payment-success/     # receipt page
+    layout.tsx           # root layout and metadata
+  components/
+    checkout/            # checkout frame, form, summary, success
+    dashboard/           # shared dashboard UI kit
+    auth/                # auth shell, logo, OTP input
+    admin/               # admin sidebar shell
+    public/              # site header, launch button
+  lib/                   # API client, theme, money helpers
+public/
+  landing/               # standalone marketing HTML
+```
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script               | Description                          |
+| -------------------- | ------------------------------------ |
+| `npm run dev`        | Start the development server         |
+| `npm run build`      | Build the production bundle          |
+| `npm run start`      | Serve the production bundle locally  |
+| `npm run lint`       | Run ESLint                           |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The API base URL and any secret keys are configured through environment variables. See the docs page (`/docs`) for the API reference, authentication, and webhook verification guides.
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Deploy on Vercel:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+vercel deploy
+```

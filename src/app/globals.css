@@ -648,35 +648,640 @@
 }
 
 .dark {
-  --background: var(--brand-900);
-  --foreground: var(--surface);
-  --card: var(--brand-800);
-  --card-foreground: var(--surface);
-  --popover: var(--brand-800);
-  --popover-foreground: var(--surface);
-  --primary: var(--brand-500);
-  --primary-foreground: var(--ink);
-  --secondary: var(--brand-800);
-  --secondary-foreground: var(--surface);
-  --muted: var(--brand-800);
-  --muted-foreground: var(--track);
-  --accent: var(--brand-800);
-  --accent-foreground: var(--surface);
-  --destructive: var(--danger);
-  --border: color-mix(in srgb, var(--surface) 16%, transparent);
-  --input: color-mix(in srgb, var(--surface) 18%, transparent);
-  --ring: var(--brand-500);
-  --chart-1: var(--brand-500);
-  --chart-2: var(--track);
-  --chart-3: var(--cat-food);
-  --chart-4: var(--cat-tfare);
-  --chart-5: var(--cat-transfer);
-  --sidebar: var(--brand-900);
-  --sidebar-foreground: var(--surface);
-  --sidebar-primary: var(--brand-500);
-  --sidebar-primary-foreground: var(--ink);
-  --sidebar-accent: var(--brand-800);
-  --sidebar-accent-foreground: var(--surface);
-  --sidebar-border: color-mix(in srgb, var(--surface) 16%, transparent);
-  --sidebar-ring: var(--brand-500);
+  color-scheme: dark;
+  --bg: #09090B;
+  --surface: #111113;
+  --surface-muted: #18181B;
+  --ink: #FAFAFA;
+  --ink-muted: #A1A1AA;
+  --line: #27272A;
+  --track: #3F3F46;
+  --brand-900: #050505;
+  --brand-800: #0C0C0E;
+  --brand-500: #F4F4F5;
+  --white: #FFFFFF;
+  --success-tint: rgba(29, 185, 84, 0.14);
+  --danger-tint: rgba(229, 25, 27, 0.16);
+  --shadow-card-token: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-dialog-token: 0 20px 60px rgba(0, 0, 0, 0.55);
+  /* every shadcn alias (--background, --card, --border, --primary, ...) already
+     points at these tokens in :root, so they flip automatically. */
+}
+
+/* No transition flicker while toggling */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+
+/* ---------- PART 2: checkout visuals ---------- */
+.checkout-glow {
+  background:
+    radial-gradient(60% 100% at 50% 0%, color-mix(in srgb, var(--brand-500) 16%, transparent), transparent 70%),
+    radial-gradient(35% 60% at 90% 0%, color-mix(in srgb, var(--cat-food) 8%, transparent), transparent 70%);
+}
+
+.checkout-success-glow {
+  background: radial-gradient(60% 100% at 50% 0%, color-mix(in srgb, var(--success) 16%, transparent), transparent 75%);
+}
+
+/* Summary panel: soft glow + faint grid */
+.checkout-summary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(70% 55% at 100% 0%, rgba(92, 199, 106, 0.28), transparent 65%),
+    radial-gradient(60% 50% at 0% 100%, rgba(92, 199, 106, 0.12), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px) 0 0 / 36px 36px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.35) 100%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.dark .checkout-summary::before {
+  background:
+    radial-gradient(70% 55% at 100% 0%, rgba(255, 255, 255, 0.14), transparent 65%),
+    radial-gradient(60% 50% at 0% 100%, rgba(255, 255, 255, 0.06), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px) 0 0 / 36px 36px;
+}
+
+/* Pending pulse */
+.checkout-pulse {
+  animation: checkout-pulse 1.8s var(--ease-out) infinite;
+}
+
+@keyframes checkout-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* Success check drawing */
+.checkout-draw-circle {
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  animation: checkout-draw 600ms var(--ease-out) 120ms forwards;
+}
+
+.checkout-draw-check {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: checkout-draw 380ms var(--ease-out) 560ms forwards;
+}
+
+@keyframes checkout-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Receipt ticket: notched edge where the tear line sits */
+.ticket-wrap {
+  filter: drop-shadow(0 18px 28px rgba(15, 42, 20, 0.10)) drop-shadow(0 2px 4px rgba(15, 42, 20, 0.05));
+}
+
+.dark .ticket-wrap {
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.5));
+}
+
+.ticket-top {
+  border-radius: 20px 20px 0 0;
+  -webkit-mask: radial-gradient(circle 12px at 0 100%, #0000 97%, #000), radial-gradient(circle 12px at 100% 100%, #0000 97%, #000);
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(circle 12px at 0 100%, #0000 97%, #000), radial-gradient(circle 12px at 100% 100%, #0000 97%, #000);
+  mask-composite: intersect;
+}
+
+.ticket-bottom {
+  border-radius: 0 0 20px 20px;
+  -webkit-mask: radial-gradient(circle 12px at 0 0, #0000 97%, #000), radial-gradient(circle 12px at 100% 0, #0000 97%, #000);
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(circle 12px at 0 0, #0000 97%, #000), radial-gradient(circle 12px at 100% 0, #0000 97%, #000);
+  mask-composite: intersect;
+}
+
+/* Printing the receipt: always light, no chrome */
+@media print {
+
+  html.dark,
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --surface-muted: #f2f1ef;
+    --ink: #111;
+    --ink-muted: #6b7280;
+    --line: #e5e5e5;
+    --success-tint: #e6f7ea;
+    --danger-tint: #fde7e7;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .ticket-wrap {
+    filter: none;
+  }
+
+  .checkout-glow,
+  .checkout-success-glow {
+    display: none;
+  }
+}
+
+
+/* ---------- PART 3: dark-mode compatibility for pages that use hard-coded hex colors ----------
+   Your dashboard pages use classes like bg-white / border-[#E5E7EB] / text-[#09090B].
+   These overrides remap them in dark mode so every page works TODAY without editing each file.
+   (Long-term, migrate those classes to bg-surface / border-line / text-ink and delete this part.) */
+
+.dark .bg-white {
+  background-color: var(--surface);
+}
+
+.dark .bg-white\/85 {
+  background-color: color-mix(in srgb, var(--surface) 85%, transparent);
+}
+
+.dark .bg-\[\#FAFAFA\] {
+  background-color: var(--surface-muted);
+}
+
+.dark .bg-\[\#F4F4F5\],
+.dark .bg-gray-100 {
+  background-color: #1F1F22;
+}
+
+.dark .bg-\[\#E4E4E7\] {
+  background-color: #2C2C31;
+}
+
+.dark .bg-\[\#09090B\] {
+  background-color: var(--brand-900);
+}
+
+.dark .bg-\[\#09090B\].text-white {
+  color: #FFFFFF;
+}
+
+.dark .bg-\[\#09090B\] .text-\[\#A1A1AA\] {
+  color: #A1A1AA;
+}
+
+.dark .border-\[\#E5E7EB\],
+.dark .border-\[\#F4F4F5\],
+.dark .border-\[\#EFEFF1\] {
+  border-color: var(--line);
+}
+
+.dark .border-\[\#D4D4D8\],
+.dark .border-\[\#E4E4E7\] {
+  border-color: #3F3F46;
+}
+
+.dark .divide-\[\#F4F4F5\]> :not(:last-child) {
+  border-color: var(--line);
+}
+
+.dark .border-white {
+  border-color: var(--surface);
+}
+
+.dark .text-\[\#09090B\] {
+  color: var(--ink);
+}
+
+.dark .text-\[\#52525B\] {
+  color: #D4D4D8;
+}
+
+.dark .text-\[\#71717A\] {
+  color: var(--ink-muted);
+}
+
+.dark .text-\[\#A1A1AA\] {
+  color: #A1A1AA;
+}
+
+.dark .placeholder\:text-\[\#A1A1AA\]::placeholder {
+  color: #A1A1AA;
+}
+
+/* hover / group-hover variants */
+.dark .hover\:bg-\[\#FAFAFA\]:hover,
+.dark .hover\:bg-\[\#F4F4F5\]:hover {
+  background-color: var(--surface-muted);
+}
+
+.dark .hover\:bg-white:hover {
+  background-color: var(--surface-muted);
+}
+
+.dark .hover\:text-\[\#09090B\]:hover {
+  color: var(--ink);
+}
+
+.dark .hover\:border-\[\#D4D4D8\]:hover {
+  border-color: #3F3F46;
+}
+
+.dark .group:hover .group-hover\:bg-\[\#09090B\] {
+  background-color: var(--ink);
+}
+
+.dark .group:hover .group-hover\:text-white {
+  color: var(--bg);
+}
+
+.dark .group:hover .group-hover\:bg-\[\#F4F4F5\] {
+  background-color: var(--surface-muted);
+}
+
+.dark .group:hover .group-hover\:text-\[\#09090B\] {
+  color: var(--ink);
+}
+
+/* status badges + tags */
+.dark .bg-\[\#ECFDF5\] {
+  background-color: rgba(16, 185, 129, 0.12);
+}
+
+.dark .border-\[\#BBF7D0\] {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.dark .text-\[\#059669\] {
+  color: #34D399;
+}
+
+.dark .bg-\[\#FEF2F2\] {
+  background-color: rgba(239, 68, 68, 0.12);
+}
+
+.dark .border-\[\#FECACA\] {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.dark .text-\[\#DC2626\] {
+  color: #F87171;
+}
+
+.dark .bg-\[\#FFFBEB\] {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+.dark .border-\[\#FDE68A\] {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.dark .text-\[\#B45309\] {
+  color: #FBBF24;
+}
+
+.dark .bg-\[\#EFF6FF\] {
+  background-color: rgba(59, 130, 246, 0.14);
+}
+
+.dark .text-\[\#2563EB\] {
+  color: #60A5FA;
+}
+
+/* SVG chart strokes/fills drawn in near-black */
+.dark path[stroke="#09090B"] {
+  stroke: var(--ink);
+}
+
+.dark stop[stop-color="#09090B"] {
+  stop-color: var(--ink);
+}
+
+/* Light-only chrome in AppHeader's toggle */
+.dark button.hover\:bg-\[\#F4F4F5\]:hover {
+  background-color: var(--surface-muted);
+}
+
+/* Keep the dark palette neutral, including small brand marks and auth accents. */
+.dark .text-\[\#5BE6AE\],
+.dark .text-\[\#1FBF82\],
+.dark .decoration-\[\#5BE6AE\] {
+  color: #FFFFFF;
+  text-decoration-color: var(--ink);
+}
+
+.dark .bg-\[\#E9FBF3\] {
+  background-color: #1F1F22;
+}
+
+.dark .text-\[\#0E8F5F\] {
+  color: #D4D4D8;
+}
+
+.dark .auth-art-copy {
+  color: #09090B !important;
+}
+
+/* Paste at the END of your globals.css */
+:root {
+  --pm-band: #F8F8F6;
+  /* header, sidebar, card header bands */
+  --pm-band-hover: #F1F1EE;
+  /* hover on band surfaces and buttons */
+  --pm-active: #ECECE9;
+  /* active nav item */
+  --pm-raised: #FFFFFF;
+  /* search box, active tab (sits on a band) */
+  --pm-line: #E5E7EB;
+  /* borders and dividers */
+  --pm-ink: #18181B;
+  /* button text */
+}
+
+/* Dark mode. Works with <html class="dark"> or <html data-theme="dark"> */
+.dark,
+[data-theme="dark"] {
+  --pm-band: #161619;
+  --pm-band-hover: #1E1E22;
+  --pm-active: #26262B;
+  --pm-raised: #202024;
+  --pm-line: #2A2A2F;
+  --pm-ink: #F4F4F5;
+}
+
+/* ---------- PART 4: extra dark-mode status + surface overrides ---------- */
+
+/* Success */
+.dark .text-\[\#047857\],
+.dark .text-\[\#064E3B\] {
+  color: #34D399;
+}
+
+.dark .bg-\[\#D1FAE5\] {
+  background-color: rgba(16, 185, 129, 0.18);
+}
+
+.dark .hover\:bg-\[\#D1FAE5\]:hover {
+  background-color: rgba(16, 185, 129, 0.22);
+}
+
+.dark .ring-\[\#BBF7D0\] {
+  --tw-ring-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Warning */
+.dark .text-\[\#92400E\] {
+  color: #FBBF24;
+}
+
+.dark .hover\:bg-\[\#FEF3C7\]:hover {
+  background-color: rgba(245, 158, 11, 0.18);
+}
+
+/* Danger */
+.dark .text-\[\#B91C1C\],
+.dark .text-\[\#B91C1C\]\/90,
+.dark .text-\[\#FCA5A5\] {
+  color: #F87171;
+}
+
+.dark .border-\[\#FCA5A5\],
+.dark .\!border-\[\#FCA5A5\],
+.dark .hover\:border-\[\#FCA5A5\]:hover {
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.dark .hover\:bg-\[\#FEE2E2\]:hover,
+.dark .hover\:bg-\[\#FEF2F2\]:hover {
+  background-color: rgba(239, 68, 68, 0.18);
+}
+
+/* Info */
+.dark .text-\[\#1D4ED8\] {
+  color: #60A5FA;
+}
+
+.dark .border-\[\#BFDBFE\] {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Neutral text */
+.dark .text-\[\#27272A\] {
+  color: #D4D4D8;
+}
+/* ---------- PART 5: docs + admin surfaces ---------- */
+/* Band backgrounds: card headers, sidebars, form sections (bg-[#F8F8F6]). */
+.dark .bg-\[\#F8F8F6\] {
+  background-color: var(--pm-band);
+}
+
+.dark .hover\:bg-\[\#F8F8F6\]:hover {
+  background-color: var(--pm-band-hover);
+}
+
+.dark .bg-white\/90 {
+  background-color: color-mix(in srgb, var(--surface) 90%, transparent);
+}
+
+.dark .bg-\[\#FAFAF9\],
+.dark .hover\:bg-\[\#FAFAF9\]:hover {
+  background-color: var(--surface-muted);
+}
+
+.dark .bg-\[\#F1F1EE\],
+.dark .hover\:bg-\[\#F1F1EE\]:hover {
+  background-color: var(--pm-band-hover);
+}
+
+.dark .bg-\[\#ECECE9\] {
+  background-color: var(--pm-active);
+}
+
+.dark .divide-\[\#F1F1F0\]> :not(:last-child) {
+  border-color: var(--line);
+}
+
+.dark .bg-\[\#FEE2E2\] {
+  background-color: rgba(239, 68, 68, 0.14);
+}
+
+.dark .bg-\[\#A1A1AA\] {
+  background-color: #3F3F46;
+}
+
+/* Scope chips (docs). */
+.dark .bg-\[\#F5F3FF\] {
+  background-color: rgba(139, 92, 246, 0.14);
+}
+
+.dark .border-\[\#DDD6FE\] {
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+.dark .text-\[\#6D28D9\] {
+  color: #C4B5FD;
+}
+
+/* Keep dark brand buttons readable on dark surfaces. */
+.dark .ring-black\/10 {
+  --tw-ring-color: rgba(255, 255, 255, 0.14);
+}
+
+
+/* ---------- PART 6: shared in-app motion ---------- */
+:root {
+  --pm-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes pm-page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pm-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pm-shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes pm-bar-rise {
+  from { opacity: 0.35; transform: scaleY(0); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes pm-line-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pm-area-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pm-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
+  50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+}
+
+@keyframes pm-live-ping {
+  0% { transform: scale(1); opacity: 0.55; }
+  70%, 100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes pm-scale-in {
+  from { opacity: 0; transform: scaleY(0.4); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+/* Route-level entrance for every dashboard page. Pages that orchestrate their
+   own stagger opt out with .pm-no-page-in. */
+.dashboard-root main > :not(.pm-no-page-in) {
+  animation: pm-page-in 260ms var(--pm-ease) both;
+}
+
+.pm-rise {
+  animation: pm-rise 320ms var(--pm-ease) both;
+}
+
+.pm-skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--pm-band);
+}
+
+.pm-skeleton::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: pm-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .pm-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+}
+
+.pm-bar-rise {
+  transform-origin: bottom;
+  animation: pm-bar-rise 520ms var(--pm-ease) both;
+}
+
+.pm-line-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pm-line-draw 760ms var(--pm-ease) 120ms forwards;
+}
+
+.pm-area-in {
+  animation: pm-area-in 700ms ease 180ms both;
+}
+
+.pm-dot-pulse {
+  animation: pm-dot-pulse 2s ease-in-out infinite;
+}
+
+.pm-live-dot {
+  position: relative;
+  display: inline-flex;
+  width: 6px;
+  height: 6px;
+}
+
+.pm-live-dot::before,
+.pm-live-dot::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #10B981;
+  content: "";
+}
+
+.pm-live-dot::after {
+  animation: pm-live-ping 1.9s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pm-nav-indicator {
+  animation: pm-scale-in 200ms var(--pm-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-root main > *,
+  .pm-rise,
+  .pm-bar-rise,
+  .pm-line-draw,
+  .pm-area-in,
+  .pm-dot-pulse,
+  .pm-live-dot::after,
+  .pm-skeleton::after,
+  .pm-nav-indicator {
+    animation: none !important;
+  }
+
+  .animate-in {
+    animation: none !important;
+  }
+
+  .pm-line-draw {
+    stroke-dashoffset: 0;
+  }
+
+  .pm-skeleton::after {
+    display: none;
+  }
 }

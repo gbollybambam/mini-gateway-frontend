@@ -3,9 +3,12 @@
 import { useCallback, useMemo, useState } from "react"
 import toast, { Toaster } from "react-hot-toast"
 import { Eye, EyeOff, RefreshCw } from "./icons"
+import Spinner from "@/components/Spinner"
 
-export const primaryButton = "inline-flex items-center justify-center gap-2 h-11 px-5 rounded-pill bg-ink text-surface font-semibold text-sm hover:bg-ink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-export const secondaryButton = "inline-flex items-center justify-center gap-2 h-11 px-5 rounded-pill bg-surface text-ink font-semibold text-sm hover:bg-surface-muted transition-colors border border-line disabled:opacity-50 disabled:cursor-not-allowed"
+export { Spinner }
+
+export const primaryButton = "inline-flex items-center justify-center gap-2 h-11 px-5 rounded-pill bg-ink text-surface font-semibold text-sm transition-all duration-150 hover:bg-ink/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+export const secondaryButton = "inline-flex items-center justify-center gap-2 h-11 px-5 rounded-pill bg-surface text-ink font-semibold text-sm transition-all duration-150 hover:bg-surface-muted active:scale-[0.98] border border-line disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
 
 export function useToast() {
   const success = useCallback((msg: string) => toast.success(msg, {
@@ -59,10 +62,6 @@ export function ErrorMessage({ message, retry }: { message: string; retry: () =>
   return <div className="flex flex-col items-center justify-center rounded-card bg-danger-tint p-8 text-center"><p className="text-sm font-medium text-danger">{message}</p><button onClick={retry} className="mt-4 inline-flex items-center gap-2 rounded-pill bg-surface px-4 py-2 text-sm font-semibold text-danger hover:bg-danger-tint"><RefreshCw size={17} /> Try again</button></div>
 }
 
-export function Spinner() {
-  return <RefreshCw size={17} className="animate-spin text-ink-muted" />
-}
-
 export function LoadingRows({ columns = 4, rows = 5 }: { columns?: number; rows?: number }) {
-  return <div className="w-full overflow-hidden rounded-card bg-surface p-4 shadow-card">{Array.from({ length: rows }).map((_, i) => <div key={i} className="flex items-center justify-between border-b border-line py-4 last:border-0">{Array.from({ length: columns }).map((__, j) => <div key={j} className="mr-4 h-4 w-1/4 animate-pulse rounded-pill bg-track last:mr-0" />)}</div>)}</div>
+  return <div className="w-full overflow-hidden rounded-card bg-surface p-4 shadow-card">{Array.from({ length: rows }).map((_, i) => <div key={i} className="flex items-center justify-between border-b border-line py-4 last:border-0">{Array.from({ length: columns }).map((__, j) => <div key={j} className="pm-skeleton mr-4 h-4 w-1/4 rounded-pill last:mr-0" />)}</div>)}</div>
 }

@@ -23,7 +23,7 @@ export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
     if (!user) {
       router.replace("/login");
     } else if (!isAuthorized) {
-      router.replace("/"); // Send unauthorized users back to the dashboard home
+      router.replace("/overview"); // Send unauthorized users back to the dashboard home
     }
   }, [user, loading, isAuthorized, router]);
 
